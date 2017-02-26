@@ -1,0 +1,99 @@
+ad count= 0 http://www.ffiec.gov/cybersecurity.htm
+ad count= 0 https://www.openssl.org/docs/
+<a href="/cvss/v2/adopters">CVSS Adopters</a>
+ad count= 1 https://www.first.org
+<a href="https://access.redhat.com/security/security-updates/#/security-advisories">Security Advisories</a>
+<a href="https://access.redhat.com/node/add/discussion">Start a Discussion</a>
+<a href="https://access.redhat.com/downloads/">Downloads</a>
+<a href="https://access.redhat.com/security/security-updates/#/security-advisories">Security Advisories</a>
+<a href="https://access.redhat.com/node/add/discussion">Start a Discussion</a>
+<a href="https://access.redhat.com/downloads/">Downloads</a>
+<a class="top-nav-downloads" href="https://access.redhat.com/downloads/">Downloads</a>
+<a href="https://access.redhat.com/security/security-updates/#/security-advisories">Security Advisories</a>
+<a href="https://access.redhat.com/node/add/discussion">Start a Discussion</a>
+<a href="http://mypy.readthedocs.io">static analyzer</a>
+<a href="https://en.wikipedia.org/wiki/Advanced_Encryption_Standard">Advanced Encryption Standard (AES)</a>
+<a aria-label="Back to Top" class="btn_slideto" href="#masthead"><span class="web-icon-upload"></span></a>
+<a class="download-software" href="https://access.redhat.com/downloads/">Downloads</a>
+ad count= 13 https://securityblog.redhat.com/
+<a href="https://threatpost.com/dino-dai-zovi-on-securing-linux-in-modern-workloads/123665/" title="Dino Dai Zovi on Securing Linux in Modern Workloads"><img alt="" class="latest-post wp-post-image" height="65" src="https://trtpost-wpengine.netdna-ssl.com/files/2017/02/dino_dai_zovi-120x65.png" width="120"/></a>
+<a href="https://threatpost.com/dino-dai-zovi-on-securing-linux-in-modern-workloads/123665/" title="Dino Dai Zovi on Securing Linux in Modern Workloads">Dino Dai Zovi on Securing Linux… </a>
+<a href="https://threatpost.com/dino-dai-zovi-on-securing-linux-in-modern-workloads/123665/" title="Dino Dai Zovi on Securing Linux in Modern Workloads"><img alt="" class="latest-podcasts wp-post-image" height="80" src="https://trtpost-wpengine.netdna-ssl.com/files/2017/02/dino_dai_zovi-140x80.png" width="140"/></a>
+<a href="https://threatpost.com/dino-dai-zovi-on-securing-linux-in-modern-workloads/123665/" title="https://threatpost.com/dino-dai-zovi-on-securing-linux-in-modern-workloads/123665/">Read More</a>
+<a href="https://threatpost.com/dino-dai-zovi-on-securing-linux-in-modern-workloads/123665/" title="Dino Dai Zovi on Securing Linux in Modern Workloads">Dino Dai Zovi on Securing Linux in Modern… </a>
+<a href="https://threatpost.com/adobe-patches-13-code-execution-vulnerabilities-in-flash/123720/" rel="bookmark" title="Permalink to Adobe Patches 13 Code Execution Vulnerabilities in Flash">Adobe Patches 13 Code Execution Vulnerabilities in Flash</a>
+<a href="https://threatpost.com/high-severity-bind-vulnerability-can-lead-to-a-crash/123677/" rel="bookmark" title="Permalink to High Severity BIND Vulnerability Can Lead to A Crash">High Severity BIND Vulnerability Can Lead to A Crash</a>
+<a href="https://threatpost.com/dino-dai-zovi-on-securing-linux-in-modern-workloads/123665/" rel="bookmark" title="Permalink to Dino Dai Zovi on Securing Linux in Modern Workloads">Dino Dai Zovi on Securing Linux in Modern Workloads</a>
+<a href="https://threatpost.com/adobe-patches-13-code-execution-vulnerabilities-in-flash/123720/" rel="bookmark" title="Permalink to Adobe Patches 13 Code Execution Vulnerabilities in Flash">Adobe Patches 13 Code Execution Vulnerabilities in Flash</a>
+<a href="https://threatpost.com/dino-dai-zovi-on-securing-linux-in-modern-workloads/123665/" title="Dino Dai Zovi on Securing Linux in Modern Workloads">Dino Dai Zovi on Securing Linux in Modern Workloads</a>
+<a href="https://academy.kaspersky.com/ic3-2016/">
+<img alt="Kaspersky Academy attended MIT (IC)3 Annual Confer..." class="final-say wp-post-image" height="180" src="https://trtpost-wpengine.netdna-ssl.com/files/2013/08/icon_Academy1-230x230.png" width="180"/>
+</a>
+<a href="https://academy.kaspersky.com/ic3-2016/">Kaspersky Academy attended MIT (IC)3 Annual Confer...</a>
+<a class="read-more" href="https://academy.kaspersky.com/ic3-2016/" rel="bookmark" title="Permalink to Kaspersky Academy attended MIT (IC)3 Annual Confer...">Read more…</a>
+ad count= 13 https://threatpost.com/
+<a href="/en-us/press-office/press-releases/2017/02/sophos-adds-advanced-machine-learning-to-its-next-generation-endpoint-protection-portfolio.aspx">Sophos Adds Advanced Machine Learning to Its Next-Generation Endpoint Protection Portfolio  with Acquisition of Invincea
+                            <span class="date">08 Feb 2017 </span>
+</a>
+<a href="/en-us/press-office/press-releases/2017/02/gartner-2017-magic-quadrant-report.aspx">Sophos Positioned as a Leader in Gartner 2017 Magic Quadrant Report For Endpoint Protection Platforms 
+                            <span class="date">02 Feb 2017 </span>
+</a>
+<a href="http://www.sophos.com/en-us/support/downloads.aspx">
+
+							Downloads &amp; Updates
+						</a>
+ad count= 3 http://www.sophos.com/en-us/security-news-trends
+<a href="https://blogs.rsa.com/leading-in-an-era-of-chaos/">Consider… American Authorities are confident that the Russian Government was behind the cyberattack on the Democratic National Committee. Did that attack change the course of…</a>
+<a href="https://blogs.rsa.com/defending-a-decade-of-phishing-and-cybercrime/">
+<img alt="Defending a Decade of Phishing and Cybercrime" src="https://blogs.rsa.com/wp-content/uploads/2016/12/a-decade-of-phishing-image-833x388-100x83.jpg"/>
+</a>
+<a href="https://blogs.rsa.com/defending-a-decade-of-phishing-and-cybercrime/">Defending a Decade of Phishing and Cybercrime</a>
+<a href="https://blogs.rsa.com/defending-a-decade-of-phishing-and-cybercrime/">With holiday shopping season in full swing, many of us are feeling just like the…</a>
+<a href="https://blogs.rsa.com/defending-a-decade-of-phishing-and-cybercrime/">
+												December 13, 2016											</a>
+<a href="https://blogs.rsa.com/the-criminal-appeal-of-advanced-ransomware-how-can-companies-protect-their-files/">
+<img alt="The Criminal Appeal of Advanced Ransomware: How Can Companies Protect Their Files?" src="https://blogs.rsa.com/wp-content/uploads/2016/06/hacker-1-100x83.jpg"/>
+</a>
+<a href="https://blogs.rsa.com/the-criminal-appeal-of-advanced-ransomware-how-can-companies-protect-their-files/">The Criminal Appeal of Advanced Ransomware: How Can Companies Protect Their Files?</a>
+<a href="https://blogs.rsa.com/the-criminal-appeal-of-advanced-ransomware-how-can-companies-protect-their-files/">Advanced ransomware—malicious software designed to take control of a computer system and hold it hostage…</a>
+<a href="https://blogs.rsa.com/the-criminal-appeal-of-advanced-ransomware-how-can-companies-protect-their-files/">
+												November 22, 2016											</a>
+<a href="https://blogs.rsa.com/emc-rsa-archer-named-leader-2016-gartner-magic-quadrant-business-continuity-management-planning-software/">For the third year in a row, RSA Archer has been named a Leader in Gartner’s…</a>
+<a href="https://blogs.rsa.com/rsa-named-a-leader-in-it-risk-management/">RSA Archer is very excited to be recognized by Gartner once again as a Leader…</a>
+<a href="https://blogs.rsa.com/great-things-come-in-3s-emc-rsa-positioned-in-leaders-quadrant-in-three-gartner-magic-quadrants/">We have all heard the adage that great things come in threes. Stooges. Pigs. Blind…</a>
+<a href="https://blogs.rsa.com/rsa-via-lifecycle-and-governance-named-a-leader-in-2016-forrester-wave-identity-management-and-governance-report/">RSA is happy to announce that RSA Via Lifecycle and Governance has been recognized as…</a>
+<a href="https://blogs.rsa.com/defending-a-decade-of-phishing-and-cybercrime/">
+<img alt="Defending a Decade of Phishing and Cybercrime" src="https://blogs.rsa.com/wp-content/uploads/2016/12/a-decade-of-phishing-image-833x388-100x83.jpg"/>
+</a>
+<a href="https://blogs.rsa.com/defending-a-decade-of-phishing-and-cybercrime/">Defending a Decade of Phishing and Cybercrime</a>
+<a href="https://blogs.rsa.com/defending-a-decade-of-phishing-and-cybercrime/">With holiday shopping season in full swing, many of us are feeling just like the guy in the song, “The 12 Pains of Christmas.”  I have my own two personal pains with the holidays, and I am still deciding which one is more annoying: Elf on…</a>
+<a href="https://blogs.rsa.com/defending-a-decade-of-phishing-and-cybercrime/">
+													December 13, 2016												</a>
+<a href="https://blogs.rsa.com/conversations-with-the-security-for-business-innovation-council-sbic-part-one-whats-top-of-mind-for-top-security-leaders/">We recently had the opportunity to discuss what’s top-of-mind for the Security for Business Innovation…</a>
+<a href="https://blogs.rsa.com/shaky-foundations-for-breach-readiness/">RSA recently compiled original research from the Security for Business Innovation Council (SBIC), a group…</a>
+<a href="https://blogs.rsa.com/measure-your-readiness-threat-intelligence-program/">
+<img src="https://blogs.rsa.com/wp-content/uploads/2016/04/Apr-29-Demetrio_ThreatIntel-475x221.jpg">
+</img></a>
+<a href="https://blogs.rsa.com/measure-your-readiness-threat-intelligence-program/">
+<span class="date">April 28, 2016</span>   |   <span class="author">Demetrio Milea</span></a>
+<a href="https://blogs.rsa.com/measure-your-readiness-threat-intelligence-program/">Measure your Readiness – Threat Intelligence Program</a>
+<a href="https://blogs.rsa.com/measure-your-readiness-threat-intelligence-program/">In the first part of this series we talked about the journey to undertake building a security monitoring and incident response program based on five dimensions: analytics, governance, measurement, operational and organizational. The third main program, also considered a primary capability of an effective Security Operations Center, is the development of tactical, operational and strategic…</a>
+<a href="https://blogs.rsa.com/measure-your-readiness-security-monitoring-program/">
+<img src="https://blogs.rsa.com/wp-content/uploads/2016/03/Security_monitoring-475x221.jpg">
+</img></a>
+<a href="https://blogs.rsa.com/measure-your-readiness-security-monitoring-program/">
+<span class="date">March 25, 2016</span>   |   <span class="author">Demetrio Milea</span></a>
+<a href="https://blogs.rsa.com/measure-your-readiness-security-monitoring-program/">Measure your Readiness – Security Monitoring Program</a>
+<a href="https://blogs.rsa.com/measure-your-readiness-security-monitoring-program/">In the previous post of this series “Measure your Readiness”, I depicted a framework to assess, shape and accelerate a Threat-Driven Incident Response program useful for all kind of organizations to enhance their response capabilities and be ready to deal with unforeseen incidents. The second post in the series aims to look at the “security…</a>
+<a href="https://blogs.rsa.com/measure-your-readiness-incident-response-program/">
+<img src="https://blogs.rsa.com/wp-content/uploads/2016/02/Measure_Readiness_IR_Program-1-475x221.jpg">
+</img></a>
+<a href="https://blogs.rsa.com/measure-your-readiness-incident-response-program/">
+<span class="date">February 18, 2016</span>   |   <span class="author">Demetrio Milea</span></a>
+<a href="https://blogs.rsa.com/measure-your-readiness-incident-response-program/">Measure your Readiness – Incident Response Program</a>
+<a href="https://blogs.rsa.com/measure-your-readiness-incident-response-program/">In today’s threat landscape it is a challenge to prevent the entire spectrum of attack vectors from impacting an organization. This is especially true with the increased adoption of new disruptive technologies and services such as cloud computing, mobility, BYOD and an increase in collaboration with third-parties who have access to the corporate’s network. On…</a>
+ad count= 31 https://blogs.rsa.com/
+<a href="http://www.adobe.com" target="_blank"><img border="0" class="sponsor_image" src="/download/datasets/517/adobe.png"/></a>
+ad count= 1 https://apwg.org/
+<a href="http://msisac.cisecurity.org/advisories/">Security Advisories (MS-ISAC)</a>
+ad count= 1 http://www.cyber

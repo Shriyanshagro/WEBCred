@@ -1,0 +1,81 @@
+contact help recommend http://www.ffiec.gov/cybersecurity.htm
+sitemap https://www.openssl.org/docs/
+contact sitemap https://www.first.org
+contact help https://securityblog.redhat.com/
+contact https://threatpost.com/
+contact http://www.sophos.com/en-us/security-news-trends
+help https://blogs.rsa.com/
+contact https://apwg.org/
+http://www.cybersecurity.alabama.gov/
+http://www.symantec.com/connect/blogs/discover?community-id=691
+http://www.digitalthreat.net/2010/05/information-security-models-for-confidentiality-and-integrity/
+contact email http://www.itsecurity.com/dictionary/all/
+https://www.schneier.com/cryptography.html
+http://www.iplocation.net/
+contact sitemap http://www.iso.org/iso/home/standards/management-standards/iso27001.htm
+contact https://www.kuppingercole.com/blog/kuppinger/information-rights-management-microsoft-gives-it-a-new-push-just-in-time-to-succeed
+contact email help http://www.cisco.com/c/en/us/td/docs/ios/sec_data_plane/configuration/guide/12_4/sec_data_plane_12_4_book.html
+https://www.freebsd.org/doc/handbook/index.html
+http://www.cgisecurity.com/owasp/html/index.html
+contact http://csrc.nist.gov/
+contact http://disa.mil/Network-Services/Data
+help http://wiki.openssl.org/
+contact http://www.isg.rhul.ac.uk/tls/
+http://www.cryptographyworld.com/
+http://www.w3.org/TR/xmlsec-algorithms/
+http://niccs.us-cert.gov/glossary
+https://www.schneier.com/essays/
+contact email help http://securitywatch.pcmag.com/
+contact https://www.torproject.org/
+contact http://resources.infosecinstitute.com
+http://www.esslsecurity.com/
+contact email help http://stackoverflow.com/questions/tagged/security
+http://docs.saltstack.com/en/latest/
+contact help https://saltthepass.com/#help-about
+contact email help recommend http://crypto.stackexchange.com/
+contact http://www.biometrics.gov/
+contact http://www.biometricsinstitute.org/pages/types-of-biometrics.html
+http://support.microsoft.com/en-us/kb/246071
+http://www.garykessler.net/library/fsc_stego.html
+contact https://technet.microsoft.com/en-us/library/cc179103.aspx
+http://cs.stanford.edu/people/eroberts/courses/soco/projects/2000-01/risc/whatis/
+http://www.gammassl.co.uk/research/chinesewall.php
+recommend http://www.softpanorama.org/Access_control/Security_models/
+http://www.openpgp.org/
+http://www.quadibloc.com/crypto/jscrypt.htm
+http://search.cpan.org/dist/Crypt-Loki97/Loki97.pm
+contact help https://www.fastmail.com/help/technical/ssltlsstarttls.html
+http://www.ietf.org/rfc/rfc4880.txt
+https://tools.ietf.org/html/rfc2595
+contact email help http://www.pcmag.com/article2/0,2817,2407168,00.asp
+contact email help http://www.pcmag.com/article2/0,2817,2372364,00.asp
+contact https://technet.microsoft.com/en-us/library/hh994558%28v=ws.10%29.aspx
+contact https://technet.microsoft.com/en-us/library/hh994561(v=ws.10).aspx
+contact https://technet.microsoft.com/en-us/library/dd883248(v=ws.10).aspx
+contact https://technet.microsoft.com/en-us/library/cc755284(v=ws.10).aspx
+contact https://technet.microsoft.com/en-us/library/cc731416(v=ws.10).aspx
+contact https://technet.microsoft.com/en-us/library/ee706526(v=ws.10).aspx
+contact https://technet.microsoft.com/en-us/library/cc731004(v=ws.10).aspx
+contact https://technet.microsoft.com/en-us/library/cc731515(v=ws.10).aspx
+contact https://technet.microsoft.com/en-us/library/cc771395(v=ws.10).aspx
+contact https://technet.microsoft.com/en-us/library/jj865680(v=ws.10).aspx
+contact https://technet.microsoft.com/en-us/library/ff641731(v=ws.10).aspx
+contact https://technet.microsoft.com/en-us/library/cc753173(v=ws.10).aspx
+contact https://technet.microsoft.com/en-us/library/cc721923(v=ws.10).aspx
+contact https://technet.microsoft.com/en-us/library/cc731549(v=ws.10).aspx
+contact https://technet.microsoft.com/en-us/library/cc732077(v=ws.10).aspx
+contact https://technet.microsoft.com/en-us/library/cc772066(v=ws.10).aspx
+https://twitter.com/bruce_schneier
+http://www.isaccouncil.org/memberisacs.html
+email https://tools.ietf.org/
+http://www.sqlsecurity.co
+contact https://technet.microsoft.com/en-us/library/security/dn610807.aspx
+contact help http://searchsecurity.techtarget.in/
+contact help http://www.bmc.com/support/security/
+contact https://portal.reisac.org/SitePages/Index.aspx
+contact http://www.infosecisland.com/
+email http://www.infosecblog.org/
+contact help https://isc.sans.edu/
+contact http://www.northropgrumman.com
+recommend https://ics-cert.us-cert.gov/Standards-and-References
+contact help http://www.information-age.com/
