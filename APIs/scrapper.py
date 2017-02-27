@@ -173,21 +173,21 @@ def crawler(threadName):
             # Contact,Help,Email,Recommendations,Sitemap - check for hyperlink
             # idea ->  Scrap web>> parse using Soup>> find_all_lines(having='anchor tag', string=="contacts|Help|Email|Recommendations|Sitemap")>> check if href?>>
             if check_hyperlink==1:
-                check_hyperlinks(raw,url)
+                check_hyperlinks(url)
 
             # No of Ads links, Image to text ratio - check for img / text size
             if check_ratio==1:
-                size_of_image = check_size_ratio(raw,url)
+                size_of_image = check_size_ratio(url)
 
 
             if check_link_ads==1:
-                no_of_ads = check_ads(raw,url)
+                no_of_ads = check_ads(url)
 
             if broken_links == 1:
-                count  = check_brokenlinks(raw,url)
+                count  = check_brokenlinks(url)
 
             if cookie==1:
-                check_cookie(raw,url)
+                check_cookie(url)
 
             print url
 
@@ -204,66 +204,83 @@ for i in range(1):
     thread = myThread(1, i)
     thread.start()
 
-def check_hyperlinks(raw,url):
-    data = raw.text
-    soup = BeautifulSoup(data,"html.parser")
-
-    for link in soup.find_all(string=re.compile("language",re.I)):
-        links = link.get('href')
-        if links:
-            print 'lan',
-            # break
-
-    # for link in soup.find_all('a', string=re.compile("contact",re.I)):
-    #     links = link.get('href')
-    #     if links:
-    #         print 'contact',
-    #         break
-    #
-    # for link in soup.find_all('a', string=re.compile("email",re.I)):
-    #     links = link.get('href')
-    #     if links:
-    #         print 'email',
-    #         break
-    #
-    # for link in soup.find_all('a', string=re.compile("help",re.I)):
-    #     links = link.get('href')
-    #     if links:
-    #         print 'help',
-    #         break
-    #
-    # for link in soup.find_all('a', string=re.compile("recommend",re.I)):
-    #     links = link.get('href')
-    #     if links:
-    #         print 'recommend',
-    #         break
-    #
-    # for link in soup.find_all('a', string=re.compile("sitemap",re.I)):
-    #     links = link.get('href')
-    #     if links:
-    #         print 'sitemap',
-    #         break
-
-    print url
-
-def check_size_ratio(raw,url):
-    ratio  = 'Not defined'
-    # in bytes
-    if not raw:
+def check_hyperlinks(url):
+    # need to specify header for scrapping otherwise some websites doesn't allow bot to scrap
+    hdr = {'User-Agent': 'Mozilla/5.0'}
+    # You should use the HEAD Request for this, it asks the webserver for the headers without the body.
+    try:
+        raw  = requests.get(url,headers=hdr)
+    except:
         print "cannot extract raw of",url
         return
 
-    # print raw.headers
     data = raw.text
-    # if raw.headers['Content-Length']:
+    soup = BeautifulSoup(data,"html.parser")
+
+    data = {'contact':0,'email':0,'help':0,'recommend':0,'sitemap':0}
+    for link in soup.find_all('a', string=re.compile("contact",re.I),href=True):
+        links = link.get('href')
+        if links:
+            # print 'contact',
+            data['contact']=1
+            break
+
+    for link in soup.find_all('a', string=re.compile("email",re.I),href=True):
+        links = link.get('href')
+        if links:
+            # print 'email',
+            data['email']=1
+            break
+
+    for link in soup.find_all('a', string=re.compile("help",re.I),href=True):
+        links = link.get('href')
+        if links:
+            # print 'help',
+            data['help']=1
+            break
+
+    for link in soup.find_all('a', string=re.compile("recommend",re.I),href=True):
+        links = link.get('href')
+        if links:
+            # print 'recommend',
+            data['recommend']=1
+            break
+
+    for link in soup.find_all('a', string=re.compile("sitemap",re.I),href=True):
+        links = link.get('href')
+        if links:
+            # print 'sitemap',
+            data['sitemap']=1
+            break
+
+    # print data,url
+    return data
+
+def check_size_ratio(url):
+    # need to specify header for scrapping otherwise some websites doesn't allow bot to scrap
+    hdr = {'User-Agent': 'Mozilla/5.0'}
+    # You should use the HEAD Request for this, it asks the webserver for the headers without the body.
     try:
+        raw  = requests.get(url,headers=hdr)
+    except:
+        print "cannot extract raw of",url
+        return
+
+    ratio  = 'Not defined'
+    total_img_size = int(0)
+    txt_size = int(0)
+
+    try:
+        data = raw.text
         txt_size = int(raw.headers['Content-Length'])
     except:
-        txt_size =0
+        txt_size ='NA'
+        print 'text size not available, page is dynamically created',
+        return "NA"
 
     soup = BeautifulSoup(data,"html.parser")
+
     # total_img_size of images
-    total_img_size = int(0)
     for link in soup.find_all('img',src=True):
         links = link.get('src')
         if links!="":
@@ -277,58 +294,79 @@ def check_size_ratio(raw,url):
                 size = r.headers['Content-Length']
             except:
                 size=0
-            total_img_size = total_img_size + int(size)
+            finally:
+                total_img_size += int(size)
             # print size,link
 
             try:
                 ratio = total_img_size/txt_size
-            except:
+            except ValueError:
                 ratio = 'Not defined'
-    print total_img_size,url,txt_size
-    print ratio
+    # print total_img_size,url,txt_size
+    # print ratio
+    return ratio
+#
+# def check_ads(url):
+#     # print ads for ads in ads_list
+#     # return
+#     hdr = {'User-Agent': 'Mozilla/5.0'}
+#     # You should use the HEAD Request for this, it asks the webserver for the headers without the body.
+#     try:
+#         raw  = requests.head(url,headers=hdr)
+#     except:
+#         print "cannot extract raw of",url
+#         return
+#     data = raw.text
+#     soup = BeautifulSoup(data,'html.parser')
+#     count = 0
+#
+#     for link in soup.find_all('a'):
+#         href = link.get('href')
+#         if  href.startswith('http://') or href.startswith('https://'):
+#             print href
+#             # for ads in ads_list:
+#             #     print str(ads)
+#             x = re.findall(r"(?=("+'|'.join(ads_list)+r"))",href)
+#             if x:
+#                 print x,len(x)
+#                 # if re.match(ads,href):
+#                 #     print link
+#                 #     count += 1
+#
+#
+#     print 'ad count=',count,
+#     return count
+#
+def check_brokenlinks(url):
+    # need to specify header for scrapping otherwise some websites doesn't allow bot to scrap
+    hdr = {'User-Agent': 'Mozilla/5.0'}
+    # You should use the HEAD Request for this, it asks the webserver for the headers without the body.
+    try:
+        raw  = requests.get(url,headers=hdr)
+    except:
+        print "cannot extract raw of",url
+        return
 
-def check_ads(raw,url):
-
-    # print ads for ads in ads_list
-    # return
-    data = raw.text
-    soup = BeautifulSoup(data,'html.parser')
-    count = 0
-
-    for link in soup.find_all('a'):
-        href = link.get('href')
-        if  href.startswith('http://') or href.startswith('https://'):
-            print href
-            # for ads in ads_list:
-            #     print str(ads)
-            x = re.findall(r"(?=("+'|'.join(ads_list)+r"))",href)
-            if x:
-                print x,len(x)
-                # if re.match(ads,href):
-                #     print link
-                #     count += 1
-
-
-    print 'ad count=',count,
-    return count
-
-def check_brokenlinks(raw,url):
     data = raw.text
     soup = BeautifulSoup(data,'html.parser')
     count = 0
     total_links  = 0
     total_external_links=0
+
     for link in soup.find_all('a',href=True):
             href = link.get('href')
             total_links+=1
             if  href.startswith('http://') or href.startswith('https://'):
                 total_external_links +=1
                 # now only allowed for external links
-                # href = url+href
+                # header is mentioned because some robots don't allow bot to crawl their pages
                 hdr = {'User-Agent': 'Mozilla/5.0'}
-                # header os mentioned because some robots don't allow bot to crawl their pages
-                # print raw
-                raw  = requests.head(url,headers=hdr)
+                # You should use the HEAD Request for this, it asks the webserver for the headers without the body.
+                try:
+                    raw  = requests.head(url,headers=hdr)
+                except:
+                    print "cannot extract raw of",url
+                    return
                 raw  = ((str(raw).split(' ')[1]).split(']')[0])
                 raw = int(raw.split('[')[1])
                 # print  raw
@@ -338,7 +376,14 @@ def check_brokenlinks(raw,url):
     print  'total_links =',total_links,'total_external_links =',total_external_links,'broken_links =',count,
     return  count
 
-def check_cookie(raw,url):
+def check_cookie(url):
+    hdr = {'User-Agent': 'Mozilla/5.0'}
+    # You should use the HEAD Request for this, it asks the webserver for the headers without the body.
+    try:
+        raw  = requests.head(url,headers=hdr)
+    except:
+        print "cannot extract raw of",url
+        return
     cookies = raw.cookies
     print cookies
     if cookies:
