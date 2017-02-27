@@ -6,13 +6,14 @@ import requests
 import re
 
 import threading
-global i,urls,check_hyperlink,check_ratio,check_link_ads,broken_links,cookie
+global i,urls,check_hyperlink,check_ratio,check_link_ads,broken_links,cookie,language
 i=0
-cookie =1
+cookie =0
 check_ratio = 0
 check_hyperlink=0
 check_link_ads = 0
 broken_links = 0
+language = 1
 
 urls = [
     "http://www.ffiec.gov/cybersecurity.htm",
@@ -122,7 +123,7 @@ urls = [
 #     "http://9gag.com/gif?ref=9nav"
 #     # "http://www.ct.gov/dds/lib/dds/images/ddslogo.jpg"
 # ]
-
+#
 easylist = open("adlist.txt", "r")
 ads_list = easylist.read().split(',')
 # print ads_list
@@ -189,6 +190,9 @@ def crawler(threadName):
             if cookie==1:
                 check_cookie(url)
 
+            if language==1:
+                check_language(url)
+
             print url
 
 class myThread (threading.Thread):
@@ -203,6 +207,224 @@ class myThread (threading.Thread):
 for i in range(1):
     thread = myThread(1, i)
     thread.start()
+
+def check_language(url):
+    iso_array = [
+      'ab' ,
+      'aa' ,
+      'af' ,
+      'ak' ,
+      'sq' ,
+      'am' ,
+      'ar' ,
+      'an' ,
+      'hy' ,
+      'as' ,
+      'av' ,
+      'ae' ,
+      'ay' ,
+      'az' ,
+      'bm' ,
+      'ba' ,
+      'eu' ,
+      'be' ,
+      'bn' ,
+      'bh' ,
+      'bi' ,
+      'bs' ,
+      'br' ,
+      'bg' ,
+      'my' ,
+      'ca' ,
+      'km' ,
+      'ch' ,
+      'ce' ,
+      'ny' ,
+      'zh' ,
+      'cu' ,
+      'cv' ,
+      'kw' ,
+      'co' ,
+      'cr' ,
+      'hr' ,
+      'cs' ,
+      'da' ,
+      'dv' ,
+      'nl' ,
+      'dz' ,
+      'en' ,
+      'eo' ,
+      'et' ,
+      'ee' ,
+      'fo' ,
+      'fj' ,
+      'fi' ,
+      'fr' ,
+      'ff' ,
+      'gd' ,
+      'gl' ,
+      'lg' ,
+      'ka' ,
+      'de' ,
+      'ki' ,
+      'el' ,
+      'kl' ,
+      'gn' ,
+      'gu' ,
+      'ht' ,
+      'ha' ,
+      'he' ,
+      'hz' ,
+      'hi' ,
+      'ho' ,
+      'hu' ,
+      'is' ,
+      'io' ,
+      'ig' ,
+      'id' ,
+      'ia' ,
+      'ie' ,
+      'iu' ,
+      'ik' ,
+      'ga' ,
+      'it' ,
+      'ja' ,
+      'jv' ,
+      'kn' ,
+      'kr' ,
+      'ks' ,
+      'kk' ,
+      'rw' ,
+      'kv' ,
+      'kg' ,
+      'ko' ,
+      'kj' ,
+      'ku' ,
+      'ky' ,
+      'lo' ,
+      'la' ,
+      'lv' ,
+      'lb' ,
+      'li' ,
+      'ln' ,
+      'lt' ,
+      'lu' ,
+      'mk' ,
+      'mg' ,
+      'ms' ,
+      'ml' ,
+      'mt' ,
+      'gv' ,
+      'mi' ,
+      'mr' ,
+      'mh' ,
+      'ro' ,
+      'mn' ,
+      'na' ,
+      'nv' ,
+      'nd' ,
+      'ng' ,
+      'ne' ,
+      'se' ,
+      'no' ,
+      'nb' ,
+      'nn' ,
+      'ii' ,
+      'oc' ,
+      'oj' ,
+      'or' ,
+      'om' ,
+      'os' ,
+      'pi' ,
+      'pa' ,
+      'ps' ,
+      'fa' ,
+      'pl' ,
+      'pt' ,
+      'qu' ,
+      'rm' ,
+      'rn' ,
+      'ru' ,
+      'sm' ,
+      'sg' ,
+      'sa' ,
+      'sc' ,
+      'sr' ,
+      'sn' ,
+      'sd' ,
+      'si' ,
+      'sk' ,
+      'sl' ,
+      'so' ,
+      'st' ,
+      'nr' ,
+      'es' ,
+      'su' ,
+      'sw' ,
+      'ss' ,
+      'sv' ,
+      'tl' ,
+      'ty' ,
+      'tg' ,
+      'ta' ,
+      'tt' ,
+      'te' ,
+      'th' ,
+      'bo' ,
+      'ti' ,
+      'to' ,
+      'ts' ,
+      'tn' ,
+      'tr' ,
+      'tk' ,
+      'tw' ,
+      'ug' ,
+      'uk' ,
+      'ur' ,
+      'uz' ,
+      've' ,
+      'vi' ,
+      'vo' ,
+      'wa' ,
+      'cy' ,
+      'fy' ,
+      'wo' ,
+      'xh' ,
+      'yi' ,
+      'yo' ,
+      'za' ,
+      'zu' ,
+    ]
+
+    # need to specify header for scrapping otherwise some websites doesn't allow bot to scrap
+    hdr = {'User-Agent': 'Mozilla/5.0'}
+    # You should use the HEAD Request for this, it asks the webserver for the headers without the body.
+    try:
+        raw  = requests.get(url,headers=hdr)
+    except:
+        print "cannot extract raw of",url
+        return
+
+    count = 0
+    done = {}
+    data = raw.text
+    soup = BeautifulSoup(data,"html.parser")
+    tags = soup.find_all(href=True)
+    for tag in tags:
+        tag = str(tag)
+        match = re.search("lang",tag)
+        if match:
+            # print tag
+            tag = re.split(' |\"',tag)
+            # print tag
+            for code in  iso_array:
+                if code in tag:
+                    if not code in done.keys():
+                        done[code]=1
+                        # print code
+                        count +=1
+    # print count
+    return count
 
 def check_hyperlinks(url):
     # need to specify header for scrapping otherwise some websites doesn't allow bot to scrap
