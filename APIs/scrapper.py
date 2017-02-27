@@ -11,9 +11,9 @@ i=0
 cookie =0
 check_ratio = 0
 check_hyperlink=0
-check_link_ads = 0
+check_link_ads = 1
 broken_links = 0
-language = 1
+language = 0
 
 urls = [
     "http://www.ffiec.gov/cybersecurity.htm",
@@ -124,30 +124,6 @@ urls = [
 #     # "http://www.ct.gov/dds/lib/dds/images/ddslogo.jpg"
 # ]
 #
-easylist = open("adlist.txt", "r")
-ads_list = easylist.read().split(',')
-# print ads_list
-# print len(ads_list)
-'''
-    [Adblock Plus 2.0]
-    ! Version: 201702151753
-    ! Title: EasyList
-    ! Last modified: 15 Feb 2017 17:53 UTC
-    ! Expires: 4 days (update frequency)
-    ! Homepage: https://easylist.to/
-    ! Licence: https://easylist.to/pages/licence.html
-    !
-    ! Please report any unblocked adverts or problems
-    ! in the forums (https://forums.lanik.us/)
-    ! or via e-mail (easylist.subscription@gmail.com).
-    ! GitHub issues: https://github.com/easylist/easylist/issues
-    ! GitHub pull requests: https://github.com/easylist/easylist/pulls
-    !
-    ! -----------------------General advert blocking filters-----------------------!
-    ! *** easylist:easylist/easylist_general_block.txt ***
-'''
-easylist.close()
-
 
 def crawler(threadName):
     global urls,i,check_hyperlink,check_ratio,check_ads
@@ -193,7 +169,7 @@ def crawler(threadName):
             if language==1:
                 check_language(url)
 
-            print url
+            # print url
 
 class myThread (threading.Thread):
     def __init__(self, threadID, name):
@@ -527,38 +503,64 @@ def check_size_ratio(url):
     # print total_img_size,url,txt_size
     # print ratio
     return ratio
-#
-# def check_ads(url):
-#     # print ads for ads in ads_list
-#     # return
-#     hdr = {'User-Agent': 'Mozilla/5.0'}
-#     # You should use the HEAD Request for this, it asks the webserver for the headers without the body.
-#     try:
-#         raw  = requests.head(url,headers=hdr)
-#     except:
-#         print "cannot extract raw of",url
-#         return
-#     data = raw.text
-#     soup = BeautifulSoup(data,'html.parser')
-#     count = 0
-#
-#     for link in soup.find_all('a'):
-#         href = link.get('href')
-#         if  href.startswith('http://') or href.startswith('https://'):
-#             print href
-#             # for ads in ads_list:
-#             #     print str(ads)
-#             x = re.findall(r"(?=("+'|'.join(ads_list)+r"))",href)
-#             if x:
-#                 print x,len(x)
-#                 # if re.match(ads,href):
-#                 #     print link
-#                 #     count += 1
-#
-#
-#     print 'ad count=',count,
-#     return count
-#
+
+def check_ads(url):
+    # print "aaya"
+    # url = "https://www.olx.in/"
+    easylist = open("easylist.txt", "r")
+    ads_list = easylist.read().split()
+    '''
+        [Adblock Plus 2.0]
+        ! Version: 201702151753
+        ! Title: EasyList
+        ! Last modified: 15 Feb 2017 17:53 UTC
+        ! Expires: 4 days (update frequency)
+        ! Homepage: https://easylist.to/
+        ! Licence: https://easylist.to/pages/licence.html
+        !
+        ! Please report any unblocked adverts or problems
+        ! in the forums (https://forums.lanik.us/)
+        ! or via e-mail (easylist.subscription@gmail.com).
+        ! GitHub issues: https://github.com/easylist/easylist/issues
+        ! GitHub pull requests: https://github.com/easylist/easylist/pulls
+        !
+        ! -----------------------General advert blocking filters-----------------------!
+        ! *** easylist:easylist/easylist_general_block.txt ***
+    '''
+    easylist.close()
+    # print ads_list
+
+
+    hdr = {'User-Agent': 'Mozilla/5.0'}
+    # You should use the HEAD Request for this, it asks the webserver for the headers without the body.
+    try:
+        raw  = requests.get(url,headers=hdr)
+    except:
+        print "cannot extract raw of",url
+        return
+
+    data = raw.text
+    soup = BeautifulSoup(data,'html.parser')
+    count = 0
+
+    for link in soup.find_all('a',href=True):
+        # print link
+        href = link.get('href')
+        if  href.startswith('http://') or href.startswith('https://'):
+            # print href
+            href = str(href)
+            for ads in ads_list:
+                match = re.search(ads,href)
+                # print ads
+                if match:
+                    print link
+                    count += 1
+
+
+    if count!=0:
+        print 'ad count=',count,url
+    return count
+
 def check_brokenlinks(url):
     # need to specify header for scrapping otherwise some websites doesn't allow bot to scrap
     hdr = {'User-Agent': 'Mozilla/5.0'}
