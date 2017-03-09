@@ -4,14 +4,12 @@ import requests
 from urllib import urlopen
 import socket
 from urlparse import urlparse
-from ttp import utils
+# from http import utils
 import re
 import urllib2
 import json
 from bs4 import BeautifulSoup, SoupStrainer
-import sys
 import unicodedata
-import re
 import os
 from flask import Flask, jsonify, make_response, request
 app = Flask(__name__)
@@ -53,7 +51,7 @@ def getLinks(url):
 	for line in txt.splitlines():
 		if "totalResults" in line:
 			break
-	
+
 	inlinks=int(re.sub("[^0-9]", "", line))
 	outlinks = len(outlinks)
 	return inlinks,outlinks

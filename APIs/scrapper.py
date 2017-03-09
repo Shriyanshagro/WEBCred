@@ -1,19 +1,25 @@
 # _author_ = Shriyansh Agrawal
 
 from bs4 import BeautifulSoup
-
 import requests
 import re
+import nltk
+from nltk.tag import pos_tag
+from nltk.corpus import wordnet
 
 import threading
-global i,urls,check_hyperlink,check_ratio,check_link_ads,broken_links,cookie,language
+global i,urls,check_hyperlink,check_ratio,check_link_ads,broken_links,cookie,language,spell_check,ads_list_flag,ads_list,iso_lang_flag
 i=0
-cookie =0
-check_ratio = 0
-check_hyperlink=0
+ads_list=[]
+iso_lang_flag=0
+ads_list_flag=0
+cookie =1
+check_ratio = 1
+check_hyperlink=1
 check_link_ads = 1
-broken_links = 0
-language = 0
+broken_links = 1
+language = 1
+spell_check = 1
 
 urls = [
     "http://www.ffiec.gov/cybersecurity.htm",
@@ -118,12 +124,13 @@ urls = [
     "http://www.wired.com/2014/11/hacker-lexicon-whats-dark-web/",
 ]
 
+
 # urls = [
-#     # "https://www.first.org",
-#     "http://9gag.com/gif?ref=9nav"
+#     "https://www.first.org",
+#     # "http://9gag.com/gif?ref=9nav"
 #     # "http://www.ct.gov/dds/lib/dds/images/ddslogo.jpg"
 # ]
-#
+
 
 def crawler(threadName):
     global urls,i,check_hyperlink,check_ratio,check_ads
@@ -150,24 +157,37 @@ def crawler(threadName):
             # Contact,Help,Email,Recommendations,Sitemap - check for hyperlink
             # idea ->  Scrap web>> parse using Soup>> find_all_lines(having='anchor tag', string=="contacts|Help|Email|Recommendations|Sitemap")>> check if href?>>
             if check_hyperlink==1:
-                check_hyperlinks(url)
+                count = check_hyperlinks(url)
+                print url,count
 
             # No of Ads links, Image to text ratio - check for img / text size
             if check_ratio==1:
-                size_of_image = check_size_ratio(url)
+                count = check_size_ratio(url)
+                print url,count
 
 
             if check_link_ads==1:
-                no_of_ads = check_ads(url)
+                count = check_ads(url)
+                print url,count
+
 
             if broken_links == 1:
                 count  = check_brokenlinks(url)
+                print url,count
 
             if cookie==1:
                 check_cookie(url)
+                print url,count
 
             if language==1:
-                check_language(url)
+                count = check_language(url)
+                print url,count
+
+            if spell_check==1:
+                count = spell_checker(url)
+                print url,count
+
+
 
             # print url
 
@@ -185,193 +205,13 @@ for i in range(1):
     thread.start()
 
 def check_language(url):
-    iso_array = [
-      'ab' ,
-      'aa' ,
-      'af' ,
-      'ak' ,
-      'sq' ,
-      'am' ,
-      'ar' ,
-      'an' ,
-      'hy' ,
-      'as' ,
-      'av' ,
-      'ae' ,
-      'ay' ,
-      'az' ,
-      'bm' ,
-      'ba' ,
-      'eu' ,
-      'be' ,
-      'bn' ,
-      'bh' ,
-      'bi' ,
-      'bs' ,
-      'br' ,
-      'bg' ,
-      'my' ,
-      'ca' ,
-      'km' ,
-      'ch' ,
-      'ce' ,
-      'ny' ,
-      'zh' ,
-      'cu' ,
-      'cv' ,
-      'kw' ,
-      'co' ,
-      'cr' ,
-      'hr' ,
-      'cs' ,
-      'da' ,
-      'dv' ,
-      'nl' ,
-      'dz' ,
-      'en' ,
-      'eo' ,
-      'et' ,
-      'ee' ,
-      'fo' ,
-      'fj' ,
-      'fi' ,
-      'fr' ,
-      'ff' ,
-      'gd' ,
-      'gl' ,
-      'lg' ,
-      'ka' ,
-      'de' ,
-      'ki' ,
-      'el' ,
-      'kl' ,
-      'gn' ,
-      'gu' ,
-      'ht' ,
-      'ha' ,
-      'he' ,
-      'hz' ,
-      'hi' ,
-      'ho' ,
-      'hu' ,
-      'is' ,
-      'io' ,
-      'ig' ,
-      'id' ,
-      'ia' ,
-      'ie' ,
-      'iu' ,
-      'ik' ,
-      'ga' ,
-      'it' ,
-      'ja' ,
-      'jv' ,
-      'kn' ,
-      'kr' ,
-      'ks' ,
-      'kk' ,
-      'rw' ,
-      'kv' ,
-      'kg' ,
-      'ko' ,
-      'kj' ,
-      'ku' ,
-      'ky' ,
-      'lo' ,
-      'la' ,
-      'lv' ,
-      'lb' ,
-      'li' ,
-      'ln' ,
-      'lt' ,
-      'lu' ,
-      'mk' ,
-      'mg' ,
-      'ms' ,
-      'ml' ,
-      'mt' ,
-      'gv' ,
-      'mi' ,
-      'mr' ,
-      'mh' ,
-      'ro' ,
-      'mn' ,
-      'na' ,
-      'nv' ,
-      'nd' ,
-      'ng' ,
-      'ne' ,
-      'se' ,
-      'no' ,
-      'nb' ,
-      'nn' ,
-      'ii' ,
-      'oc' ,
-      'oj' ,
-      'or' ,
-      'om' ,
-      'os' ,
-      'pi' ,
-      'pa' ,
-      'ps' ,
-      'fa' ,
-      'pl' ,
-      'pt' ,
-      'qu' ,
-      'rm' ,
-      'rn' ,
-      'ru' ,
-      'sm' ,
-      'sg' ,
-      'sa' ,
-      'sc' ,
-      'sr' ,
-      'sn' ,
-      'sd' ,
-      'si' ,
-      'sk' ,
-      'sl' ,
-      'so' ,
-      'st' ,
-      'nr' ,
-      'es' ,
-      'su' ,
-      'sw' ,
-      'ss' ,
-      'sv' ,
-      'tl' ,
-      'ty' ,
-      'tg' ,
-      'ta' ,
-      'tt' ,
-      'te' ,
-      'th' ,
-      'bo' ,
-      'ti' ,
-      'to' ,
-      'ts' ,
-      'tn' ,
-      'tr' ,
-      'tk' ,
-      'tw' ,
-      'ug' ,
-      'uk' ,
-      'ur' ,
-      'uz' ,
-      've' ,
-      'vi' ,
-      'vo' ,
-      'wa' ,
-      'cy' ,
-      'fy' ,
-      'wo' ,
-      'xh' ,
-      'yi' ,
-      'yo' ,
-      'za' ,
-      'zu' ,
-    ]
-
+    global iso_lang_flag
+    if iso_lang_flag==0:
+        # print "scanning array"
+        iso = open("lang_iso.txt", "r")
+        iso_array = iso.read().split(",")
+        iso.close()
+        iso_lang_flag=1
     # need to specify header for scrapping otherwise some websites doesn't allow bot to scrap
     hdr = {'User-Agent': 'Mozilla/5.0'}
     # You should use the HEAD Request for this, it asks the webserver for the headers without the body.
@@ -399,7 +239,11 @@ def check_language(url):
                         done[code]=1
                         # print code
                         count +=1
-    # print count
+
+    # some uni-lang websites didn't mention lang tags
+    if count==0:
+        count = 1
+    count = {"Total supported Lang":count}
     return count
 
 def check_hyperlinks(url):
@@ -502,13 +346,17 @@ def check_size_ratio(url):
                 ratio = 'Not defined'
     # print total_img_size,url,txt_size
     # print ratio
+    ratio = {'Image:text Ratio':ratio}
     return ratio
 
-def check_ads(url):
-    # print "aaya"
-    # url = "https://www.olx.in/"
+# compiling all regular expressions of ads
+def compile_ads():
+    global ads_list_flag,ads_list
+    if ads_list_flag==1:
+        return
+    # print "compiling ads regex"
     easylist = open("easylist.txt", "r")
-    ads_list = easylist.read().split()
+    ads_list_raw = easylist.read().split()
     '''
         [Adblock Plus 2.0]
         ! Version: 201702151753
@@ -528,11 +376,20 @@ def check_ads(url):
         ! *** easylist:easylist/easylist_general_block.txt ***
     '''
     easylist.close()
+    for ads in ads_list_raw:
+        # use of re.escape so that if your text has special characters(#,?,/,\,.), they won't be interpreted as such.
+        ads = re.compile(re.escape(ads),re.X)
+        ads_list.append(ads)
+    ads_list_flag=1
+    return
+
+def check_ads(url):
+    # get compiled list of ads regex
+    compile_ads()
     # print ads_list
 
 
     hdr = {'User-Agent': 'Mozilla/5.0'}
-    # You should use the HEAD Request for this, it asks the webserver for the headers without the body.
     try:
         raw  = requests.get(url,headers=hdr)
     except:
@@ -549,16 +406,19 @@ def check_ads(url):
         if  href.startswith('http://') or href.startswith('https://'):
             # print href
             href = str(href)
+
             for ads in ads_list:
-                match = re.search(ads,href)
+                ads = str(ads)
+                match = re.search(ads,href, re.X)
                 # print ads
                 if match:
                     print link
                     count += 1
 
 
-    if count!=0:
-        print 'ad count=',count,url
+    # if count!=0:
+    #     print 'ad count=',count,url
+    count = {"ad count":count}
     return count
 
 def check_brokenlinks(url):
@@ -597,8 +457,9 @@ def check_brokenlinks(url):
                 if raw>300:
                     #  success response code are only b/w 200-300
                     count +=1
-    print  'total_links =',total_links,'total_external_links =',total_external_links,'broken_links =',count,
-    return  count
+
+    array = {'total_links':total_links,'total_external_links':total_external_links,'broken_links':broken_links}
+    return  array
 
 def check_cookie(url):
     hdr = {'User-Agent': 'Mozilla/5.0'}
@@ -609,9 +470,46 @@ def check_cookie(url):
         print "cannot extract raw of",url
         return
     cookies = raw.cookies
-    print cookies
+    # print cookies
     if cookies:
-        print 'yes website installs cookie on client system'
-        return 1
+        # print 'yes website installs cookie on client system'
+        return {'cookies':1}
     else:
-        return 0
+        return {'cookies':0}
+
+def spell_checker(url):
+    hdr = {'User-Agent': 'Mozilla/5.0'}
+    # You should use the HEAD Request for this, it asks the webserver for the headers without the body.
+    try:
+        raw  = requests.get(url,headers=hdr)
+    except:
+        print "cannot extract raw of",url
+        return
+
+    # give text with html tags
+    text = raw.text
+    # gives only  text of HTML, i.e removes all HTML tags
+    text = BeautifulSoup(text,"html.parser")
+    text = text.get_text()
+    # print raw,text
+    tags =  [i[0] for i in pos_tag(text.split()) if i[1] != "NNP"]
+    # print tags
+    total_tags = len(tags)
+    # count of undefined words
+    count = 0
+    for tag in tags:
+        flag =1
+        # print tag
+        syns = wordnet.synsets(tag)
+        try:
+            defi = syns[0].definition()
+            # print tag,"=",defi
+        except:
+            # print tag,"naa ho paayega"
+            flag = 0
+
+        if flag ==0:
+            count+= 1
+
+    array ={"Misspelled words":count,"total words":total_tags}
+    return array
