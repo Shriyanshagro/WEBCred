@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+{% block body %}
+	<form action="{{ url_for('start') }}" method=get class=add-entry>
+	      <dl>
+	        <dt>URL:
+	        <dd><input type=url name=site>
+	        <input type="checkbox" name="hyperlinks" value="true" checked="checked"> hyperlinks
+	        <input type="checkbox" name="imgratio" value="true" checked="checked"> imgratio
+	        <input type="checkbox" name="ads" value="true" checked="checked"> ads
+	        <input type="checkbox" name="brokencount" value="true" checked="checked"> brokencount
+	        <input type="checkbox" name="cookie" value="true" checked="checked"> cookie
+	        <input type="checkbox" name="langcount" value="true" checked="checked"> language count
+	        <input type="checkbox" name="misspelled" value="true" checked="checked"> misspelled
+	        <input type="checkbox" name="lastmod" value="true" checked="checked"> lastmod
+	        <input type="checkbox" name="domain" value="true" checked="checked"> domain
+	        <input type="checkbox" name="inlinksoutlinks" value="true" checked="checked"> inlinks outlinks
+	        <input type="checkbox" name="pageloattime" value="true" checked="checked"> pageloattime
+	        <dd><input type=submit value=Share>
+	      </dl>
+	</form>
+{% endblock %}

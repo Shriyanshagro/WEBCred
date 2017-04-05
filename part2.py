@@ -12,7 +12,7 @@ from bs4 import BeautifulSoup, SoupStrainer
 import unicodedata
 import re
 import os
-from flask import Flask, jsonify, make_response, request
+from flask import Flask, abort, flash, redirect, render_template, request, url_for, jsonify, make_response
 from bs4 import BeautifulSoup
 import requests
 from nltk.tokenize import word_tokenize
@@ -20,6 +20,7 @@ import nltk
 from nltk.tag import pos_tag
 from nltk.corpus import wordnet
 import threading
+from wtforms import Form, BooleanField, StringField, PasswordField, validators
 app = Flask(__name__)
 
 
@@ -425,33 +426,55 @@ def pageloadtime(url):
 
 @app.route("/start",methods=['GET'])
 def start():
+	site=lastmod=domain=inlinks=outlinks=plt=hyprlinks=imgratio=ads=brokencount=cookie=langcount=misspelled=None
 	site=str(request.args.get('site'))
-	try:
-		lastmod=getDate(site)
-		lastmod.replace(",",":")
-	except:
-		lastmod='+++'
-	domain=getDomain(site)
-	inlinks, outlinks=getLinks(site)
+	# print str(request.args)
+	if str(request.args.get('lastmod'))=="true":
+		try:
+			lastmod=getDate(site)
+			lastmod.replace(",",":")
+		except:
+			lastmod='+++'
+	if str(request.args.get('domain'))=="true":
+		domain=getDomain(site)
+	if str(request.args.get('inlinksoutlinks'))=="true":
+		inlinks, outlinks=getLinks(site)
 	print inlinks,outlinks
-	try:
-		plt=pageloadtime(sit)
-	except:
-		plt='+++'
-	hyprlinks=check_hyperlinks(site)
-	imgratio = check_size_ratio(site)
-	ads = check_ads(site)
-	brokencount  = check_brokenlinks(site)
-	cookie=check_cookie(site)
-	langcount=check_language(site)
-	misspelled=spell_checker(site)
+	if str(request.args.get('pageloadtime'))=="true":
+		try:
+			plt=pageloadtime(sit)
+		except:
+			plt='+++'
+	if str(request.args.get('hyperlinks'))=="true":
+		hyprlinks=check_hyperlinks(site)
+	if str(request.args.get('imgratio'))=="true":
+		imgratio = check_size_ratio(site)
+	if str(request.args.get('ads'))=="true":
+		ads = check_ads(site)
+	if str(request.args.get('brokencount'))=="true":
+		brokencount  = check_brokenlinks(site)
+	if str(request.args.get('cookie'))=="true":
+		cookie=check_cookie(site)
+	if str(request.args.get('langcount'))=="true":
+		langcount=check_language(site)
+	if str(request.args.get('misspelled'))=="true":
+		misspelled=spell_checker(site)
 	dic={'site':site,'lastmod':lastmod,'domain':domain,'inlinks':inlinks,'outlinks':outlinks,
 	'pageloadtime':plt,'hyprlinks':hyprlinks,'imgratio':imgratio,'ads':ads,'brokencount':brokencount,
 	'cookie':cookie,'langcount':langcount,'misspelled':misspelled}
 	return jsonify(dic)
 
+@app.route("/")
+def index():
+	# form = WEBCred(request.form)
+	# if request.method == 'POST' and form.validate():
+	# 	url = form.url.data
+	# 	data = getdata(url)
+	return render_template("index.html")
 
-
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
 
 if __name__ == "__main__":
-	app.run(host="0.0.0.0",debug=True)
+	app.run(debug=True)
