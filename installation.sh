@@ -7,6 +7,7 @@ sudo pip install requests
 # sudo pip install urllib
 # sudo pip install socket
 sudo pip install utils
+sudo pip install wtforms
 # sudo pip install re
 # sudo pip install urllib2
 # sudo pip install json
