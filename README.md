@@ -1,2 +1,2 @@
 # WebCredibility
-Web Credibility Scoring For Information Security Websites
+Web Credibility assesment For Information Security Websites

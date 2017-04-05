@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% block body %}
-	<form action="{{ url_for('start') }}" method=get class=add-entry>
+	<form action="/start" method=get class=add-entry>
 	      <dl>
 	        <dt>URL:
 	        <dd><input type=url name=site>
@@ -15,7 +15,7 @@
 	        <input type="checkbox" name="domain" value="true" checked="checked"> domain
 	        <input type="checkbox" name="inlinksoutlinks" value="true" checked="checked"> inlinks outlinks
 	        <input type="checkbox" name="pageloattime" value="true" checked="checked"> pageloattime
-	        <dd><input type=submit value=Share>
+	        <dd><input type=submit value="Asses Score">
 	      </dl>
 	</form>
 {% endblock %}
