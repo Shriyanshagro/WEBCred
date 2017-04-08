@@ -94,48 +94,71 @@ def check_hyperlinks(url):
 	return data
 
 def check_language(url):
-	global iso_lang_flag,iso_array
-	if iso_lang_flag==0:
-		# print "scanning array"
-		iso = open("lang_iso.txt", "r")
-		iso_array = iso.read().split(",")
-		iso.close()
-		iso_lang_flag=1
+    # idea is to find patter 'lang' in tags and then iso_lang code in those tags
+    # there are two possible patterns, to match iso_lang -
+        # ="en"
+        # =en
+    global iso_lang_flag,iso_array
+    if iso_lang_flag==0:
+        # print "scanning array"
+        iso = open("lang_iso.txt", "r")
+        iso_array = iso.read().split()
+        iso.close()
+        iso_lang_flag=1
 
-	count = {"Total supported Lang":"Page NA"}
-	# need to specify header for scrapping otherwise some websites doesn't allow bot to scrap
-	hdr = {'User-Agent': 'Mozilla/5.0'}
-	# You should use the HEAD Request for this, it asks the webserver for the headers without the body.
-	try:
-		raw  = requests.get(url,headers=hdr)
-	except:
-		# print "cannot extract raw of",url
-		return count
+    count = {"Total supported Lang":"Page NA"}
+    # need to specify header for scrapping otherwise some websites doesn't allow bot to scrap
+    hdr = {'User-Agent': 'Mozilla/5.0'}
+    # You should use the HEAD Request for this, it asks the webserver for the headers without the body.
+    try:
+        raw  = requests.get(url,headers=hdr)
+    except:
+        # print "cannot extract raw of",url
+        return count
 
-	count = 0
-	done = {}
-	data = raw.text
-	soup = BeautifulSoup(data,"html.parser")
-	tags = soup.find_all(href=True)
-	for tag in tags:
-		tag = str(tag)
-		match = re.search("lang",tag)
-		if match:
-			# print tag
-			tag = re.split(' |\"',tag)
-			# print tag
-			for code in  iso_array:
-				if code in tag:
-					if not code in done.keys():
-						done[code]=1
-						# print code
-						count +=1
+    count = 0
+    done = {}
+    data = raw.text
+    soup = BeautifulSoup(data,"html.parser")
+    tags = soup.find_all(href=True)
+    for tag in tags:
+        tag = str(tag)
+        match = re.search("lang",tag,re.I)
+        # tag = tag.split("=")
+        if match:
+            # print tag
+            # tag = word_tokenize(tag)
+            for code in  iso_array:
+            # return {"Total supported Lang":"Page NA"}
+                    code = str(code)
+                    # print code,
+                # compile iso-code of languages
+                    # break
+                    reg = '='+code
+                    pattern = re.compile(reg)
+                    # # look for match in the string
+                    match= pattern.search(tag)
 
-	# some uni-lang websites didn't mention lang tags
-	if count==0:
-		count = 1
-	count = {"Total supported Lang":count}
-	return count
+                    if not match:
+
+                        reg = '='+ '"' + code + '"'
+                        pattern = re.compile(reg)
+                        # # look for match in the string
+                        match= pattern.search(tag)
+                    # # print match
+                    # # match = re.search("en",tag)
+                    if match:
+                        if not code in done.keys():
+                            # print code
+                            done[code]=1
+                            count +=1
+                            # print code
+
+    # some uni-lang websites didn't mention lang tags
+    if count==0:
+        count = -1
+    count = {"Total supported Lang":count}
+    return count
 
 def check_size_ratio(url):
 	ratio = "Page NA"
@@ -193,7 +216,7 @@ def compile_ads():
 	global ads_list_flag,ads_list
 	if ads_list_flag==1:
 		return
-	# print "compiling ads regex"
+	print "compiling ads regex"
 	easylist = open("easylist.txt", "r")
 	ads_list_raw = easylist.read().split()
 	'''
@@ -426,7 +449,7 @@ def pageloadtime(url):
 
 @app.route("/start",methods=['GET'])
 def start():
-	site=lastmod=domain=inlinks=outlinks=plt=hyprlinks=imgratio=ads=brokencount=cookie=langcount=misspelled=None
+	site=lastmod=domain=inlinks=outlinks=plt=hyperlinks=imgratio=ads=brokencount=cookie=langcount=misspelled=None
 	site=str(request.args.get('site'))
 	# print str(request.args)
 	if str(request.args.get('lastmod'))=="true":
@@ -442,11 +465,11 @@ def start():
 	print inlinks,outlinks
 	if str(request.args.get('pageloadtime'))=="true":
 		try:
-			plt=pageloadtime(sit)
+			plt=pageloadtime(site)
 		except:
 			plt='+++'
 	if str(request.args.get('hyperlinks'))=="true":
-		hyprlinks=check_hyperlinks(site)
+		hyperlinks=check_hyperlinks(site)
 	if str(request.args.get('imgratio'))=="true":
 		imgratio = check_size_ratio(site)
 	if str(request.args.get('ads'))=="true":
@@ -460,7 +483,7 @@ def start():
 	if str(request.args.get('misspelled'))=="true":
 		misspelled=spell_checker(site)
 	dic={'site':site,'lastmod':lastmod,'domain':domain,'inlinks':inlinks,'outlinks':outlinks,
-	'pageloadtime':plt,'hyprlinks':hyprlinks,'imgratio':imgratio,'ads':ads,'brokencount':brokencount,
+	'pageloadtime':plt,'hyperlinks':hyperlinks,'imgratio':imgratio,'ads':ads,'brokencount':brokencount,
 	'cookie':cookie,'langcount':langcount,'misspelled':misspelled}
 	return jsonify(dic)
 
