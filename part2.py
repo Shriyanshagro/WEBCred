@@ -21,6 +21,8 @@ from nltk.tag import pos_tag
 from nltk.corpus import wordnet
 import threading
 from wtforms import Form, BooleanField, StringField, PasswordField, validators
+from ast import literal_eval
+
 app = Flask(__name__)
 
 
@@ -38,6 +40,28 @@ broken_links = 1
 cookie =1
 language = 1
 spell_check = 1
+
+def check_wot(url):
+    result = "http://api.mywot.com/0.4/public_link_json2?hosts=" + url + "/&callback=&key=d60fa334759ae377ceb9cd679dfa22aec57ed998"
+    hdr = {'User-Agent': 'Mozilla/5.0'}
+    try:
+        raw  = requests.get(result,headers=hdr)
+        result =  literal_eval(raw.text[1:-2])
+        return list(result.values())[0]['0']
+    except:
+        # print "cannot extract raw of", url
+        return 'NA'
+
+def check_responsive_check(url):
+    result = "http://tools.mercenie.com/responsive-check/api/?format=json&url="+url
+    hdr = {'User-Agent': 'Mozilla/5.0'}
+    try:
+        raw  = requests.get(result,headers=hdr)
+    except:
+        # print "cannot extract raw of", url
+        return 'NA'
+    result =  literal_eval(raw.text)
+    return result['responsive']
 
 def check_hyperlinks(url):
 	data = {'contact':'Page NA','email':'Page NA','help':'Page NA','recommend':'Page NA','sitemap':'Page NA'}
@@ -96,8 +120,8 @@ def check_hyperlinks(url):
 def check_language(url):
     # idea is to find patter 'lang' in tags and then iso_lang code in those tags
     # there are two possible patterns, to match iso_lang -
-        # ="en"
-        # =en
+    #     ="en"
+    #     =en
     global iso_lang_flag,iso_array
     if iso_lang_flag==0:
         # print "scanning array"
@@ -449,7 +473,7 @@ def pageloadtime(url):
 
 @app.route("/start",methods=['GET'])
 def start():
-	site=lastmod=domain=inlinks=outlinks=plt=hyperlinks=imgratio=ads=brokencount=cookie=langcount=misspelled=None
+	responsive=wot=site=lastmod=domain=inlinks=outlinks=plt=hyperlinks=imgratio=ads=brokencount=cookie=langcount=misspelled=None
 	site=str(request.args.get('site'))
 	# print str(request.args)
 	if str(request.args.get('lastmod'))=="true":
@@ -482,9 +506,13 @@ def start():
 		langcount=check_language(site)
 	if str(request.args.get('misspelled'))=="true":
 		misspelled=spell_checker(site)
+	if str(request.args.get('wot'))=="true":
+		wot=check_wot(site)
+	if str(request.args.get('responsive'))=="true":
+		responsive=check_responsive_check(site)
 	dic={'site':site,'lastmod':lastmod,'domain':domain,'inlinks':inlinks,'outlinks':outlinks,
 	'pageloadtime':plt,'hyperlinks':hyperlinks,'imgratio':imgratio,'ads':ads,'brokencount':brokencount,
-	'cookie':cookie,'langcount':langcount,'misspelled':misspelled}
+	'cookie':cookie,'langcount':langcount,'misspelled':misspelled,"wot":wot,"responsive":responsive}
 	return jsonify(dic)
 
 @app.route("/")
