@@ -20,11 +20,11 @@ sudo pip install wtforms
 
 # install flask
 # https://www.digitalocean.com/community/tutorials/how-to-deploy-a-flask-application-on-an-ubuntu-vps#step-three-%E2%80%93-install-flask
-sudo pip install virtualenv
-sudo virtualenv venv
-source venv/bin/activate
+  # sudo pip install virtualenv
+  # sudo virtualenv venv
+  # source venv/bin/activate
 sudo pip install Flask
-deactivate #To deactivate the environment
+  # deactivate #To deactivate the environment
 # done
 
 # install nltk
