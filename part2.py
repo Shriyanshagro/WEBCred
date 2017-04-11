@@ -47,20 +47,18 @@ def check_wot(url):
     try:
         raw  = requests.get(result,headers=hdr)
         result =  literal_eval(raw.text[1:-2])
-        return list(result.values())[0]['0']
     except:
-        # print "cannot extract raw of", url
         return 'NA'
+    return list(result.values())[0]['0']
 
 def check_responsive_check(url):
     result = "http://tools.mercenie.com/responsive-check/api/?format=json&url="+url
     hdr = {'User-Agent': 'Mozilla/5.0'}
     try:
         raw  = requests.get(result,headers=hdr)
+        result =  literal_eval(raw.text)
     except:
-        # print "cannot extract raw of", url
         return 'NA'
-    result =  literal_eval(raw.text)
     return result['responsive']
 
 def check_hyperlinks(url):
@@ -180,7 +178,7 @@ def check_language(url):
 
     # some uni-lang websites didn't mention lang tags
     if count==0:
-        count = -1
+        count = 1
     count = {"Total supported Lang":count}
     return count
 
@@ -444,14 +442,24 @@ def getDomain(url):
 
 def getLinks(url):
 	outlinks=[]
-	html = requests.get(url,headers={'User-Agent': 'Mozilla/5.0'}).text
+	hdr = {'User-Agent': 'Mozilla/5.0'}
+	# You should use the HEAD Request for this, it asks the webserver for the headers without the body.
+	try:
+		html = requests.get(url,headers=hdr).text
+		# raw  = requests.head(url,headers=hdr)
+	except:
+		# print "cannot extract raw of",url
+		return 'Page NA','Page NA'
 	soup=BeautifulSoup(html)
+
 	for link in soup.find_all('a', href=True):
 		outlinks.append(link['href'])
 	API_KEY='AIzaSyB5L_ZZZKg9OeOVLQpmfOiqaHZMg8r9FCc'
-	r = requests.get('https://www.googleapis.com/customsearch/v1?key='+API_KEY+'&cx=017576662512468239146:omuauf_lfve&q=link:'+url,
-				 headers={'User-Agent': 'Mozilla/5.0'}
-				)
+	try:
+		r = requests.get('https://www.googleapis.com/customsearch/v1?key='+API_KEY+'&cx=017576662512468239146:omuauf_lfve&q=link:'+url,headers=hdr)
+	except:
+		# print "cannot extract raw of",url
+		return 'Page NA','Page NA'
 	txt=r.text
 	txt=unicodedata.normalize('NFKD', txt).encode('ascii','ignore')
 	for line in txt.splitlines():
