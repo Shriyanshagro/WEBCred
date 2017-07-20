@@ -12,7 +12,8 @@ from bs4 import BeautifulSoup, SoupStrainer
 import unicodedata
 import re
 import os
-from flask import Flask, abort, flash, redirect, render_template, request, url_for, jsonify, make_response
+from flask import Flask, abort, flash, redirect, render_template, request
+from flask import url_for, jsonify, make_response
 from bs4 import BeautifulSoup
 import requests
 from nltk.tokenize import word_tokenize
@@ -25,92 +26,102 @@ from ast import literal_eval
 
 app = Flask(__name__)
 
+global i, urls, check_hyperlink, check_ratio, check_link_ads, broken_links
+global cookie, language, spell_check, ads_list_flag, ads_list, iso_lang_flag
+global iso_array
 
-global i,urls,check_hyperlink,check_ratio,check_link_ads,broken_links,cookie,language,spell_check,ads_list_flag,ads_list,iso_lang_flag,iso_array
-i=0
-ads_list=[]
-iso_lang_flag=0
-ads_list_flag=0
+i = 0
+ads_list = []
+iso_lang_flag = 0
+ads_list_flag = 0
 
 # flags to Factors
-check_hyperlink=1
+check_hyperlink = 1
 check_ratio = 1
 check_link_ads = 1
 broken_links = 1
-cookie =1
+cookie = 1
 language = 1
 spell_check = 1
 
+
 def check_wot(url):
-    result = "http://api.mywot.com/0.4/public_link_json2?hosts=" + url + "/&callback=&key=d60fa334759ae377ceb9cd679dfa22aec57ed998"
+    result = "http://api.mywot.com/0.4/public_link_json2?hosts=" + url +
+    "/&callback=&key=d60fa334759ae377ceb9cd679dfa22aec57ed998"
     hdr = {'User-Agent': 'Mozilla/5.0'}
     try:
-        raw  = requests.get(result,headers=hdr)
-        result =  literal_eval(raw.text[1:-2])
+        raw = requests.get(result, headers=hdr)
+        result = literal_eval(raw.text[1:-2])
     except:
         return 'NA'
     return list(result.values())[0]['0']
 
+
 def check_responsive_check(url):
-    result = "http://tools.mercenie.com/responsive-check/api/?format=json&url="+url
+    result = "http://tools.mercenie.com/responsive-check/api/?format=json&url="
+    +url
     hdr = {'User-Agent': 'Mozilla/5.0'}
     try:
-        raw  = requests.get(result,headers=hdr)
-        result =  literal_eval(raw.text)
+        raw = requests.get(result, headers=hdr)
+        result = literal_eval(raw.text)
     except:
         return 'NA'
     return result['responsive']
 
+
 def check_hyperlinks(url):
-	data = {'contact':'Page NA','email':'Page NA','help':'Page NA','recommend':'Page NA','sitemap':'Page NA'}
+    data = {'contact': 'Page NA', 'email': 'Page NA', 'help': 'Page NA',
+            'recommend': 'Page NA', 'sitemap': 'Page NA'}
 
-	# need to specify header for scrapping otherwise some websites doesn't allow bot to scrap
-	hdr = {'User-Agent': 'Mozilla/5.0'}
-	# You should use the HEAD Request for this, it asks the webserver for the headers without the body.
-	try:
-		raw  = requests.get(url,headers=hdr)
-	except:
-		# print "cannot extract raw of",url
-		return data
+    '''need to specify header for scrapping otherwise some websites doesn't
+    allow bot to scrap'''
+    hdr = {'User-Agent': 'Mozilla/5.0'}
+    ''' You should use the HEAD Request for this, it asks the webserver for the
+    headers without the body.'''
+    try:
+        raw = requests.get(url, headers=hdr)
+    except:
+        # print "cannot extract raw of",url
+        return data
 
-	data = raw.text
-	soup = BeautifulSoup(data,"html.parser")
+    data = raw.text
+    soup = BeautifulSoup(data, "html.parser")
+    data = {'contact': 'NA', 'email': 'NA', 'help': 'NA', 'recommend': 'NA',
+            'sitemap': 'NA'}
+    for link in soup.find_all('a', string=re.compile("contact", re.I), href=True):
+        links = link.get('href')
+        if links:
+            # print 'contact',
+            data['contact'] = 1
+            break
 
-	data = {'contact':'NA','email':'NA','help':'NA','recommend':'NA','sitemap':'NA'}
-	for link in soup.find_all('a', string=re.compile("contact",re.I),href=True):
-		links = link.get('href')
-		if links:
-			# print 'contact',
-			data['contact']=1
-			break
+    for link in soup.find_all('a', string=re.compile("email", re.I), href=True):
+        links = link.get('href')
+        if links:
+            # print 'email',
+            data['email'] = 1
+            break
 
-	for link in soup.find_all('a', string=re.compile("email",re.I),href=True):
-		links = link.get('href')
-		if links:
-			# print 'email',
-			data['email']=1
-			break
+    for link in soup.find_all('a', string=re.compile("help", re.I), href=True):
+        links = link.get('href')
+        if links:
+            # print 'help',
+            data['help'] = 1
+            break
 
-	for link in soup.find_all('a', string=re.compile("help",re.I),href=True):
-		links = link.get('href')
-		if links:
-			# print 'help',
-			data['help']=1
-			break
+	for link in soup.find_all('a', string=re.compile("recommend", re.I), href=True):
+        links = link.get('href')
+        if links:
+            # print 'recommend',
+            data['recommend'] = 1
+            break
 
-	for link in soup.find_all('a', string=re.compile("recommend",re.I),href=True):
-		links = link.get('href')
-		if links:
-			# print 'recommend',
-			data['recommend']=1
-			break
-
-	for link in soup.find_all('a', string=re.compile("sitemap",re.I),href=True):
-		links = link.get('href')
-		if links:
-			# print 'sitemap',
-			data['sitemap']=1
-			break
+	for link in soup.find_all('a', string=re.compile("sitemap", re.I), href=True):
+        links = link.get('href')
+        if links:
+            # print 'sitemap',
+            data['sitemap'] = 1
+            break
 
 	# print data,url
 	return data
