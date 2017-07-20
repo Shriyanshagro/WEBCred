@@ -1,30 +1,27 @@
 import sys
 import extraction
 import requests
+import urllib2
 from urllib import urlopen
-import socket
 from urlparse import urlparse
+import socket
 import utils
 import re
-import urllib2
 import json
 from bs4 import BeautifulSoup, SoupStrainer
 import unicodedata
 import re
 import os
-from flask import Flask, abort, flash, redirect, render_template, request
-from flask import url_for, jsonify, make_response
-from bs4 import BeautifulSoup
-import requests
 from nltk.tokenize import word_tokenize
 import nltk
 from nltk.tag import pos_tag
 from nltk.corpus import wordnet
-import threading
 from wtforms import Form, BooleanField, StringField, PasswordField, validators
 from ast import literal_eval
-
-app = Flask(__name__)
+from datetime import datetime
+from classes import webcredError
+from classes import urlattributes
+import pdb
 
 global i, urls, check_hyperlink, check_ratio, check_link_ads, broken_links
 global cookie, language, spell_check, ads_list_flag, ads_list, iso_lang_flag
@@ -35,19 +32,9 @@ ads_list = []
 iso_lang_flag = 0
 ads_list_flag = 0
 
-# flags to Factors
-check_hyperlink = 1
-check_ratio = 1
-check_link_ads = 1
-broken_links = 1
-cookie = 1
-language = 1
-spell_check = 1
-
-
 def check_wot(url):
-    result = "http://api.mywot.com/0.4/public_link_json2?hosts=" + url +
-    "/&callback=&key=d60fa334759ae377ceb9cd679dfa22aec57ed998"
+    result = ("http://api.mywot.com/0.4/public_link_json2?hosts=" + url +
+    "/&callback=&key=d60fa334759ae377ceb9cd679dfa22aec57ed998")
     hdr = {'User-Agent': 'Mozilla/5.0'}
     try:
         raw = requests.get(result, headers=hdr)
@@ -55,7 +42,6 @@ def check_wot(url):
     except:
         return 'NA'
     return list(result.values())[0]['0']
-
 
 def check_responsive_check(url):
     result = "http://tools.mercenie.com/responsive-check/api/?format=json&url="
@@ -68,63 +54,21 @@ def check_responsive_check(url):
         return 'NA'
     return result['responsive']
 
+def check_hyperlinks(url, attributes):
 
-def check_hyperlinks(url):
-    data = {'contact': 'Page NA', 'email': 'Page NA', 'help': 'Page NA',
-            'recommend': 'Page NA', 'sitemap': 'Page NA'}
-
-    '''need to specify header for scrapping otherwise some websites doesn't
-    allow bot to scrap'''
-    hdr = {'User-Agent': 'Mozilla/5.0'}
-    ''' You should use the HEAD Request for this, it asks the webserver for the
-    headers without the body.'''
     try:
-        raw = requests.get(url, headers=hdr)
+        soup = url.soup()
+    except webcredError as e:
+        raise webcredError(e.message)
     except:
-        # print "cannot extract raw of",url
-        return data
+        raise webcredError('Error while parsing Page')
 
-    data = raw.text
-    soup = BeautifulSoup(data, "html.parser")
-    data = {'contact': 'NA', 'email': 'NA', 'help': 'NA', 'recommend': 'NA',
-            'sitemap': 'NA'}
-    for link in soup.find_all('a', string=re.compile("contact", re.I), href=True):
-        links = link.get('href')
-        if links:
-            # print 'contact',
-            data['contact'] = 1
-            break
-
-    for link in soup.find_all('a', string=re.compile("email", re.I), href=True):
-        links = link.get('href')
-        if links:
-            # print 'email',
-            data['email'] = 1
-            break
-
-    for link in soup.find_all('a', string=re.compile("help", re.I), href=True):
-        links = link.get('href')
-        if links:
-            # print 'help',
-            data['help'] = 1
-            break
-
-	for link in soup.find_all('a', string=re.compile("recommend", re.I), href=True):
-        links = link.get('href')
-        if links:
-            # print 'recommend',
-            data['recommend'] = 1
-            break
-
-	for link in soup.find_all('a', string=re.compile("sitemap", re.I), href=True):
-        links = link.get('href')
-        if links:
-            # print 'sitemap',
-            data['sitemap'] = 1
-            break
-
-	# print data,url
-	return data
+    data = {}
+    for element in attributes:
+        data[element] = 0
+        if soup.find_all('a', string=re.compile(element, re.I), href=True):
+            data[element] = 1
+    return data
 
 def check_language(url):
     # idea is to find patter 'lang' in tags and then iso_lang code in those tags
@@ -194,55 +138,54 @@ def check_language(url):
     return count
 
 def check_size_ratio(url):
-	ratio = "Page NA"
-	# need to specify header for scrapping otherwise some websites doesn't allow bot to scrap
-	hdr = {'User-Agent': 'Mozilla/5.0'}
-	# You should use the HEAD Request for this, it asks the webserver for the headers without the body.
-	try:
-		raw  = requests.get(url,headers=hdr)
-	except:
-		# print "cannot extract raw of",url
-		return {'Text:Page Ratio':ratio}
 
-	total_img_size = int(0)
-	txt_size = int(0)
+    '''need to specify header for scrapping otherwise some websites doesn't
+    allow bot to scrap'''
+    hdr = {'User-Agent': 'Mozilla/5.0'}
 
-	try:
-		data = raw.text
-		txt_size = int(raw.headers['Content-Length'])
-	except:
-		# txt_size ='NA'
-		# print 'text size not available, page is dynamically created',
-		return {'Text:Page Ratio':ratio}
+    try:
+        raw  = url.requests()
+        soup = url.soup()
+    except webcredError as e:
+        raise webcredError(e.message)
+    except:
+        raise webcredError('Error while Requests Page')
 
-	soup = BeautifulSoup(data,"html.parser")
+    total_img_size = int(0)
+    txt_size = int(0)
 
-	# total_img_size of images
-	for link in soup.find_all('img',src=True):
-		links = link.get('src')
-		if links!="":
-			if not links.startswith('http://') or links.startswith('https://'):
-				links = url+links
-				# print links
+    if raw.headers.get('Content-Length', None):
+        txt_size = int(raw.headers.get('Content-Length'))
+    else:
+        raise webcredError('Content-Length in headers is not available')
 
-			hdr = {'User-Agent': 'Mozilla/5.0'}
-			try:
-				r  = requests.get(links,headers=hdr)
-				size = r.headers['Content-Length']
-			except:
-				size=0
-			finally:
-				total_img_size += int(size)
-			# print size,link
+    # total_img_size of images
+    for link in soup.find_all('img', src=True):
+        links = link.get('src')
+        if links!="":
+            if not links.startswith('http://') and not links.startswith('https://'):
+                # pdb.set_trace()
+                links = url.geturl()+links
 
-			try:
-				ratio = str(txt_size)+'/'+str(total_img_size+txt_size)
-			except ValueError:
-				ratio = 'Page Na'
-	# print total_img_size,url,txt_size
-	# print ratio
-	ratio = {'Text:Page Ratio':ratio}
-	return ratio
+            try:
+                '''You should use the HEAD Request for this, it asks the
+                webserver for the headers without the body.'''
+                r  = requests.head(links, headers=hdr)
+                size = r.headers['Content-Length']
+            except:
+                # raise webcredError('Error while Requesting Page attributes')
+            	size=0
+            finally:
+            	total_img_size += int(size)
+                print total_img_size
+
+    # pdb.set_trace()
+    try:
+    	ratio = txt_size/float(total_img_size+txt_size)
+    except ValueError:
+        raise webcredError('Error in fetching images')
+
+    return ratio
 
 # compiling all regular expressions of ads
 def compile_ads():
@@ -431,120 +374,88 @@ def spell_checker(url):
 	array ={"Misspelled words":count,"total words":total_tags}
 	# print array,len(text)
 	return array
+
 def getDate(url):
-	print urllib2.urlopen(url).info().getdate('last-modified')
-	if urllib2.urlopen(url).code/100<4:
-		lastmod=str(urllib2.urlopen(url).info().getdate('last-modified'))
-		if lastmod=='None':
-			lastmod='cr'+str(urllib2.urlopen(url).info().getdate('date'))
-	else:
-		try:
-			response=urllib2.urlopen("http://archive.org/wayback/available?url="+url)
-			data = json.load(response)['archived_snapshots']['closest']['timestamp']
-			lastmod='wr'+'('+data[0:4]+', '+data[4:6]+', '+data[6:8]+', '+data[8:10]+', '+data[10:12]+', '+data[12:14]+')'
-		except:
-			lastmod='NA'
-	return lastmod
+
+    resp = url.urllibreq()
+    if resp.code/100<4:
+    	try:
+            lastmod=str(resp.info().getdate('last-modified'))
+            if lastmod == 'None' :
+                # some page has key 'date' for same
+        		lastmod=str(resp.info().getdate('date'))
+            lastmod = datetime.strptime(str(lastmod), '(%Y, %m, %d, %H, %M, %S, %f, %W, %U)')
+        except:
+            raise webcredError('Error with Requests')
+    else:
+    	try:
+            # fetching data form archive
+            req = urllib2.Request("http://archive.org/wayback/available?url="+url)
+            req.add_header('User-Agent', 'Mozilla/5.0')
+            response=urllib2.urlopen(req)
+            data = (json.load(response)['archived_snapshots']['closest']
+                    ['timestamp'])
+            lastmod= ('wr'+ '('+ data[0:4]+ ', '+ data[4:6]+ ', '+ data[6:8]+
+            ', '+ data[8:10]+ ', '+ data[10:12]+ ', '+ data[12:14]+')')
+    	except:
+    		raise webcredError('Error in fetching last-modified date from archive')
+    return lastmod
 
 def getDomain(url):
-	parsed_uri = urlparse(url)
-	domain = '{uri.scheme}://{uri.netloc}/'.format(uri=parsed_uri)
-	return domain
+    # a fascinating use of .format() syntax
+    try:
+        parsed_uri = urlparse(url.geturl())
+        domain = '{uri.scheme}://{uri.netloc}/'.format(uri=parsed_uri)
+    except:
+        raise webcredError('urlparsing error')
+    return domain
 
-def getLinks(url):
-	outlinks=[]
-	hdr = {'User-Agent': 'Mozilla/5.0'}
-	# You should use the HEAD Request for this, it asks the webserver for the headers without the body.
-	try:
-		html = requests.get(url,headers=hdr).text
-		# raw  = requests.head(url,headers=hdr)
-	except:
-		# print "cannot extract raw of",url
-		return 'Page NA','Page NA'
-	soup=BeautifulSoup(html)
+def getOutLinks(url):
+    outlinks=[]
 
-	for link in soup.find_all('a', href=True):
-		outlinks.append(link['href'])
-	API_KEY='AIzaSyB5L_ZZZKg9OeOVLQpmfOiqaHZMg8r9FCc'
-	try:
-		r = requests.get('https://www.googleapis.com/customsearch/v1?key='+API_KEY+'&cx=017576662512468239146:omuauf_lfve&q=link:'+url,headers=hdr)
-	except:
-		# print "cannot extract raw of",url
-		return 'Page NA','Page NA'
-	txt=r.text
-	txt=unicodedata.normalize('NFKD', txt).encode('ascii','ignore')
-	for line in txt.splitlines():
-		if "totalResults" in line:
-			break
-	try:
-		inlinks=int(re.sub("[^0-9]", "", line))
-	except:
-		inlinks=0
-	outlinks = len(outlinks)
-	return inlinks,outlinks
+    try:
+        soup = url.soup()
+    except webcredError as e:
+        raise webcredError(e.message)
+    except:
+        raise webcredError('Url is broken')
+
+
+    for link in soup.find_all('a', href=True):
+    	outlinks.append(link['href'])
+
+    outlinks = len(outlinks)
+    return outlinks
+
+def getInLinks(url):
+
+    hdr = {'User-Agent': 'Mozilla/5.0'}
+    '''You should use the HEAD Request for this, it asks the webserver for the
+    headers without the body.'''
+
+    API_KEY='AIzaSyB5L_ZZZKg9OeOVLQpmfOiqaHZMg8r9FCc'
+    try:
+    	r = requests.get('https://www.googleapis.com/customsearch/v1?key='+
+        API_KEY+ '&cx=017576662512468239146:omuauf_lfve&q=link:'+
+        url, headers=hdr)
+    except:
+    	raise webcredError('GoogleApi limit is exceeded')
+
+    txt=r.text
+    txt=unicodedata.normalize('NFKD', txt).encode('ascii','ignore')
+
+    for line in txt.splitlines():
+    	if "totalResults" in line:
+    		break
+    try:
+    	inlinks=int(re.sub("[^0-9]", "", line))
+    except:
+    	raise webcredError('Inlinks are hard to get for this URL')
+
+    return inlinks
 
 '''install phantomjs and have yslow.js in the path to execute'''
 def pageloadtime(url):
 	response=os.popen('phantomjs yslow.js --info basic '+url).read()
 	response=json.loads(response.split('\n')[1])
 	return (int)(response['lt'])/((int)(response['r']))
-
-
-@app.route("/start",methods=['GET'])
-def start():
-	responsive=wot=site=lastmod=domain=inlinks=outlinks=plt=hyperlinks=imgratio=ads=brokencount=cookie=langcount=misspelled=None
-	site=str(request.args.get('site'))
-	# print str(request.args)
-	if str(request.args.get('lastmod'))=="true":
-		try:
-			lastmod=getDate(site)
-			lastmod.replace(",",":")
-		except:
-			lastmod='+++'
-	if str(request.args.get('domain'))=="true":
-		domain=getDomain(site)
-	if str(request.args.get('inlinksoutlinks'))=="true":
-		inlinks, outlinks=getLinks(site)
-	print inlinks,outlinks
-	if str(request.args.get('pageloadtime'))=="true":
-		try:
-			plt=pageloadtime(site)
-		except:
-			plt='+++'
-	if str(request.args.get('hyperlinks'))=="true":
-		hyperlinks=check_hyperlinks(site)
-	if str(request.args.get('imgratio'))=="true":
-		imgratio = check_size_ratio(site)
-	if str(request.args.get('ads'))=="true":
-		ads = check_ads(site)
-	if str(request.args.get('brokencount'))=="true":
-		brokencount  = check_brokenlinks(site)
-	if str(request.args.get('cookie'))=="true":
-		cookie=check_cookie(site)
-	if str(request.args.get('langcount'))=="true":
-		langcount=check_language(site)
-	if str(request.args.get('misspelled'))=="true":
-		misspelled=spell_checker(site)
-	if str(request.args.get('wot'))=="true":
-		wot=check_wot(site)
-	if str(request.args.get('responsive'))=="true":
-		responsive=check_responsive_check(site)
-	dic={'site':site,'lastmod':lastmod,'domain':domain,'inlinks':inlinks,'outlinks':outlinks,
-	'pageloadtime':plt,'hyperlinks':hyperlinks,'imgratio':imgratio,'ads':ads,'brokencount':brokencount,
-	'cookie':cookie,'langcount':langcount,'misspelled':misspelled,"wot":wot,"responsive":responsive}
-	return jsonify(dic)
-
-@app.route("/")
-def index():
-	# form = WEBCred(request.form)
-	# if request.method == 'POST' and form.validate():
-	# 	url = form.url.data
-	# 	data = getdata(url)
-	return render_template("index.html")
-
-@app.errorhandler(404)
-def page_not_found(e):
-    return render_template('404.html'), 404
-
-if __name__ == "__main__":
-	app.run(host='0.0.0.0',debug=True)
