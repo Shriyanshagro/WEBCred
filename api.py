@@ -185,7 +185,7 @@ def check_cookie(url):
             raise WebcredError(e.message)
 
         if match:
-            print key
+            # print key
             return 'Yes'
 
     return 'No'
@@ -311,7 +311,8 @@ def getOutLinks(url):
                 if url.getdomain() != uri.getdomain():
                 	outlinks += 1
             except WebcredError as e:
-                raise WebcredError(e.message)
+                pass
+                # raise WebcredError(e.message)
 
     return outlinks
 
