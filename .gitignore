@@ -3,3 +3,4 @@ node_modules/*
 api.pyc
 classes.pyc
 exception.pyc
+utils.pyc
