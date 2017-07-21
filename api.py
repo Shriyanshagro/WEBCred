@@ -168,18 +168,27 @@ def check_ads(url):
     return count
 
 def check_cookie(url):
-    # pdb.set_trace()
     try:
     	header = url.getheader()
     except WebcredError as e:
         raise WebcredError(e.message)
 
-    if header.get('cookies', None):
-        cookies = header.get('cookies')
-    else:
-    	raise WebcredError('Header have no info of cookie')
+    try:
+        pattern = url.getPatternObj().regexCompile(['cookie'])
+    except WebcredError as e:
+        raise WebcredError(e.message)
+    for key in header.keys():
+        try:
+            match, matched = url.getPatternObj().regexMatch(pattern=pattern, data=key)
+        except WebcredError as e:
+            # pdb.set_trace()
+            raise WebcredError(e.message)
 
-    return cookie
+        if match:
+            print key
+            return 'Yes'
+
+    return 'No'
 
 def spell_checker(url):
     # pdb.set_trace()

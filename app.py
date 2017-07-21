@@ -3,19 +3,13 @@ from flask import url_for, jsonify, make_response
 import api
 from utils import WebcredError
 from utils import Urlattributes
-from utils import PatternMatching
 import json
+import pdb
 
 # debugging imports
 import UserDict
-# import pdb
-
-global app, patternMatching
-
-patternMatching = None
 
 app = Flask(__name__)
-print 'sfsd'
 
 @app.route("/start",methods=['GET'])
 def start():
@@ -80,11 +74,11 @@ def start():
                 data['brokencount'] = '+++'
         if str(request.args.get('cookie', None))=="true":
             try:
-                data['cookie'] = api.check_cookie(site)
+                data['Store cookie?'] = api.check_cookie(site)
             except WebcredError as e:
-                data['cookie'] = e.message
+                data['Store cookie?'] = e.message
             except:
-                data['cookie'] = '+++'
+                data['Store cookie?'] = '+++'
         if str(request.args.get('langcount', None))=="true":
             try:
                 data['langcount'] = api.check_language(site)
@@ -131,6 +125,7 @@ def start():
     except WebcredError as e:
         data =  WebcredError(e.message).message
 
+    # pdb.set_trace()
     return jsonify(data)
 
 def debug_start(request):
@@ -140,7 +135,7 @@ def debug_start(request):
 
     #  object
     try:
-        site = Urlattributes(url=site, obj=patternMatching)
+        site = Urlattributes(url=site)
     except WebcredError as e:
         print WebcredError(e.message).message
 
