@@ -11,7 +11,7 @@ from utils import Urlattributes
 from utils import PatternMatching
 import pdb
 
-def check_wot(url):
+def getWot(url):
 
     result = ("http://api.mywot.com/0.4/public_link_json2?hosts=" +
     url.geturl() + "/&callback=&key=d60fa334759ae377ceb9cd679dfa22aec57ed998")
@@ -26,7 +26,7 @@ def check_wot(url):
     except:
         return 'NA'
 
-def check_responsive_check(url):
+def getResponsive(url):
     result = ("http://tools.mercenie.com/responsive-check/api/?format=json&url="
     + url.geturl())
     try:
@@ -39,7 +39,7 @@ def check_responsive_check(url):
     except:
         return 'Info not NA'
 
-def check_hyperlinks(url, attributes):
+def getHyperlinks(url, attributes):
 
     try:
         soup = url.getsoup()
@@ -55,7 +55,7 @@ def check_hyperlinks(url, attributes):
             data[element] = 1
     return data
 
-def check_language(url):
+def getLangcount(url):
     '''
     idea is to find pattern 'lang' in tags and then iso_lang code in those tags
     there are 2 possible patterns, to match iso_lang -
@@ -95,7 +95,7 @@ def check_language(url):
         count = 1
     return count
 
-def check_size_ratio(url):
+def getImgratio(url):
 
     total_img_size = int(0)
     txt_size = int(0)
@@ -143,7 +143,7 @@ def check_size_ratio(url):
 
     return ratio
 
-def check_ads(url):
+def getAds(url):
     try:
         soup  = url.getsoup()
     except webcredError as e:
@@ -167,7 +167,7 @@ def check_ads(url):
 
     return count
 
-def check_cookie(url):
+def getCookie(url):
     try:
     	header = url.getheader()
     except WebcredError as e:
@@ -190,7 +190,7 @@ def check_cookie(url):
 
     return 'No'
 
-def spell_checker(url):
+def getMisspelled(url):
     # pdb.set_trace()
     try:
     	text  = url.gettext()
@@ -223,7 +223,7 @@ def spell_checker(url):
             count+= 1
 
     # pdb.set_trace()
-    return count, total_tags
+    return count
 
 def getDate(url):
     # pdb.set_trace()
@@ -265,7 +265,7 @@ def getDomain(url):
         raise WebcredError('urlparsing error')
     return domain
 
-def getBrokenLinks(url):
+def getBrokenlinks(url):
     broken_links = 0
 
     try:
@@ -293,7 +293,7 @@ def getBrokenLinks(url):
 
     return broken_links
 
-def getOutLinks(url):
+def getOutlinks(url):
     outlinks = 0
 
     try:
@@ -317,7 +317,7 @@ def getOutLinks(url):
     return outlinks
 
 # total web-pages which redirect/mention url
-def getInLinks(url):
+def getInlinks(url):
 
     API_KEY='AIzaSyB5L_ZZZKg9OeOVLQpmfOiqaHZMg8r9FCc'
     try:
@@ -344,7 +344,7 @@ def getInLinks(url):
     return inlinks
 
 '''install phantomjs and have yslow.js in the path to execute'''
-def pageloadtime(url):
+def getPageloadtime(url):
     # pdb.set_trace()
     try:
         response=os.popen('phantomjs yslow.js --info basic '+ url.geturl()).read()

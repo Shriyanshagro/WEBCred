@@ -1,247 +1,79 @@
 from flask import Flask, abort, flash, redirect, render_template, request
 from flask import url_for, jsonify, make_response
-import api
 from utils import WebcredError
 from utils import Urlattributes
+from utils import MyThread
 import json
-import pdb
-
-# debugging imports
 import UserDict
+import pdb
 
 app = Flask(__name__)
 
 @app.route("/start",methods=['GET'])
 def start():
 
-    data = {}
-    site = str(request.args.get('site', None))
-    #  object
     try:
-        site = Urlattributes(url=site)
-        data['site'] = site.geturl()
+        data = {}
+        req = {}
+        req['args'] = {}
+        hyperlinks_attributes = ['contact', 'email', 'help', 'recommend',
+        'sitemap']
+        apiList = {
+            'lastmod': ['getDate', '', ''],
+            'domain': ['getDomain', '', ''],
+            'inlinks': ['getInlinks', '', ''],
+            'outlinks': ['getOutlinks', '', ''],
+            'hyperlinks': ['getHyperlinks', hyperlinks_attributes, ''],
+            'imgratio': ['getImgratio', '', ''],
+            'brokenlinks': ['getBrokenlinks', '', ''],
+            'cookie': ['getCookie', '', ''],
+            'langcount': ['getLangcount', '', ''],
+            'misspelled': ['getMisspelled', '', ''],
+            'wot': ['getWot', '', ''],
+            'responsive': ['getResponsive', '', ''],
+            'ads': ['getAds', '', ''],
+            'pageloadtime': ['getPageloadtime', '', ''],
+            'site': ['']
+        }
+
+        # for production start method
+        # req['args']['site'] = request.args.get('site', None)
+        for keys in apiList.keys():
+            # because request.args is of ImmutableMultiDict form
+            req['args'][keys] = request.args.get(keys)
 
         # pdb.set_trace()
-        if str(request.args.get('lastmod', None))=="true":
-        	try:
-        		data['lastmod'] = api.getDate(site)
-        	except WebcredError as e:
-        		data['lastmod'] = e.message
-        	except:
-        		data['lastmod'] = '+++'
-        if str(request.args.get('domain', None))=="true":
-            try:
-                data['domain'] = api.getDomain(site)
-            except WebcredError as e:
-                data['domain'] = e.message
-            except:
-                data['domain'] = '+++'
-        if str(request.args.get('inlinks', None))=="true":
-            try:
-            	data['inlinks'] = api.getInLinks(site)
-            except WebcredError as e:
-                data['inlinks'] = str(e.message)
-            except:
-                data['inlinks'] = '+++'
-        if str(request.args.get('outlinks', None))=="true":
-            try:
-            	data['outlinks'] = api.getOutLinks(site)
-            except WebcredError as e:
-                data['outlinks'] = str(e.message)
-            except:
-                data['outlinks'] = '+++'
-        if str(request.args.get('hyperlinks', None))=="true":
-            attributes = ['contact', 'email', 'help', 'recommend', 'sitemap']
-            try:
-            	data['hyperlinks'] = api.check_hyperlinks(site, attributes)
-            except WebcredError as e:
-                data['hyperlinks'] = e.message
-            except:
-                data['hyperlinks'] = '+++'
-        if str(request.args.get('imgratio', None))=="true":
-            try:
-                data['imgratio'] = api.check_size_ratio(site)
-            except WebcredError as e:
-                data['imgratio'] = e.message
-            except:
-                data['imgratio'] = '+++'
-        if str(request.args.get('brokencount', None))=="true":
-            try:
-                data['brokencount'] = api.getBrokenLinks(site)
-            except WebcredError as e:
-                data['brokencount'] = e.message
-            except:
-                data['brokencount'] = '+++'
-        if str(request.args.get('cookie', None))=="true":
-            try:
-                data['Store cookie?'] = api.check_cookie(site)
-            except WebcredError as e:
-                data['Store cookie?'] = e.message
-            except:
-                data['Store cookie?'] = '+++'
-        if str(request.args.get('langcount', None))=="true":
-            try:
-                data['langcount'] = api.check_language(site)
-            except WebcredError as e:
-                data['langcount'] = e.message
-            except:
-                data['langcount'] = '+++'
-        if str(request.args.get('misspelled', None))=="true":
-            try:
-                data['misspelled'], data['total_tags'] = api.spell_checker(site)
-            except WebcredError as e:
-                data['misspelled'] = e.message
-            except:
-                data['misspelled'] = '+++'
-        if str(request.args.get('wot', None))=="true":
-            try:
-                data['wot'] = api.check_wot(site)
-            except WebcredError as e:
-                data['wot'] = e.message
-            except:
-                data['wot'] = '+++'
-        if str(request.args.get('responsive'))=="true":
-            try:
-                data['responsive'] = api.check_responsive_check(site)
-            except WebcredError as e:
-                data['responsive'] = e.message
-            except:
-                data['responsive'] = '+++'
-        if str(request.args.get('ads', None))=="true":
-            try:
-                data['ads'] = api.check_ads(site)
-            except WebcredError as e:
-                data['ads'] = e.message
-            except:
-                data['ads'] = '+++'
-        if str(request.args.get('pageloadtime', None))=="true":
-            try:
-                data['pageloadtime'] = api.pageloadtime(site)
-            except WebcredError as e:
-                data['pageloadtime'] = e.message
-            except:
-                data['pageloadtime'] = '+++'
+        # for debug method
+        # req['args'] = request['args']
+        # site = str(req['args'].get('site', None))
+
+
+        site = Urlattributes(url=req['args']['site'])
+        del req['args']['site']
+        data['url'] = site.geturl()
+
+        threads = []
+
+        for keys in req['args'].keys():
+            if str(req['args'].get(keys, None))=="true":
+                try:
+                    thread = MyThread(Method=apiList[keys][0], Name=keys, Url=site,
+                    Args=apiList[keys][1])
+                    thread.start()
+                    threads.append(thread)
+                except WebcredError as e:
+                    print keys, e.message
+                    continue
+
+        for t in threads:
+            t.join()
+            data[t.getName()] = t.getResult()
 
     except WebcredError as e:
         data =  WebcredError(e.message).message
 
-    # pdb.set_trace()
-    return jsonify(data)
-
-def debug_start(request):
-
-    data = {}
-    site = str(request['args'].get('site', None))
-
-    #  object
-    try:
-        site = Urlattributes(url=site)
-    except WebcredError as e:
-        print WebcredError(e.message).message
-
-    data['url'] = site.geturl()
-
-    # pdb.set_trace()
-    if str(request['args'].get('lastmod', None))=="true":
-    	try:
-    		data['lastmod'] = api.getDate(site)
-    	except WebcredError as e:
-    		data['lastmod'] = e.message
-    	except:
-    		data['lastmod'] = '+++'
-    if str(request['args'].get('domain', None))=="true":
-        try:
-            data['domain'] = api.getDomain(site)
-        except WebcredError as e:
-            data['domain'] = e.message
-        except:
-            data['domain'] = '+++'
-    if str(request['args'].get('inlinks', None))=="true":
-        try:
-        	data['inlinks'] = api.getInLinks(site)
-        except WebcredError as e:
-            data['inlinks'] = str(e.message)
-        except:
-            data['inlinks'] = '+++'
-    if str(request['args'].get('outlinks', None))=="true":
-        try:
-        	data['outlinks'] = api.getOutLinks(site)
-        except WebcredError as e:
-            data['outlinks'] = str(e.message)
-        except:
-            data['outlinks'] = '+++'
-    if str(request['args'].get('hyperlinks', None))=="true":
-        attributes = ['contact', 'email', 'help', 'recommend', 'sitemap']
-    	try:
-        	data['hyperlinks'] = api.check_hyperlinks(site, attributes)
-        except WebcredError as e:
-            data['hyperlinks'] = e.message
-        except:
-            data['hyperlinks'] = '+++'
-    if str(request['args'].get('imgratio', None))=="true":
-    	try:
-        	data['imgratio'] = api.check_size_ratio(site)
-        except WebcredError as e:
-            data['imgratio'] = e.message
-        except:
-            data['imgratio'] = '+++'
-    if str(request['args'].get('brokencount', None))=="true":
-        try:
-            data['brokencount'] = api.getBrokenLinks(site)
-        except WebcredError as e:
-            data['brokencount'] = e.message
-        except:
-            data['brokencount'] = '+++'
-    if str(request['args'].get('cookie', None))=="true":
-        try:
-            data['cookie'] = api.check_cookie(site)
-        except WebcredError as e:
-            data['cookie'] = e.message
-        except:
-            data['cookie'] = '+++'
-    if str(request['args'].get('langcount', None))=="true":
-        try:
-            data['langcount'] = api.check_language(site)
-        except WebcredError as e:
-            data['langcount'] = e.message
-        except:
-            data['langcount'] = '+++'
-    if str(request['args'].get('misspelled', None))=="true":
-        try:
-            data['misspelled'], data['total_tags'] = api.spell_checker(site)
-        except WebcredError as e:
-            data['misspelled'] = e.message
-        except:
-            data['misspelled'] = '+++'
-    if str(request['args'].get('wot', None))=="true":
-        try:
-            data['wot'] = api.check_wot(site)
-        except WebcredError as e:
-            data['wot'] = e.message
-        except:
-            data['wot'] = '+++'
-    if str(request['args'].get('responsive'))=="true":
-        try:
-            data['responsive'] = api.check_responsive_check(site)
-        except WebcredError as e:
-            data['responsive'] = e.message
-        except:
-            data['responsive'] = '+++'
-    if str(request['args'].get('ads', None))=="true":
-        try:
-            data['ads'] = api.check_ads(site)
-        except WebcredError as e:
-            data['ads'] = e.message
-        except:
-            data['ads'] = '+++'
-    if str(request['args'].get('pageloadtime', None))=="true":
-        try:
-            data['pageloadtime'] = api.pageloadtime(site)
-        except WebcredError as e:
-            data['pageloadtime'] = e.message
-        except:
-            data['pageloadtime'] = '+++'
-
+    #  for production mode
+    data = jsonify(data)
     print data
     return data
 
@@ -255,11 +87,11 @@ def page_not_found(e):
     return render_template('404.html'), 404
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', debug=True)
+    app.run(host='0.0.0.0', debug=False)
 
     # data = {'lastmod': 'true', 'domain': 'true', 'inlinks': 'true',
     #  'outlinks': 'true', 'hyperlinks': 'true', 'imgratio': 'true',
-    #  'brokencount': 'true', 'cookie': 'true', 'langcount': 'true',
+    #  'brokenlinks': 'false', 'cookie': 'true', 'langcount': 'true',
     #  'misspelled': 'true', 'responsive': 'true', 'wot': 'true',
     #  'pageloadtime': 'true','ads': 'true',
     #  'site': 'https://threatpost.com/'}

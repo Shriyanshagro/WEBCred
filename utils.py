@@ -6,6 +6,7 @@ import pdb
 from urlparse import urlparse
 import validators
 import re
+import threading
 
 global patternMatching
 patternMatching = None
@@ -203,6 +204,53 @@ class Urlattributes(object):
             raise WebcredError('Pattern Obj is NA')
 
         # self.isoList =
+
+import api
+
+class MyThread(threading.Thread):
+
+    def __init__(self, Method=None, Name=None, Url=None, Args=None):
+
+        threading.Thread.__init__(self)
+
+        if Method:
+            self.func = getattr(api, Method)
+        else:
+            raise WebcredError('Provide method')
+
+        if Name:
+            self.name = Name
+        else:
+            raise WebcredError('Provide name')
+
+        if Url:
+            self.url = Url
+        else:
+            raise WebcredError('Provide url')
+
+        if Args and Args!= '':
+            self.args = Args
+        else:
+            self.args = None
+
+        # pdb.set_trace()
+
+    def run(self):
+
+        try:
+            print 'Fetching {}'.format(self.name)
+            if self.args:
+                self.result = self.func(self.url, self.args)
+            else:
+                self.result = self.func(self.url)
+            print 'Got {}'.format(self.name)
+        except WebcredError as e:
+            self.result = e.message
+        except:
+            self.result = '+++'
+
+    def getResult(self):
+        return self.result
 
 # pdb.set_trace()
 # url = 'https://blogs.rsa.com/'
