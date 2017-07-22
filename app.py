@@ -40,15 +40,19 @@ def start():
         # req['args']['site'] = request.args.get('site', None)
         for keys in apiList.keys():
             # because request.args is of ImmutableMultiDict form
-            req['args'][keys] = request.args.get(keys)
+            if request.args.get(keys, None):
+                req['args'][keys] = request.args.get(keys)
 
         # pdb.set_trace()
         # for debug method
         # req['args'] = request['args']
         # site = str(req['args'].get('site', None))
 
+        try:
+            site = Urlattributes(url=req['args'].get('site', None))
+        except WebcredError as e:
+            raise WebcredError(e.message)
 
-        site = Urlattributes(url=req['args']['site'])
         del req['args']['site']
         data['url'] = site.geturl()
 
@@ -62,7 +66,7 @@ def start():
                     thread.start()
                     threads.append(thread)
                 except WebcredError as e:
-                    print keys, e.message
+                    # print keys, e.message
                     continue
 
         for t in threads:
@@ -74,12 +78,12 @@ def start():
 
     #  for production mode
     data = jsonify(data)
-    print data
+    # print data
     return data
 
 @app.route("/")
 def index():
-    print 'index'
+    # print 'index'
     return render_template("index.html")
 
 @app.errorhandler(404)

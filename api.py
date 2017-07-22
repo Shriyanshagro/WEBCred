@@ -9,7 +9,35 @@ from datetime import datetime
 from utils import WebcredError
 from utils import Urlattributes
 from utils import PatternMatching
+from utils import MyThread
 import pdb
+import validators
+
+def funcBrokenllinks(url):
+    # pdb.set_trace()
+    result = None
+    if url:
+        try:
+            uri = Urlattributes(url)
+            resp = uri.geturllibreq()
+            if not resp.code/100<4:
+                result = 'True'
+        except WebcredError as e:
+            result = 'True'
+        except:
+            result = 'True'
+    return result
+
+def funcImgratio(url):
+    header = None
+    try:
+        uri = Urlattributes(url)
+        header = uri.getheader()
+    except WebcredError as e:
+        pass
+    except:
+        pass
+    return header
 
 def getWot(url):
 
@@ -99,14 +127,23 @@ def getImgratio(url):
 
     total_img_size = int(0)
     txt_size = int(0)
+    threads = []
+    match = None
 
     try:
         header = url.getheader()
     except WebcredError as e:
         raise WebcredError(e.message)
 
-    if header.get('Content-Length', None):
-        txt_size = int(header.get('Content-Length'))
+    pattern = re.compile('Content-Length', re.I)
+
+    for key in header.keys():
+        match = pattern.search(key)
+        if match:
+            break
+
+    if match:
+        txt_size = int(header.get(key))
     else:
         raise WebcredError('Content-Length in headers is NA')
 
@@ -121,18 +158,22 @@ def getImgratio(url):
         if not uri.startswith('http://') and not uri.startswith('https://'):
             uri = url.geturl() + uri
 
-        try:
-            uri = Urlattributes(uri)
-            header = uri.getheader()
-        except:
-            # WebcredError as e:
-            # raise WebcredError(e.message)
-            continue
+        if validators.url(uri):
+            t = MyThread(Method='funcImgratio', Name='Imgratio', Url=uri)
+            t.start()
+            threads.append(t)
 
-        if header.get('Content-Length', None):
-            size = int(header.get('Content-Length'))
-        else:
-            size = 0
+    for t in threads:
+        size = 0
+        t.join()
+        if t.getResult():
+            header = t.getResult()
+            for key in header.keys():
+                match = pattern.search(key)
+                if match:
+                    size = int(header.get(key))
+                    break
+
         total_img_size += size
         # print total_img_size
 
@@ -267,7 +308,7 @@ def getDomain(url):
 
 def getBrokenlinks(url):
     broken_links = 0
-
+    threads = []
     try:
         soup = url.getsoup()
     except WebcredError as e:
@@ -279,17 +320,19 @@ def getBrokenlinks(url):
         uri = link.get('href')
 
         # TODO should it inlude inner links as well?
-        if uri.startswith('http://') or uri.startswith('https://'):
-            # uri = url.geturl() + uri
-            try:
-                uri = Urlattributes(uri)
-                resp = uri.geturllibreq()
-                if not resp.code/100<4:
-                    broken_links += 1
-                    # print uri.geturl()
-            except:
-                # print uri.geturl()
-                broken_links += 1
+        if not uri.startswith('http://') and not uri.startswith('https://'):
+            uri = url.geturl() + uri
+
+        if validators.url(uri):
+            t = MyThread(Method='funcBrokenllinks', Name='brokenlinks', Url=uri)
+            t.start()
+            threads.append(t)
+
+    for t in threads:
+        # pdb.set_trace()
+        t.join()
+        if t.getResult():
+            broken_links += 1
 
     return broken_links
 

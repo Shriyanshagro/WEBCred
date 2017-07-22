@@ -205,7 +205,6 @@ class Urlattributes(object):
 
         # self.isoList =
 
-import api
 
 class MyThread(threading.Thread):
 
@@ -252,6 +251,7 @@ class MyThread(threading.Thread):
     def getResult(self):
         return self.result
 
+import api
 # pdb.set_trace()
 # url = 'https://blogs.rsa.com/'
 #
