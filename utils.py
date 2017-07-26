@@ -267,7 +267,6 @@ class Captcha(object):
     def check(self):
         result = requests.post(url=self.url, params=self.params).text
         result = json.loads(result)
-        pdb.set_trace()
         return result.get('success', None)
 
 import api
