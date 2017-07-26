@@ -3,6 +3,7 @@ from flask import url_for, jsonify, make_response
 from utils import WebcredError
 from utils import Urlattributes
 from utils import MyThread
+from utils import Captcha
 import json
 import UserDict
 import pdb
@@ -11,7 +12,13 @@ app = Flask(__name__)
 
 @app.route("/start",methods=['GET'])
 def start():
-
+    # pdb.set_trace()
+    addr = request.environ.get('REMOTE_ADDR')
+    g_recaptcha_response = request.args.get('g-recaptcha-response')
+    response_captcha = Captcha(ip=addr, resp=g_recaptcha_response)
+    if not response_captcha.check():
+        result = "Robot not allowed"
+        return result
     try:
         data = {}
         req = {}
@@ -91,7 +98,7 @@ def page_not_found(e):
     return render_template('404.html'), 404
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', debug=False)
+    app.run(threaded=True, host='0.0.0.0', debug=False)
 
     # data = {'lastmod': 'true', 'domain': 'true', 'inlinks': 'true',
     #  'outlinks': 'true', 'hyperlinks': 'true', 'imgratio': 'true',

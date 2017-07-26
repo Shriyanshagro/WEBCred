@@ -7,6 +7,8 @@ from urlparse import urlparse
 import validators
 import re
 import threading
+import requests
+import json
 
 global patternMatching
 patternMatching = None
@@ -250,6 +252,23 @@ class MyThread(threading.Thread):
 
     def getResult(self):
         return self.result
+
+class Captcha(object):
+
+    def __init__(self, resp=None, ip=None):
+        google_api = 'https://www.google.com/recaptcha/api/siteverify'
+        self.url = google_api
+        self.key = '6LcsiCoUAAAAAL9TssWVBE0DBwA7pXPNklXU42Rk'
+        self.resp = resp
+        self.ip = ip
+        self.params = {'secret': self.key, 'response': self.resp,
+        'remoteip': self.ip }
+
+    def check(self):
+        result = requests.post(url=self.url, params=self.params).text
+        result = json.loads(result)
+        pdb.set_trace()
+        return result.get('success', None)
 
 import api
 # pdb.set_trace()
