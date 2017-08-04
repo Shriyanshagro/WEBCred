@@ -30,14 +30,15 @@ def funcBrokenllinks(url):
 
 def funcImgratio(url):
     header = None
+    size = 0
     try:
-        uri = Urlattributes(url)
-        header = uri.getheader()
+        size = url.getsize()
+        # print url.geturl(), size
     except WebcredError as e:
         pass
     except:
         pass
-    return header
+    return size
 
 def getWot(url):
 
@@ -79,8 +80,86 @@ def getHyperlinks(url, attributes):
     data = {}
     for element in attributes:
         data[element] = 0
-        if soup.find_all('a', string=re.compile(element, re.I), href=True):
-            data[element] = 1
+        '''
+        Using wn.synset('dog.n.1').lemma_names is the correct way to access the
+        synonyms of a sense. It's because a word has many senses and it's more
+        appropriate to list synonyms of a particular meaning/sense
+        '''
+        syn = wordnet.synsets(element)
+        if syn:
+            syn = wordnet.synsets(element)[0].lemma_names()
+        # pdb.set_trace()
+        lookup = {'header':0, 'footer':0}
+        percentage = 10
+
+        # looking for element in lookup
+        for tags in lookup.keys():
+            if soup.find_all(tags, None) and not data[element]:
+                lookup[tags] = 1
+
+                text = soup.find(tags, None)
+                text = text.find_all('a', href=True)
+                for ss in syn:
+                    for index in text:
+                        if data[element]:
+                            break
+                        try:
+                            pattern = url.getPatternObj().regexCompile([ss])
+                            match, matched = url.getPatternObj().regexMatch(pattern=pattern, data=str(index))
+                        except:
+                            # pdb.set_trace()
+                            raise WebcredError('Error with patternmatching')
+
+                        if match:
+                            data[element] = 1
+                            print element, matched
+                            break
+
+        # pdb.set_trace()
+        '''if lookup tags are not found, then we check in upper and lower
+        percentage of text'''
+        for tags in lookup.keys():
+            # pdb.set_trace()
+            if not data[element] and not lookup[tags]:
+                text = soup.find_all('a', href=True)
+                # text = url.gettext()
+                if tag == 'header':
+                    text = text[:(len(text)*(percentage/100))]
+
+                elif tag == 'footer':
+                    text = text[(len(text)*((100- percentage)/100)):]
+
+                for ss in syn:
+                    for index in text:
+                        if data[element]:
+                            break
+                        try:
+                            pattern = url.getPatternObj().regexCompile([ss])
+                            match, matched = url.getPatternObj().regexMatch(pattern=pattern, data=str(index))
+                        except:
+                            # pdb.set_trace()
+                            raise WebcredError('Error with patternmatching')
+                        if match:
+                            data[element] = 1
+                            break
+
+                # such cases where syn is []
+                # wordnet has no synonyms for sitemap
+                if not data[element]:
+                    for index in text:
+                        if data[element]:
+                            break
+                        try:
+                            pattern = url.getPatternObj().regexCompile([element])
+                            match, matched = url.getPatternObj().regexMatch(pattern=pattern, data=str(index))
+                        except:
+                            # pdb.set_trace()
+                            raise WebcredError('Error with patternmatching')
+                        if match:
+                            data[element] = 1
+                            break
+
+    # pdb.set_trace()
     return data
 
 def getLangcount(url):
@@ -125,60 +204,43 @@ def getLangcount(url):
 
 def getImgratio(url):
 
-    total_img_size = int(0)
-    txt_size = int(0)
+    total_img_size = 0
     threads = []
-    match = None
 
     try:
-        header = url.getheader()
+        text_size = url.getsize()
     except WebcredError as e:
-        raise WebcredError(e.message)
+        return e.message
 
-    pattern = re.compile('Content-Length', re.I)
-
-    for key in header.keys():
-        match = pattern.search(key)
-        if match:
-            break
-
-    if match:
-        txt_size = int(header.get(key))
-    else:
-        raise WebcredError('Content-Length in headers is NA')
-
-    try:
-        soup = url.getsoup()
-    except WebcredError as e:
-        raise WebcredError(e.message)
+    soup = url.getsoup()
 
     # total_img_size of images
     for link in soup.find_all('img', src=True):
-        uri = link.get('src')
+        uri = link.get('src', None)
         if not uri.startswith('http://') and not uri.startswith('https://'):
             uri = url.geturl() + uri
 
         if validators.url(uri):
-            t = MyThread(Method='funcImgratio', Name='Imgratio', Url=uri)
-            t.start()
-            threads.append(t)
+            try:
+                uri = Urlattributes(uri)
+                t = MyThread(Method='funcImgratio', Name='Imgratio', Url=uri)
+                t.start()
+                threads.append(t)
+            except WebcredError as  e:
+                # even if particular image is not accessible, we don't mind it
+                pass
 
     for t in threads:
-        size = 0
         t.join()
-        if t.getResult():
-            header = t.getResult()
-            for key in header.keys():
-                match = pattern.search(key)
-                if match:
-                    size = int(header.get(key))
-                    break
-
-        total_img_size += size
+        size = t.getResult()
+        if isinstance(size, int):
+            total_img_size += size
         # print total_img_size
 
     try:
-    	ratio = txt_size/float(total_img_size+txt_size)
+        total_size = total_img_size + text_size
+    	ratio = float(text_size)/total_size
+        # print ratio, text_size, total_size
     except ValueError:
         raise WebcredError('Error in fetching images')
 
@@ -233,13 +295,10 @@ def getCookie(url):
 
 def getMisspelled(url):
     # pdb.set_trace()
-    try:
-    	text  = url.gettext()
-    except webcredError as e:
-    	raise webcredError(e.message)
+    text  = url.gettext()
 
     excluded_tags = ['NNP', 'NNPS', 'SYM', 'CD', 'IN', 'TO', 'CC','LS','POS',
-    '(',')',':','EX','FW','RP']
+     '(',')',':','EX','FW','RP']
 
     text = word_tokenize(text)
     tags = []
@@ -255,12 +314,14 @@ def getMisspelled(url):
     # count of undefined words
     count = 0
     for tag in tags:
-        syns = wordnet.synsets(tag)
         try:
+            syns = wordnet.synsets(str(tag))
             if syns:
+                # [0] is in the closest sense
                 defi = syns[0].definition()
                 # print defi
         except:
+            # pdb.set_trace()
             count+= 1
 
     # pdb.set_trace()
@@ -280,6 +341,7 @@ def getDate(url):
                 # some page has key 'date' for same
         		lastmod=str(resp.info().getdate('date'))
             lastmod = datetime.strptime(str(lastmod), '(%Y, %m, %d, %H, %M, %S, %f, %W, %U)')
+            lastmod = lastmod.isoformat()
         except:
             raise WebcredError('Error with Requests')
     else:
@@ -344,19 +406,25 @@ def getOutlinks(url):
     except WebcredError as e:
         raise WebcredError(e.message)
     except:
+        # pdb.set_trace()
         raise WebcredError('Url is broken')
 
+    list_ = []
     for link in soup.find_all('a', href=True):
         uri = link.get('href')
         if uri.startswith('https://') or uri.startswith('http://'):
             try:
                 uri = Urlattributes(uri)
-                if url.getdomain() != uri.getdomain():
-                	outlinks += 1
+                if url.getnetloc() != uri.getnetloc():
+                    outlinks += 1
+                    # uri = uri.geturl()
+                    # list_.append(uri)
             except WebcredError as e:
                 pass
                 # raise WebcredError(e.message)
-
+    # pdb.set_trace()
+    # f = open('outlinks.text','w')
+    # f.write(links_)
     return outlinks
 
 # total web-pages which redirect/mention url

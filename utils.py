@@ -1,14 +1,13 @@
-import requests
 import urllib2
 from urlparse import urlparse
 from bs4 import BeautifulSoup, SoupStrainer
 import pdb
-from urlparse import urlparse
 import validators
 import re
 import threading
-import requests
 import json
+import time
+import statistics
 
 global patternMatching
 patternMatching = None
@@ -108,20 +107,27 @@ class Urlattributes(object):
         raise WebcredError(e.message)
 
     def __init__(self, url=None):
-
-        if url:
-            if not validators.url(url):
-                raise WebcredError('Provide a valid url')
-            self.url = str(url)
-        else:
-            raise WebcredError('Provide a url')
-
+        # print 'here'
+        # pdb.set_trace()
         if patternMatching:
             self.patternMatching = patternMatching
 
         self.hdr = {'User-Agent': 'Mozilla/5.0'}
         self.requests = self.urllibreq = self.soup = self.text = None
-        self.domain = self.header = None
+        self.netloc = self.header = self.size= self.domain = None
+        self.lock = threading.Lock()
+        if url:
+            if not validators.url(url):
+                raise WebcredError('Provide a valid url')
+            self.url = str(url)
+            # case of redirections
+            resp =self.getrequests()
+            self.url = str(resp.geturl())
+            self.getsoup()
+            # if url!= self.url:
+            #     print 'redirected', url,' >> ', self.url
+        else:
+            raise WebcredError('Provide a url')
 
     def geturl(self):
         return self.url
@@ -147,10 +153,12 @@ class Urlattributes(object):
 
     def geturllibreq(self):
         # pdb.set_trace()
+        # with self.lock:
         if not self.urllibreq:
             try:
                 # binding the request
-                req = urllib2.Request(self.geturl())
+                # print self.url
+                req = urllib2.Request(self.url)
                 key = self.gethdr().keys()[0]
                 val = self.gethdr()[key]
                 req.add_header(key, val)
@@ -158,6 +166,7 @@ class Urlattributes(object):
             except:
                 raise WebcredError('Error in binding req to urllib2')
 
+        # print self.urllibreq.geturl()
         return self.urllibreq
 
     def gettext(self):
@@ -167,21 +176,18 @@ class Urlattributes(object):
                 self.text = self.getrequests().read()
             except WebcredError as e:
                 raise WebcredError(e.message)
-            try:
-                self.text = self.text.decode(url.getheader(
-                ).get('content-type').split(';')[1].split('=')[1])
-            except:
-                self.text = self.text.decode('UTF-8')
+
+            # try:
+            #     self.text = self.text.decode(url.getheader(
+            #     ).get('content-type').split(';')[1].split('=')[1])
+            # except:
+            #     self.text = self.text.decode('UTF-8')
         return self.text
 
     def getsoup(self):
         # pdb.set_trace()
         if not self.soup:
-            try:
-                data = self.gettext()
-                # pdb.set_trace()
-            except  WebcredError as e:
-                raise WebcredError(e.message)
+            data = self.gettext()
             try:
                 self.soup = BeautifulSoup(data, "html.parser")
             except:
@@ -189,13 +195,23 @@ class Urlattributes(object):
 
         return self.soup
 
+    def getnetloc(self):
+        if not self.netloc:
+            try:
+                parsed_uri = urlparse(self.geturl())
+                self.netloc = '{uri.netloc}'.format(uri=parsed_uri)
+            except:
+                raise WebcredError('Error while fetching attributes from parsed_uri')
+
+        return self.netloc
+
     def getdomain(self):
         if not self.domain:
             try:
-                parsed_uri = urlparse(self.geturl())
-                self.domain = '{uri.scheme}://{uri.netloc}/'.format(uri=parsed_uri)
+                netloc = self.getnetloc()
+                self.domain = netloc.split('.')[-1]
             except:
-                raise WebcredError('Error while fetching attributes from parsed_uri')
+                raise WebcredError('provided {} not valid'.format(netloc))
 
         return self.domain
 
@@ -207,15 +223,29 @@ class Urlattributes(object):
 
         # self.isoList =
 
+    def getsize(self):
+        if not self.size:
+            # pdb.set_  trace()
+            t = self.gettext()
+            try:
+                self.size = len(t)
+            except WebcredError as e:
+                raise WebcredError(e.message)
+            except:
+                pdb.set_trace()
+                raise WebcredError('error in retrieving length')
+        return self.size
 
 class MyThread(threading.Thread):
 
-    def __init__(self, Method=None, Name=None, Url=None, Args=None):
+    def __init__(self, Module='api', Method=None, Name=None, Url=None, Args=None):
 
         threading.Thread.__init__(self)
 
-        if Method:
+        if Method and Module=='api':
             self.func = getattr(api, Method)
+        elif Method and Module=='app':
+            self.func = getattr(app, Method)
         else:
             raise WebcredError('Provide method')
 
@@ -239,12 +269,13 @@ class MyThread(threading.Thread):
     def run(self):
 
         try:
-            print 'Fetching {}'.format(self.name)
+            # print 'Fetching {}'.format(self.name)
             if self.args:
                 self.result = self.func(self.url, self.args)
             else:
+                # pdb.set_trace()
                 self.result = self.func(self.url)
-            print 'Got {}'.format(self.name)
+            # print 'Got {}'.format(self.name)
         except WebcredError as e:
             self.result = e.message
         except:
@@ -269,9 +300,131 @@ class Captcha(object):
         result = json.loads(result)
         return result.get('success', None)
 
+class Webcred(object):
+
+    def assess(self, request):
+            if not isinstance(request, dict):
+                # pdb.set_trace()
+                request = dict(request.args)
+            try:
+                data = {}
+                req = {}
+                req['args'] = {}
+                hyperlinks_attributes = ['contact', 'email', 'help',
+                'sitemap']
+                apiList = {
+                    'lastmod': ['getDate', '', ''],
+                    'domain': ['getDomain', '', ''],
+                    'inlinks': ['getInlinks', '', ''],
+                    'outlinks': ['getOutlinks', '', ''],
+                    'hyperlinks': ['getHyperlinks', hyperlinks_attributes, ''],
+                    'imgratio': ['getImgratio', '', ''],
+                    'brokenlinks': ['getBrokenlinks', '', ''],
+                    'cookie': ['getCookie', '', ''],
+                    'langcount': ['getLangcount', '', ''],
+                    'misspelled': ['getMisspelled', '', ''],
+                    'wot': ['getWot', '', ''],
+                    'responsive': ['getResponsive', '', ''],
+                    'ads': ['getAds', '', ''],
+                    'pageloadtime': ['getPageloadtime', '', ''],
+                    'site': ['']
+                }
+
+                for keys in apiList.keys():
+                    # because request.args is of ImmutableMultiDict form
+                    if request.get(keys, None):
+                        req['args'][keys] = request.get(keys)
+
+                data['url'] =  req['args']['site']
+                site = Urlattributes(url=req['args'].get('site', None))
+
+                if data['url'] != site.geturl():
+                    data['redirected'] = site.geturl()
+
+                # site is not a WEBCred parameter
+                del req['args']['site']
+                threads = []
+
+                for keys in req['args'].keys():
+                    if str(req['args'].get(keys, None))=="true":
+                            thread = MyThread(Method=apiList[keys][0], Name=keys, Url=site,
+                            Args=apiList[keys][1])
+                            thread.start()
+                            threads.append(thread)
+
+                for t in threads:
+                    try:
+                        t.join()
+                        data[t.getName()] = t.getResult()
+                    except WebcredError as e:
+                        data[t.getName()] = e.message
+                    except:
+                        data[t.getName()] = 'Fatal Error'
+
+            except WebcredError as e:
+                data['Error'] =  e.message
+            except:
+                data['Error'] = 'Fatal error'
+            return data
+
+class Normalize(object):
+
+    # data = json_List
+    # name =parameter to score
+    def __init__(self, data=None, name=None):
+        if not data or not name:
+            raise WebcredError('Need 3 args, 2 pass')
+
+        self.data = data
+        self.name = name
+
+        self.dataList = self.mean = self.deviation = None
+
+    def getdatalist(self):
+        if not self.dataList:
+            dataList = []
+            for element in self.data:
+                if not isinstance(element[self.name], str):
+                    dataList.append(element[self.name])
+            self.dataList = dataList
+
+        return self.dataList
+
+    def normalize(self):
+        for index in range(len(self.data)):
+            self.data[index][self.name] = self.getscore(self.data[index][self.name])
+
+        return self.data
+
+    def getdata(self):
+        return self.data
+
+    def getmean(self):
+        if not self.mean:
+            mean =statistics.mean(self.getdatalist())
+        return mean
+
+    def getdeviation(self):
+        if not self.deviation:
+            deviation =statistics.pstdev(self.getdatalist())
+        return deviation
+
+    def getscore(self, value):
+        mean = self.getmean()
+        deviation = self.getdeviation()
+
+        if isinstance(value, str):
+            return 0
+
+        if value<(mean-deviation):
+            return -1
+
+        else :
+            if value>(mean+deviation):
+                return 1
+            return 0
+
+
+
 import api
-# pdb.set_trace()
-# url = 'https://blogs.rsa.com/'
-#
-# uri = Urlattributes(url='')
-# header = uri.getheader()
+import app
