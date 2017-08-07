@@ -12,6 +12,7 @@ from utils import PatternMatching
 from utils import MyThread
 import pdb
 import validators
+import ast
 
 def funcBrokenllinks(url):
     # pdb.set_trace()
@@ -61,11 +62,12 @@ def getResponsive(url):
     try:
         # pdb.set_trace()
         uri = Urlattributes(result)
-        result = literal_eval(uri.gettext())
+        result = ast.literal_eval(re.search('({.+})', uri.gettext()).group(0))
         return result['responsive']
     except WebcredError as e:
         raise WebcredError(e.message)
     except:
+        # pdb.set_trace()
         return 'Info not NA'
 
 def getHyperlinks(url, attributes):
@@ -97,8 +99,8 @@ def getHyperlinks(url, attributes):
             if soup.find_all(tags, None) and not data[element]:
                 lookup[tags] = 1
 
-                text = soup.find(tags, None)
-                text = text.find_all('a', href=True)
+                text = soup.find_all(tags, None)
+                text = text[0].find_all('a', href=True)
                 for ss in syn:
                     for index in text:
                         if data[element]:
@@ -112,7 +114,7 @@ def getHyperlinks(url, attributes):
 
                         if match:
                             data[element] = 1
-                            print element, matched
+                            # print element, matched
                             break
 
         # pdb.set_trace()
@@ -123,10 +125,10 @@ def getHyperlinks(url, attributes):
             if not data[element] and not lookup[tags]:
                 text = soup.find_all('a', href=True)
                 # text = url.gettext()
-                if tag == 'header':
+                if tags == 'header':
                     text = text[:(len(text)*(percentage/100))]
 
-                elif tag == 'footer':
+                elif tags == 'footer':
                     text = text[(len(text)*((100- percentage)/100)):]
 
                 for ss in syn:
@@ -185,17 +187,20 @@ def getLangcount(url):
         match = re.search("lang", tag, re.I)
 
         if match:
-            # FIXME check for reg =**
             pattern = url.patternMatching.getIsoPattern()
-            try:
-                match, pattern = url.patternMatching.regexMatch(pattern, tag)
-            except WebcredError as e:
-                raise WebcredError(e.message)
+            match, pattern = url.getPatternObj().regexMatch(pattern, tag)
             if match:
+
+                # iso_pattern = ="iso"|=iso
+                pattern = pattern.split('=')[-1]
+
+                if pattern.startswith('"'):
+                    pattern = pattern.split('"')[1]
+
                 if pattern not in matched:
                     matched.append(pattern)
                     count +=1
-                    # pdb.set_trace()
+                # pdb.set_trace()
 
     # some uni-lang websites didn't mention lang tags
     if count==0:
@@ -300,7 +305,12 @@ def getMisspelled(url):
     excluded_tags = ['NNP', 'NNPS', 'SYM', 'CD', 'IN', 'TO', 'CC','LS','POS',
      '(',')',':','EX','FW','RP']
 
-    text = word_tokenize(text)
+    try:
+        text = word_tokenize(text)
+    except UnicodeDecodeError:
+        text = unicode(text, 'utf-8')
+        text = word_tokenize(text)
+
     tags = []
     # print text
     for texts in text:

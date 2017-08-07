@@ -4,111 +4,138 @@ from utils import WebcredError
 from utils import Urlattributes
 from utils import MyThread
 from utils import Captcha
-import json
+from utils import Webcred
+import utils
 import UserDict
 import pdb
+import json
+import threading
+import time
+from random import randint
+from datetime import datetime
 
 app = Flask(__name__)
 
 @app.route("/start",methods=['GET'])
 def start():
-    # pdb.set_trace()
+
     addr = request.environ.get('REMOTE_ADDR')
-    g_recaptcha_response = request.args.get('g-recaptcha-response')
-    response_captcha = Captcha(ip=addr, resp=g_recaptcha_response)
-    if not response_captcha.check():
+    g_recaptcha_response = request.args.get('g-recaptcha-response', None)
+
+    if g_recaptcha_response:
+        response_captcha = Captcha(ip=addr, resp=g_recaptcha_response)
+
+    if not g_recaptcha_response or not response_captcha.check():
         result = "Robot not allowed"
         return result
+
     try:
-        data = {}
-        req = {}
-        req['args'] = {}
-        hyperlinks_attributes = ['contact', 'email', 'help', 'recommend',
-        'sitemap']
-        apiList = {
-            'lastmod': ['getDate', '', ''],
-            'domain': ['getDomain', '', ''],
-            'inlinks': ['getInlinks', '', ''],
-            'outlinks': ['getOutlinks', '', ''],
-            'hyperlinks': ['getHyperlinks', hyperlinks_attributes, ''],
-            'imgratio': ['getImgratio', '', ''],
-            'brokenlinks': ['getBrokenlinks', '', ''],
-            'cookie': ['getCookie', '', ''],
-            'langcount': ['getLangcount', '', ''],
-            'misspelled': ['getMisspelled', '', ''],
-            'wot': ['getWot', '', ''],
-            'responsive': ['getResponsive', '', ''],
-            'ads': ['getAds', '', ''],
-            'pageloadtime': ['getPageloadtime', '', ''],
-            'site': ['']
-        }
-
-        # for production start method
-        # req['args']['site'] = request.args.get('site', None)
-        for keys in apiList.keys():
-            # because request.args is of ImmutableMultiDict form
-            if request.args.get(keys, None):
-                req['args'][keys] = request.args.get(keys)
-
-        # pdb.set_trace()
-        # for debug method
-        # req['args'] = request['args']
-        # site = str(req['args'].get('site', None))
-
-        try:
-            site = Urlattributes(url=req['args'].get('site', None))
-        except WebcredError as e:
-            raise WebcredError(e.message)
-
-        del req['args']['site']
-        data['url'] = site.geturl()
-
-        threads = []
-
-        for keys in req['args'].keys():
-            if str(req['args'].get(keys, None))=="true":
-                try:
-                    thread = MyThread(Method=apiList[keys][0], Name=keys, Url=site,
-                    Args=apiList[keys][1])
-                    thread.start()
-                    threads.append(thread)
-                except WebcredError as e:
-                    # print keys, e.message
-                    continue
-
-        for t in threads:
-            t.join()
-            data[t.getName()] = t.getResult()
-
+        data = Webcred()
+        data = data.assess(request)
     except WebcredError as e:
-        data =  WebcredError(e.message).message
+        data =  e.message
 
-    #  for production mode
     data = jsonify(data)
-    # print data
     return data
 
 @app.route("/")
 def index():
-    # print 'index'
     return render_template("index.html")
 
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html'), 404
 
-if __name__ == "__main__":
-    app.run(threaded=True, host='0.0.0.0', debug=False)
+def collectData(url, request):
 
-    # data = {'lastmod': 'true', 'domain': 'true', 'inlinks': 'true',
-    #  'outlinks': 'true', 'hyperlinks': 'true', 'imgratio': 'true',
-    #  'brokenlinks': 'false', 'cookie': 'true', 'langcount': 'true',
-    #  'misspelled': 'true', 'responsive': 'true', 'wot': 'true',
-    #  'pageloadtime': 'true','ads': 'true',
-    #  'site': 'https://threatpost.com/'}
+    try:
+        dt = Webcred()
+        dt = dt.assess(request)
+        # print dt
+
+    except WebcredError as e:
+        dt['Error'] = {e.message}
+
+    print dt
+    return dt
+
+if __name__ == "__main__":
+    app.run(threaded=True, host='0.0.0.0', debug=True)
+
+    # from pipeline import Pipeline
+    # from werkzeug.datastructures import ImmutableMultiDict
+    # work = 'None'
+    # data = []
     #
-    # request = UserDict.UserDict(args=data)
+    # if work:
+    #     link = open('APIs/urls.txt', 'r')
+    #     links = link.readlines()
+    #     link.close()
+    #     # i = raw_input('Give me the url')
+    #     # links = []
+    #     # links.append(i)
+    #     count = 100
+    #     counter = 0
+    #     request = {}
+    #     request = {
+    #      'lastmod': 'true', 'domain': 'true', 'inlinks': 'true',
+    #      'outlinks': 'true', 'hyperlinks': 'true', 'imgratio': 'true',
+    #      'brokenlinks': 'true', 'cookie': 'true', 'langcount': 'true',
+    #      'misspelled': 'true', 'wot': 'true', 'responsive': 'true',
+    #      'pageloadtime': 'true','ads': 'true',
+    #      }
+    #     # request = ImmutableMultiDict(request)
+    #     # pdb.set_trace()
+    #     data = []
+    #     threads = []
+    #     now = datetime.now().time().isoformat()
+    #     new_id = 'data.{}.{:04d}'.format(
+    #             now,
+    #             randint(0, 9999))
+    #     new_id = 'DATA/' + str(new_id)+'.json'
+    #     data_file = open(new_id,'w')
+    #     data_file.close()
     #
-    # debug_start(request)
-    # pdb.set_trace()
-    # print result
+    #     for url in links[:count]:
+    #                 request['site'] = url[:-1]
+    #                 dt = collectData(request['site'], request)
+    #                 data_file = open(new_id,'a')
+    #                 data.append(dt)
+    #                 # print dt
+    #                 content = '"' + str(counter)+ '"' + ": " + json.dumps(dt) + '\n'
+    #                 # pdb.set_trace()
+    #                 data_file.write(content)
+    #                 data_file.close()
+    #                 counter += 1
+    #
+    # else:
+    #     if not data:
+    #         file_ = 'DATA/data.00:56:36.889197.7922.json'
+    #         file_ = open(file_, 'r').read()
+    #         file_ = file_.split('\n')
+    #         import json
+    #         for element in file_[:-1]:
+    #             # print str(element[4:])
+    #             # pdb.set_trace()
+    #             data.append(json.loads(str(element[4:])))
+    #     # pdb.set_trace()
+    #     norm = utils.Normalize(data, 'outlinks')
+    #     dt = norm.normalize()
+    #     print dt
+    #
+    #     # data = open('jsondata.json','r')
+    #     # data = data.readlines()
+    #     # dict_list = []
+    #     # for index in range(len(data)):
+    #     #     # pdb.set_trace()
+    #     #     temp = data[index]
+    #     #     temp = temp[:-1]
+    #     #     temp = '{' + temp + '}'
+    #     #     temp = json.loads(temp)
+    #     #     dict_list.append(temp)
+    #     #     # dict_[temp.keys()[0]] = temp.values()[0]
+    #     # pipe = Pipeline()
+    #     # csv = pipe.convertjson(dict_list)
+    #     # pdb.set_trace()
+    #     # f = open('csvData.csv','w')
+    #     # f.write(csv)

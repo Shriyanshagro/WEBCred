@@ -8,6 +8,7 @@ import threading
 import json
 import time
 import statistics
+import requests
 
 global patternMatching
 patternMatching = None
@@ -31,6 +32,14 @@ class PatternMatching(object):
             try:
                 iso = open(lang_iso, "r")
                 self.isoList = iso.read().split()
+                isoList = []
+                # pdb.set_trace()
+                for code in self.isoList:
+                    # isoList.pop(iso)
+                    isoList.append(str('='+code))
+                    isoList.append(str('="'+code+'"'))
+                # pdb.set_trace()
+                self.isoList = isoList
                 self.isoPattern = self.regexCompile(self.isoList)
                 iso.close()
             except WebcredError as e:
@@ -186,6 +195,7 @@ class Urlattributes(object):
 
     def getsoup(self):
         # pdb.set_trace()
+        # with self.lock:
         if not self.soup:
             data = self.gettext()
             try:
@@ -279,6 +289,12 @@ class MyThread(threading.Thread):
         except WebcredError as e:
             self.result = e.message
         except:
+            # pdb.set_trace()
+            # if self.args:
+            #     self.result = self.func(self.url, self.args)
+            # else:
+            #     # pdb.set_trace()
+            #     self.result = self.func(self.url)
             self.result = '+++'
 
     def getResult(self):
@@ -304,7 +320,6 @@ class Webcred(object):
 
     def assess(self, request):
             if not isinstance(request, dict):
-                # pdb.set_trace()
                 request = dict(request.args)
             try:
                 data = {}
@@ -331,10 +346,14 @@ class Webcred(object):
                 }
 
                 for keys in apiList.keys():
-                    # because request.args is of ImmutableMultiDict form
                     if request.get(keys, None):
-                        req['args'][keys] = request.get(keys)
+                        # because request.args is of ImmutableMultiDict form
+                        if isinstance(request.get(keys, None), list):
+                            req['args'][keys] = str(request.get(keys)[0])
+                        else:
+                            req['args'][keys] = request.get(keys)
 
+                # pdb.set_trace()
                 data['url'] =  req['args']['site']
                 site = Urlattributes(url=req['args'].get('site', None))
 
