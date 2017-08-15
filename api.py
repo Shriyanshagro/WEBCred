@@ -23,6 +23,7 @@ def funcBrokenllinks(url):
             resp = uri.geturllibreq()
             if not resp.code/100<4:
                 result = 'True'
+            uri.freemem()        
         except WebcredError as e:
             result = 'True'
         except:
@@ -237,6 +238,7 @@ def getImgratio(url):
 
     for t in threads:
         t.join()
+        t.freemem()
         size = t.getResult()
         if isinstance(size, int):
             total_img_size += size
@@ -403,6 +405,7 @@ def getBrokenlinks(url):
     for t in threads:
         # pdb.set_trace()
         t.join()
+        # t.freemem()
         if t.getResult():
             broken_links += 1
 
@@ -444,7 +447,7 @@ def getInlinks(url):
     try:
         uri = ('https://www.googleapis.com/customsearch/v1?key='+
         API_KEY+ '&cx=017576662512468239146:omuauf_lfve&q=link:'+
-        url.geturl())
+        url.getoriginalurl())
         uri = Urlattributes(uri)
         txt = uri.gettext()
         # except WebcredError as e:

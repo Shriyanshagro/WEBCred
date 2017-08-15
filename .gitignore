@@ -8,8 +8,5 @@ classes.pyc
 exception.pyc
 utils.pyc
 npm-debug.log
-csvdata.csv
-csvData.csv
 jsondata.json
-pipeline.py
 pipeline.pyc

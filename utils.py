@@ -9,6 +9,7 @@ import json
 import time
 import statistics
 import requests
+import types
 
 global patternMatching
 patternMatching = None
@@ -128,7 +129,7 @@ class Urlattributes(object):
         if url:
             if not validators.url(url):
                 raise WebcredError('Provide a valid url')
-            self.url = str(url)
+            self.originalUrl = self.url = str(url)
             # case of redirections
             resp =self.getrequests()
             self.url = str(resp.geturl())
@@ -137,6 +138,9 @@ class Urlattributes(object):
             #     print 'redirected', url,' >> ', self.url
         else:
             raise WebcredError('Provide a url')
+
+    def getoriginalurl(self):
+        return self.originalUrl
 
     def geturl(self):
         return self.url
@@ -196,12 +200,12 @@ class Urlattributes(object):
     def getsoup(self):
         # pdb.set_trace()
         # with self.lock:
-        if not self.soup:
-            data = self.gettext()
-            try:
-                self.soup = BeautifulSoup(data, "html.parser")
-            except:
-                raise WebcredError('Error while parsing using bs4')
+        # if not self.soup:
+        data = self.gettext()
+        try:
+            self.soup = BeautifulSoup(data, "html.parser")
+        except:
+            raise WebcredError('Error while parsing using bs4')
 
         return self.soup
 
@@ -239,12 +243,13 @@ class Urlattributes(object):
             t = self.gettext()
             try:
                 self.size = len(t)
-            except WebcredError as e:
-                raise WebcredError(e.message)
             except:
-                pdb.set_trace()
+                # pdb.set_trace()
                 raise WebcredError('error in retrieving length')
         return self.size
+
+    def freemem(self):
+        del self
 
 class MyThread(threading.Thread):
 
@@ -277,7 +282,6 @@ class MyThread(threading.Thread):
         # pdb.set_trace()
 
     def run(self):
-
         try:
             # print 'Fetching {}'.format(self.name)
             if self.args:
@@ -299,6 +303,10 @@ class MyThread(threading.Thread):
 
     def getResult(self):
         return self.result
+
+    # clear url if Urlattributes object
+    def freemem(self):
+        self.url.freemem()
 
 class Captcha(object):
 
@@ -371,20 +379,25 @@ class Webcred(object):
                             thread.start()
                             threads.append(thread)
 
+                maxTime = 500
                 for t in threads:
                     try:
-                        t.join()
+                        t.join(maxTime)
                         data[t.getName()] = t.getResult()
                     except WebcredError as e:
                         data[t.getName()] = e.message
                     except:
-                        data[t.getName()] = 'Fatal Error'
+                        data[t.getName()] = 'TimeOut Error, Max {} sec'.format(maxTime)
 
             except WebcredError as e:
                 data['Error'] =  e.message
             except:
                 data['Error'] = 'Fatal error'
-            return data
+            finally:
+                try:
+                    site.freemem()
+                finally:
+                    return data
 
 class Normalize(object):
 
@@ -394,24 +407,38 @@ class Normalize(object):
         if not data or not name:
             raise WebcredError('Need 3 args, 2 pass')
 
-        self.data = data
-        self.name = name
+        self.reverse = self.dataList = self.mean = self.deviation = None
+        self.factorise = None
 
-        self.dataList = self.mean = self.deviation = None
+        self.data = data
+        self.name = name[0]
+
+        if isinstance(name[1], str):
+            if  name[1] == 'reverse':
+                self.reverse = True
+
+        elif isinstance(name[1], dict):
+            self.factorise = name[1]
 
     def getdatalist(self):
         if not self.dataList:
             dataList = []
+            NumberTypes = (types.IntType, types.LongType, types.FloatType, types.ComplexType)
             for element in self.data:
-                if not isinstance(element[self.name], str):
+                if element.get(self.name) and isinstance(element[self.name], NumberTypes):
+                    if isinstance(element[self.name], float):
+                        element[self.name] = int(element[self.name]*1000000)
                     dataList.append(element[self.name])
             self.dataList = dataList
 
+        # print self.dataList
+        # pdb.set_trace()
         return self.dataList
 
     def normalize(self):
         for index in range(len(self.data)):
-            self.data[index][self.name] = self.getscore(self.data[index][self.name])
+            if self.data[index].get(self.name):
+                self.data[index][self.name] = self.getscore(self.data[index][self.name])
 
         return self.data
 
@@ -433,16 +460,39 @@ class Normalize(object):
         deviation = self.getdeviation()
 
         if isinstance(value, str):
-            return 0
+            return value
 
         if value<(mean-deviation):
+            if self.reverse:
+                return 1
             return -1
 
         else :
             if value>(mean+deviation):
+                if self.reverse:
+                    return -1
                 return 1
             return 0
 
+    def factoise(self):
+        if not self.factorise:
+            raise WebcredError('Provide attr to factorise')
+
+
+        for index in range(len(self.data)):
+            if self.data[index].get(self.name):
+                modified = 0
+                for k,v in self.factorise.items():
+                    value = self.data[index][self.name]
+                    if str(value) == str(k):
+                        self.data[index][self.name] = v
+                        modified = 1
+                    # if value==0 and self.name == 'misspelled':
+                    #     pdb.set_trace()
+                if not modified:
+                    if 'else' in self.factorise.keys():
+                        self.data[index][self.name] = self.factorise.get('else')
+        return self.data
 
 
 import api
