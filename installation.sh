@@ -1,11 +1,7 @@
 # These python librabries need to be installed prior to deploy
 
 sudo pip install statistics
-sudo pip install re
-sudo pip install urllib2
-sudo pip install json
 sudo pip install bs4
-sudo pip install urlparse
 sudo pip install validators
 sudo pip install -U nltk
 sudo pip install Flask
