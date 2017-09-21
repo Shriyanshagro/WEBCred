@@ -80,6 +80,9 @@ def appinfo(url=None):
 if __name__ == "__main__":
     app.run(threaded=True, host='0.0.0.0', debug=False)
 
+    '''
+    BELOW ARE THE WORKER FUNCTIONS TO COLLECTDATA
+    '''
     # from pipeline import Pipeline
     # from werkzeug.datastructures import ImmutableMultiDict
     # # collectData, normalize, csv, json
@@ -87,8 +90,8 @@ if __name__ == "__main__":
     # csv_filename = 'csvData.csv'
     # data = []
     # # pdb.set_trace()
-    # # t = MyThread(Module='app', Method='appinfo', Name='appinfo', Url='url')
-    # # t.start()
+    # t = MyThread(Module='app', Method='appinfo', Name='appinfo', Url='url')
+    # t.start()
     # # time.sleep(500)
     # if work == 'collectData':
     #     link = open('APIs/urls.txt', 'r')
@@ -120,8 +123,7 @@ if __name__ == "__main__":
     #     data_file.close()
     #
     #     count = len(links)
-    #     tempcounter = len(tempData)
-    #     counter = 0
+    #     tempcounter = counter = len(tempData)
     #
     #     for url in links[tempcounter:count]:
     #                 request['site'] = url[:-1]
@@ -132,11 +134,6 @@ if __name__ == "__main__":
     #                 data_file.write(content)
     #                 data_file.close()
     #                 counter += 1
-    #                 if counter > 10:
-    #                     # collecting garbage takes much time, hence activating only after certain time period
-    #                     gc.collect()
-    #                     counter = 0
-    #
     #
     # if not data:
     #     file_ = 'DATA/data2.json'
