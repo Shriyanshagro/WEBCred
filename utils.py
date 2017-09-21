@@ -388,6 +388,8 @@ class Webcred(object):
                         data[t.getName()] = e.message
                     except:
                         data[t.getName()] = 'TimeOut Error, Max {} sec'.format(maxTime)
+                    finally:
+                        print t.getName()," = ", data[t.getName()]     
 
             except WebcredError as e:
                 data['Error'] =  e.message
