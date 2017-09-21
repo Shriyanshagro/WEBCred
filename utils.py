@@ -379,7 +379,7 @@ class Webcred(object):
                             thread.start()
                             threads.append(thread)
 
-                maxTime = 500
+                maxTime = 200
                 for t in threads:
                     try:
                         t.join(maxTime)
@@ -389,7 +389,7 @@ class Webcred(object):
                     except:
                         data[t.getName()] = 'TimeOut Error, Max {} sec'.format(maxTime)
                     finally:
-                        print t.getName()," = ", data[t.getName()]     
+                        print t.getName()," = ", data[t.getName()]
 
             except WebcredError as e:
                 data['Error'] =  e.message
