@@ -2,24 +2,108 @@
 {% block body %}
 	<form action="start" method=get class=add-entry>
 	      <dl>
-	        <dt>URL:
-	        <dd><input type=url name=site>
-	        <input type="checkbox" name="hyperlinks" value="true" checked="checked"> hyperlinks
-	        <input type="checkbox" name="imgratio" value="true" checked="checked"> imgratio
-	        <input type="checkbox" name="ads" value="true" checked="checked"> ads
-	        <input type="checkbox" name="brokenlinks" value="true" checked="checked"> brokencount
-	        <input type="checkbox" name="cookie" value="true" checked="checked"> cookie
-	        <input type="checkbox" name="langcount" value="true" checked="checked"> language count
-	        <input type="checkbox" name="misspelled" value="true" checked="checked"> misspelled
-	        <input type="checkbox" name="lastmod" value="true" checked="checked"> lastmod
-	        <input type="checkbox" name="domain" value="true" checked="checked"> domain
-	        <input type="checkbox" name="inlinks" value="true" checked="checked"> inlinks
-	        <input type="checkbox" name="outlinks" value="true" checked="checked">  outlinks
-	        <input type="checkbox" name="pageloadtime" value="true" checked="checked"> pageloattime
-	        <input type="checkbox" name="wot" value="true" checked="checked"> wot
-	        <input type="checkbox" name="responsive" value="true" checked="checked"> responsive_check
+					<dd>URL:<input type=url name=site size="50">
+
+					<table cellpadding="5px">
+
+						<tr>
+
+							<td>
+								<input type="checkbox" name="ads" value="true" checked="checked"> Advertisement
+							</td>
+
+							<td>
+								<input type="checkbox" name="cohesion" value="true" checked="checked"> Cohesion
+							</td>
+
+						</tr>
+
+						<tr>
+
+							<td>
+								<input type="checkbox" name="brokenlinks" value="true" checked="checked"> Broken Links
+							</td>
+
+							<td>
+								<input type="checkbox" name="domain_similarity" value="true" checked="checked"> Domain Similarity
+							</td>
+
+						</tr>
+
+						<tr>
+
+							<td>
+								<input type="checkbox" name="langcount" value="true" checked="checked"> Internationalization
+							</td>
+
+							<td>
+								<input type="checkbox" name="genre" value="true" checked="checked"> Genre
+							</td>
+
+						</tr>
+
+						<tr>
+
+							<td>
+								<input type="checkbox" name="misspelled" value="true" checked="checked"> Misspelled
+							</td>
+
+							<td>
+								<input type="checkbox" name="inlinks" value="true" checked="checked"> Inlinks
+							</td>
+
+						</tr>
+
+						<tr>
+
+							<td>
+								<input type="checkbox" name="pageloadtime" value="true" checked="checked"> Pageloadtime
+							</td>
+
+							<td>
+								<input type="checkbox" name="domain" value="true" checked="checked"> Internet Domain
+							</td>
+
+						</tr>
+
+						<tr>
+
+							<td>
+								<input type="checkbox" name="hyperlinks" value="true" checked="checked"> Real World Presence
+							</td>
+
+							<td>
+								<input type="checkbox" name="lastmod" value="true" checked="checked"> Lastmodified
+							</td>
+
+						</tr>
+
+						<tr>
+
+							<td>
+								<input type="checkbox" name="responsive" value="true" checked="checked"> Responsive Design
+							</td>
+
+							<td>
+								<input type="checkbox" name="outlinks" value="true" checked="checked">  Outlinks
+							</td>
+
+						</tr>
+
+						<tr>
+
+							<td>
+								<input type="checkbox" name="imgratio" value="true" checked="checked"> Text2BodyRatio
+							</td>
+
+						</tr>
+
+					</table>
+
+	        <!-- <input type="checkbox" name="wot" value="true" checked="checked"> wot_score -->
 					<div class="g-recaptcha" data-sitekey="6LcsiCoUAAAAAM4y5pKsPEGfBasVYdkB0PvgpllL"></div>
-					<dd><input type=submit value="Assess Score">
+
+					<dd><input type=submit value="Assess Credibility">
 	      </dl>
 	</form>
 {% endblock %}
