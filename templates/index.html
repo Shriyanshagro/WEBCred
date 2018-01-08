@@ -4,7 +4,7 @@
 	      <dl>
 					<dd>URL:<input type=url name=site size="50">
 
-					<table cellpadding="5px">
+					<table cellpadding="5px" id="dimensions">
 
 						<tr>
 
@@ -12,8 +12,11 @@
 								<input type="checkbox" name="ads" value="true" checked="checked"> Advertisement
 							</td>
 
-							<td>
+							<!-- <td>
 								<input type="checkbox" name="cohesion" value="true" checked="checked"> Cohesion
+							</td> -->
+							<td>
+								<input type="checkbox" name="inlinks" value="true" checked="checked"> Inlinks
 							</td>
 
 						</tr>
@@ -24,8 +27,11 @@
 								<input type="checkbox" name="brokenlinks" value="true" checked="checked"> Broken Links
 							</td>
 
-							<td>
+							<!-- <td>
 								<input type="checkbox" name="domain_similarity" value="true" checked="checked"> Domain Similarity
+							</td> -->
+							<td>
+								<input type="checkbox" name="domain" value="true" checked="checked"> Internet Domain
 							</td>
 
 						</tr>
@@ -36,8 +42,11 @@
 								<input type="checkbox" name="langcount" value="true" checked="checked"> Internationalization
 							</td>
 
-							<td>
+							<!-- <td>
 								<input type="checkbox" name="genre" value="true" checked="checked"> Genre
+							</td> -->
+							<td>
+								<input type="checkbox" name="lastmod" value="true" checked="checked"> Lastmodified
 							</td>
 
 						</tr>
@@ -49,7 +58,7 @@
 							</td>
 
 							<td>
-								<input type="checkbox" name="inlinks" value="true" checked="checked"> Inlinks
+								<input type="checkbox" name="outlinks" value="true" checked="checked">  Outlinks
 							</td>
 
 						</tr>
@@ -60,9 +69,6 @@
 								<input type="checkbox" name="pageloadtime" value="true" checked="checked"> Pageloadtime
 							</td>
 
-							<td>
-								<input type="checkbox" name="domain" value="true" checked="checked"> Internet Domain
-							</td>
 
 						</tr>
 
@@ -72,9 +78,6 @@
 								<input type="checkbox" name="hyperlinks" value="true" checked="checked"> Real World Presence
 							</td>
 
-							<td>
-								<input type="checkbox" name="lastmod" value="true" checked="checked"> Lastmodified
-							</td>
 
 						</tr>
 
@@ -84,9 +87,6 @@
 								<input type="checkbox" name="responsive" value="true" checked="checked"> Responsive Design
 							</td>
 
-							<td>
-								<input type="checkbox" name="outlinks" value="true" checked="checked">  Outlinks
-							</td>
 
 						</tr>
 
@@ -100,10 +100,33 @@
 
 					</table>
 
+					<!-- Add more dimensions -->
+
+					<button type="button" onclick="myFunction()">Add more Dimensions</button>
+
 	        <!-- <input type="checkbox" name="wot" value="true" checked="checked"> wot_score -->
 					<div class="g-recaptcha" data-sitekey="6LcsiCoUAAAAAM4y5pKsPEGfBasVYdkB0PvgpllL"></div>
 
 					<dd><input type=submit value="Assess Credibility">
 	      </dl>
 	</form>
+	<script>
+
+  function myFunction() {
+      console.log("hello");
+			var x = document.getElementById('dimensions');
+		  var new_row = x.rows[1].cloneNode(true);
+		  var len = x.rows.length+5;
+			dimension = "dimension" + len;
+			api = "api" + len;
+			console.log(dimension, api);
+
+		  new_row.cells[0].innerHTML = '<input type="text" placeholder="New Dimension" name="'+ dimension + '"/>';
+
+		  new_row.cells[1].innerHTML = '<input type="text" placeholder="API for dimension" name="'+ api + '"/>';
+
+		  x.appendChild(new_row);
+  }
+  </script>
+
 {% endblock %}
