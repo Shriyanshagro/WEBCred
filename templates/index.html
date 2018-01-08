@@ -116,6 +116,9 @@
       console.log("hello");
 			var x = document.getElementById('dimensions');
 		  var new_row = x.rows[1].cloneNode(true);
+			// FIXME +5 is caluclated number as of now total dimensions are 12
+			// and len==8
+			// HACK if this number is changed, then change accordingly in utils.py
 		  var len = x.rows.length+5;
 			dimension = "dimension" + len;
 			api = "api" + len;

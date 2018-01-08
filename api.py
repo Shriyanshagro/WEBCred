@@ -23,7 +23,7 @@ def funcBrokenllinks(url):
             resp = uri.geturllibreq()
             if not resp.code/100<4:
                 result = 'True'
-            uri.freemem()        
+            uri.freemem()
         except WebcredError as e:
             result = 'True'
         except:
@@ -478,3 +478,16 @@ def getPageloadtime(url):
         raise webcredError('FAIL to load')
     except:
         raise webcredError('Fatal error')
+
+def dimapi(url, api):
+    # REVIEW
+    try:
+        # pdb.set_trace()
+        uri = Urlattributes(api)
+        raw = uri.gettext()
+        # result = literal_eval(raw[1:-2])
+        return raw
+    except WebcredError as e:
+        raise WebcredError("Give valid API")
+    except:
+        return 'NA'

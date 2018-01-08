@@ -379,6 +379,24 @@ class Webcred(object):
                             thread.start()
                             threads.append(thread)
 
+
+                # HACK 13 is calculated number, refer to index.html, where new
+                # dimensions are dynamically added
+                number = 13
+                while True:
+                    dim = "dimension"+str(number)
+                    API = "api"+str(number)
+                    if dim in request.keys():
+                        try:
+                            data[request.get(dim)[0]] = api.dimapi(site.geturl(), request.get(API)[0])
+                        except WebcredError as e:
+                            data[request.get(dim)[0]] = e.message
+                        except:
+                            data[request.get(dim)[0]] = "Fatal ERROR"
+                    else:
+                        break
+                    number += 1
+
                 maxTime = 200
                 for t in threads:
                     try:
