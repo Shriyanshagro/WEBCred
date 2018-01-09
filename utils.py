@@ -14,6 +14,11 @@ import types
 global patternMatching
 patternMatching = None
 
+# represents the normalized class of each dimension
+# normalizedData[dimension_name].getscore(dimension_value) gives normalized_value
+global normalizedData
+normalizedData = None
+
 # A class to catch error and exceptions
 class WebcredError(Exception):
     """An error happened during assessment of site.
@@ -105,6 +110,126 @@ class PatternMatching(object):
         else:
             return False, None
 
+# A class to get normalized score for given value based on collectData
+class Normalize(object):
+
+    # data = json_List
+    # name =parameter to score
+    def __init__(self, data=None, name=None):
+        if not data or not name:
+            raise WebcredError('Need 3 args, 2 pass')
+
+        self.reverse = self.dataList = self.mean = self.deviation = None
+        self.factorise = None
+
+        self.data = data
+        self.name = name[0]
+
+        if isinstance(name[1], str):
+            if  name[1] == 'reverse':
+                self.reverse = True
+
+        elif isinstance(name[1], dict):
+            self.factorise = name[1]
+
+    def getdatalist(self):
+        if not self.dataList:
+            dataList = []
+            NumberTypes = (types.IntType, types.LongType, types.FloatType, types.ComplexType)
+            for element in self.data:
+                if element.get(self.name) and isinstance(element[self.name], NumberTypes):
+                    if isinstance(element[self.name], float):
+                        element[self.name] = int(element[self.name]*1000000)
+                    dataList.append(element[self.name])
+            self.dataList = dataList
+
+        # print self.dataList
+        # pdb.set_trace()
+        return self.dataList
+
+    def normalize(self):
+        NumberTypes = (types.IntType, types.LongType, types.FloatType, types.ComplexType)
+        for index in range(len(self.data)):
+            if isinstance(self.data[index].get(self.name), NumberTypes):
+                self.data[index][self.name] = self.getscore(self.data[index][self.name])
+
+        return self.data
+
+    def getnormalizedScore(self, value):
+        NumberTypes = (types.IntType, types.LongType, types.FloatType, types.ComplexType)
+        if isinstance(value, NumberTypes):
+            return self.getscore(value)
+
+        # case when dimension value throws error
+        # REVIEW
+        return -1
+
+    def getdata(self):
+        return self.data
+
+    def getmean(self):
+        if not self.mean:
+            self.mean =statistics.mean(self.getdatalist())
+            print "mean=", self.mean, self.name
+        return self.mean
+
+    def getdeviation(self):
+        if not self.deviation:
+            self.deviation =statistics.pstdev(self.getdatalist())
+            print "deviation=", self.deviation, self.name
+        return self.deviation
+
+    def getscore(self, value):
+        mean = self.getmean()
+        deviation = self.getdeviation()
+
+        # somtimes mean<deviation and surpass good reults, as no value is less than 0
+        netmd = mean-deviation
+        if netmd<0:
+            netmd = 0
+
+        if value<=(netmd):
+            if self.reverse:
+                return 1
+            return -1
+
+        else :
+            if value>=(mean+deviation):
+                if self.reverse:
+                    return -1
+                return 1
+            return 0
+
+    def getfactoise(self, value):
+        modified = 0
+        for k,v in self.factorise.items():
+            if str(value) == str(k):
+                return v
+        if not modified:
+            if 'else' in self.factorise.keys():
+                return self.factorise.get('else')
+
+
+    def factoise(self):
+        if not self.factorise:
+            raise WebcredError('Provide attr to factorise')
+
+
+        for index in range(len(self.data)):
+            if self.data[index].get(self.name):
+                modified = 0
+                for k,v in self.factorise.items():
+                    value = self.data[index][self.name]
+                    if str(value) == str(k):
+                        self.data[index][self.name] = v
+                        modified = 1
+                    # if value==0 and self.name == 'misspelled':
+                    #     pdb.set_trace()
+                if not modified:
+                    if 'else' in self.factorise.keys():
+                        self.data[index][self.name] = self.factorise.get('else')
+        return self.data
+
 # A class to use extract url attributes
 class Urlattributes(object):
     try:
@@ -113,6 +238,88 @@ class Urlattributes(object):
         if not patternMatching:
             patternMatching = PatternMatching(lang_iso='lang_iso.txt', ads_list='ads.txt' )
             print 'end patternMatching'
+
+        global normalizedData
+        if not normalizedData:
+            normalizedData = {}
+            # read existing data
+            old_data = 'DATA/data2.json'
+            old_data = open(old_data, 'r').read()
+            old_data = old_data.split('\n')
+            new_data = 'DATA/new_data.json'
+            new_data = open(new_data, 'r').read()
+            new_data = new_data.split('\n')
+            re_data = 'DATA/re_data.json'
+            re_data = open(re_data, 'r').read()
+            re_data = re_data.split('\n')
+
+            file_= list(set(new_data + old_data + re_data))
+
+            # final json_List of data
+            data = []
+
+            for element in file_[:-1]:
+                try:
+                    metadata = json.loads(str(element))
+                    # if metadata.get('redirected'):
+                    #     url = metadata['redirected']
+                    # else:
+                    #     url = metadata['url']
+                    # obj = utils.Domain(url)
+                    # url = obj.getnetloc()
+                    # metadata['domain_similarity'] = scorefile_data.get(url)
+                except:
+                    continue
+                if metadata.get('Error'):
+                    continue
+                data.append(metadata)
+
+            normalizeCategory = {
+                '3':{
+                 'outlinks': 'reverse', 'inlinks': 'linear',
+                 'ads':'reverse',
+                 'brokenlinks': 'reverse', 'pageloadtime': 'reverse',
+                 'imgratio': 'linear', 'langcount': 'linear'
+                 },
+                '2':{'misspelled': {0:1, 'else':0}, 'cookie': {'Yes':0, 'No':1},
+                 'responsive': {'true':1, 'false':0},},
+                'not_sure': ['domain', 'lastmod'],
+                'misc': {'hyperlinks':"linear"},
+                'eval':['wot']
+             }
+
+            print 'normalize 3'
+
+            it = normalizeCategory['3'].items()
+            for k in it:
+                normalizedData[k[0]] = Normalize(data, k)
+                normalizedData[k[0]].normalize()
+
+            print 'normalize misc'
+            # it = ('hyperlinks', 'linear')
+            it = normalizeCategory['misc'].items()[0]
+            # summation of hyperlinks_attribute values
+            for index in range(len(data)):
+                if data[index].get(it[0]):
+                    sum_hyperlinks_attributes = 0
+                    tempData = data[index].get(it[0])
+                    try:
+                        for k,v in tempData.items():
+                            sum_hyperlinks_attributes += v
+                    except:
+                        # TimeOut error clause
+                        pass
+                    finally:
+                        data[index][it[0]] = sum_hyperlinks_attributes
+
+            normalizedData[it[0]] = Normalize(data, it)
+            data = normalizedData[it[0]].normalize()
+
+            print 'normalize 2'
+            for k in normalizeCategory['2'].items():
+                normalizedData[k[0]] = Normalize(data, k)
+                normalizedData[k[0]].factoise()
+
     except WebcredError as e:
         raise WebcredError(e.message)
 
@@ -368,6 +575,9 @@ class Webcred(object):
                             if request.get(perc):
                                 percentage[keys] = request.get(perc)
 
+                # to show wot ranking
+                req['args']['wot'] = "true"
+
                 data['url'] =  req['args']['site']
                 site = Urlattributes(url=req['args'].get('site', None))
 
@@ -425,102 +635,56 @@ class Webcred(object):
                 try:
                     site.freemem()
                 finally:
+                    data = self.webcredScore(data, percentage)
                     return data
 
-class Normalize(object):
+    def webcredScore(self, data, percentage):
+        global normalizedData
+        normalizeCategory = {
+            '3':[
+             'outlinks', 'inlinks',
+             'ads', 'brokenlinks', 'pageloadtime',
+             'imgratio', 'langcount',
+             ],
+            '2':['misspelled', 'cookie',
+             'responsive'],
+            'not_sure': ['domain', 'lastmod'],
+            'misc': ['hyperlinks',],
+            'eval':['wot']
+         }
 
-    # data = json_List
-    # name =parameter to score
-    def __init__(self, data=None, name=None):
-        if not data or not name:
-            raise WebcredError('Need 3 args, 2 pass')
+        score = 0
+        for k,v in data.items():
 
-        self.reverse = self.dataList = self.mean = self.deviation = None
-        self.factorise = None
+            try:
+                if k in normalizeCategory['3']:
+                    name = k + "Norm"
+                    data[name] = normalizedData[k].getnormalizedScore(v)
+                    score += data[name]*float(percentage[k])
 
-        self.data = data
-        self.name = name[0]
+                if k in normalizeCategory['2']:
+                    name = k + "Norm"
+                    data[name] = normalizedData[k].getfactoise(v)
+                    score += data[name]*float(percentage[k])
 
-        if isinstance(name[1], str):
-            if  name[1] == 'reverse':
-                self.reverse = True
+                if k in normalizeCategory['misc']:
+                    sum_hyperlinks_attributes = 0
+                    try:
+                        for key,value in v.items():
+                            sum_hyperlinks_attributes += value
+                        name = k + "Norm"
+                        data[name] = normalizedData[k].getnormalizedScore(sum_hyperlinks_attributes)
+                        score += data[name]*float(percentage[k])
+                    except:
+                        # TimeOut error clause
+                        pass
+            except:
+                import pdb; pdb.set_trace()
 
-        elif isinstance(name[1], dict):
-            self.factorise = name[1]
+        data["WEBCred Score"] = score
 
-    def getdatalist(self):
-        if not self.dataList:
-            dataList = []
-            NumberTypes = (types.IntType, types.LongType, types.FloatType, types.ComplexType)
-            for element in self.data:
-                if element.get(self.name) and isinstance(element[self.name], NumberTypes):
-                    if isinstance(element[self.name], float):
-                        element[self.name] = int(element[self.name]*1000000)
-                    dataList.append(element[self.name])
-            self.dataList = dataList
+        return data
 
-        # print self.dataList
-        # pdb.set_trace()
-        return self.dataList
-
-    def normalize(self):
-        for index in range(len(self.data)):
-            if self.data[index].get(self.name):
-                self.data[index][self.name] = self.getscore(self.data[index][self.name])
-
-        return self.data
-
-    def getdata(self):
-        return self.data
-
-    def getmean(self):
-        if not self.mean:
-            mean =statistics.mean(self.getdatalist())
-        return mean
-
-    def getdeviation(self):
-        if not self.deviation:
-            deviation =statistics.pstdev(self.getdatalist())
-        return deviation
-
-    def getscore(self, value):
-        mean = self.getmean()
-        deviation = self.getdeviation()
-
-        if isinstance(value, str):
-            return value
-
-        if value<(mean-deviation):
-            if self.reverse:
-                return 1
-            return -1
-
-        else :
-            if value>(mean+deviation):
-                if self.reverse:
-                    return -1
-                return 1
-            return 0
-
-    def factoise(self):
-        if not self.factorise:
-            raise WebcredError('Provide attr to factorise')
-
-
-        for index in range(len(self.data)):
-            if self.data[index].get(self.name):
-                modified = 0
-                for k,v in self.factorise.items():
-                    value = self.data[index][self.name]
-                    if str(value) == str(k):
-                        self.data[index][self.name] = v
-                        modified = 1
-                    # if value==0 and self.name == 'misspelled':
-                    #     pdb.set_trace()
-                if not modified:
-                    if 'else' in self.factorise.keys():
-                        self.data[index][self.name] = self.factorise.get('else')
-        return self.data
 
 
 import api
