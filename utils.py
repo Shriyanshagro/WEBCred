@@ -333,6 +333,7 @@ class Webcred(object):
                 data = {}
                 req = {}
                 req['args'] = {}
+                percentage = {}
                 hyperlinks_attributes = ['contact', 'email', 'help',
                 'sitemap']
                 apiList = {
@@ -358,10 +359,15 @@ class Webcred(object):
                         # because request.args is of ImmutableMultiDict form
                         if isinstance(request.get(keys, None), list):
                             req['args'][keys] = str(request.get(keys)[0])
+                            perc = keys + "Perc"
+                            if request.get(perc):
+                                percentage[keys] = request.get(perc)[0]
                         else:
                             req['args'][keys] = request.get(keys)
+                            perc = keys + "Perc"
+                            if request.get(perc):
+                                percentage[keys] = request.get(perc)
 
-                # pdb.set_trace()
                 data['url'] =  req['args']['site']
                 site = Urlattributes(url=req['args'].get('site', None))
 
@@ -389,6 +395,8 @@ class Webcred(object):
                     if dim in request.keys():
                         try:
                             data[request.get(dim)[0]] = api.dimapi(site.geturl(), request.get(API)[0])
+                            perc = API + "Perc"
+                            percentage[dim] = request.get(perc)[0]
                         except WebcredError as e:
                             data[request.get(dim)[0]] = e.message
                         except:
@@ -397,7 +405,7 @@ class Webcred(object):
                         break
                     number += 1
 
-                maxTime = 200
+                maxTime = 130
                 for t in threads:
                     try:
                         t.join(maxTime)

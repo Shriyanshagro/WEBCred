@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% block body %}
-	<form action="start" method=get class=add-entry>
+	<form action="start" method=get class=add-entry onsubmit="return validateForm()">
 	      <dl>
 					<dd>URL:<input type=url name=site size="50">
 
@@ -33,7 +33,7 @@
 								<br>
 								<input type="radio" onclick="checkGenre()"name="genre"
 								 id="other" value="" >
-								 <input type='text' placeholder="Other genre"
+								 <input type='text' placeholder="Other Genre"
 									 name="other_genre"/>
 							</td>
 
@@ -41,173 +41,291 @@
 
 					</table>
 
-					<!-- select dimension -->
-					<table cellpadding="5px" id="dimensions">
+					<div id="tool" style="display:none">
 
-						<tr>
+						<!-- select dimension -->
+						<table cellpadding="10px" id="dimensions">
 
-							<td>
-								<input type="checkbox" name="ads" id="ads" value="true" > Advertisement
-							</td>
+							<tr>
 
-							<!-- <td>
-								<input type="checkbox" name="cohesion" id="cohesion" value="true" > Cohesion
-							</td> -->
-							<td>
-								<input type="checkbox" name="inlinks" id="inlinks" value="true" > Inlinks
-							</td>
+								<td>
+									<input type="checkbox" name="ads" id="ads" value="true" >
+									 Less Ads
+									<br>
+									<input type="number" step="any" min="0" max="100" \
+										name="adsPerc" id="adsPerc" value="0">
+								</td>
 
-						</tr>
+								<td>
+									<input type="checkbox" name="brokenlinks" id="brokenlinks"
+									value="true" > Less BrokenLinks
+									<br>
+									<input type="number" step="any" min="0" max="100" \
+										name="brokenlinksPerc" id="brokenlinksPerc" value="0">
+								</td>
 
-						<tr>
+								<td>
+									<input type="checkbox" name="langcount" id="langcount"
+									value="true" > Multi Lingual
+									<br>
+									<input type="number" step="any" min="0" max="100" \
+										name="langcountPerc" id="langcountPerc" value="0">
+								</td>
 
-							<td>
-								<input type="checkbox" name="brokenlinks" id="brokenlinks" value="true" > Broken Links
-							</td>
+								<!-- <td>
+									<input type="checkbox" name="genre" id="genre" value="true" > Genre
+								</td> -->
 
-							<!-- <td>
-								<input type="checkbox" name="domain_similarity" id="domain_similarity" value="true" > Domain Similarity
-							</td> -->
-							<td>
-								<input type="checkbox" name="domain" id="domain" value="true" > Internet Domain
-							</td>
+								<!-- <td>
+									<input type="checkbox" name="cohesion" id="cohesion" value="true" > Cohesion
+								</td> -->
 
-						</tr>
+								<!-- <td>
+									<input type="checkbox" name="domain_similarity"
+									id="domain_similarity" value="true" > Domain Similarity
+								</td> -->
 
-						<tr>
+						  </tr>
 
-							<td>
-								<input type="checkbox" name="langcount" id="langcount" value="true" > Internationalization
-							</td>
+							<tr>
 
-							<!-- <td>
-								<input type="checkbox" name="genre" id="genre" value="true" > Genre
-							</td> -->
-							<td>
-								<input type="checkbox" name="lastmod" id="lastmod" value="true" > Lastmodified
-							</td>
+								<td>
+									<input type="checkbox" name="domain" id="domain" value="true" > Internet Domain
+									<br>
+									<input type="number" step="any" min="0" max="100" \
+										name="domainPerc" id="domainPerc" value="0">
+								</td>
 
-						</tr>
+								<td>
+									<input type="checkbox" name="inlinks" id="inlinks" value="true" > More Inlinks
+									<br>
+									<input type="number" step="any" min="0" max="100" \
+										name="inlinksPerc" id="inlinksPerc" value="0">
+								</td>
 
-						<tr>
+								<td>
+									<input type="checkbox" name="lastmod" id="lastmod" value="true" > Lastmodified
+									<br>
+									<input type="number" step="any" min="0" max="100" \
+										name="lastmodPerc" id="lastmodPerc" value="0">
+								</td>
 
-							<td>
-								<input type="checkbox" name="misspelled" id="misspelled" value="true" > Misspelled
-							</td>
+							</tr>
 
-							<td>
-								<input type="checkbox" name="outlinks" id="outlinks" value="true" >  Outlinks
-							</td>
+							<tr>
 
-						</tr>
+								<td>
+									<input type="checkbox" name="hyperlinks" id="hyperlinks" value="true" > Real World Presence
+									<br>
+									<input type="number" step="any" min="0" max="100" \
+										name="hyperlinksPerc" id="hyperlinksPerc" value="0">
+								</td>
 
-						<tr>
+								<td>
+									<input type="checkbox" name="outlinks" id="outlinks" value="true" >  Less Outlinks
+									<br>
+									<input type="number" step="any" min="0" max="100" \
+										name="outlinksPerc" id="outlinksPerc" value="0">
+								</td>
 
-							<td>
-								<input type="checkbox" name="pageloadtime" id="pageloadtime" value="true" > Pageloadtime
-							</td>
+								<td>
+									<input type="checkbox" name="misspelled" id="misspelled" value="true" > Less Misspell
+									<br>
+									<input type="number" step="any" min="0" max="100" \
+										name="misspelledPerc" id="misspelledPerc" value="0">
+								</td>
 
+							</tr>
 
-						</tr>
+							<tr>
 
-						<tr>
+								<td>
+									<input type="checkbox" name="imgratio" id="imgratio" value="true" > Text to Image Ratio
+									<br>
+									<input type="number" step="any" min="0" max="100" \
+										name="imgratioPerc" id="imgratioPerc" value="0">
+								</td>
 
-							<td>
-								<input type="checkbox" name="hyperlinks" id="hyperlinks" value="true" > Real World Presence
-							</td>
+								<td>
+									<input type="checkbox" name="responsive" id="responsive" value="true" > Responsive Design
+									<br>
+									<input type="number" step="any" min="0" max="100" \
+										name="responsivePerc" id="responsivePerc" value="0">
+								</td>
 
+								<td>
+									<input type="checkbox" name="pageloadtime" id="pageloadtime" value="true" > Pageloadtime
+									<br>
+									<input type="number" step="any" min="0" max="100" \
+										name="pageloadtimePerc" id="pageloadtimePerc" value="0">
+								</td>
 
-						</tr>
+							</tr>
 
-						<tr>
+						</table>
 
-							<td>
-								<input type="checkbox" name="responsive" id="responsive" value="true" > Responsive Design
-							</td>
+						<table>
+							<tr>
 
+								<td>
+									<!-- Add more dimensions -->
+									<button type="button" onclick="addRow()">Add more
+										Dimensions</button>
+								</td>
 
-						</tr>
+								<td>
+									<!-- Remove last row/dimensions -->
+									<button type="button" id="removerow" onclick="removeRow()"
+										style="display:none">Remove Last Row</button>
+								</td>
 
-						<tr>
+							</tr>
 
-							<td>
-								<input type="checkbox" name="imgratio" id="imgratio" value="true" > Text2BodyRatio
-							</td>
+						</table>
 
-						</tr>
+						<!-- google Captcha -->
+						<div class="g-recaptcha" data-sitekey=
+							"6LcsiCoUAAAAAM4y5pKsPEGfBasVYdkB0PvgpllL"></div>
 
-					</table>
+						<input type=submit value="Assess Credibility">
 
-					<!-- Add more dimensions -->
-
-					<button type="button" onclick="myFunction()">Add more
-						Dimensions</button>
-
-	        <!-- <input type="checkbox" name="wot" value="true" >
-					 wot_score -->
-					<div class="g-recaptcha" data-sitekey=
-						"6LcsiCoUAAAAAM4y5pKsPEGfBasVYdkB0PvgpllL"></div>
-
-					<dd><input type=submit value="Assess Credibility">
+					</div>
 	      </dl>
 	</form>
 
 	<script>
-  function myFunction() {
-      console.log("hello");
+	  function addRow() {
+				document.getElementById("removerow").style.display = "inline"
+				var x = document.getElementById('dimensions');
+			  var new_row = x.rows[1].cloneNode(true);
+				//FIXME +5 is caluclated number as total dimensions are 12
+				//and len==8
+				//HACK if +5 number is changed, then change in utils.py, validateForm()
+				// , removeRow()
+			  var len = x.rows.length + 9;
+				dimension = "dimension" + len;
+				api = "api" + len;
+				console.log(dimension, api);
+
+			  new_row.cells[0].innerHTML = '<input type="text" placeholder=\
+				"New Dimension" name="'+ dimension + '" id="'+dimension+'" required/>';
+
+			  new_row.cells[1].innerHTML = '<input type="url" placeholder=\
+				"API for dimension" name="'+ api + '" id="'+api+'"required />';
+
+				// <input type="number" step="any" min="0" max="100" \
+				// 	name="imgratioPerc" id="imgratioPerc" value="0">
+			  new_row.cells[2].innerHTML = '<input type="number"  placeholder=\
+				"Weightage for dimension" step="any" min="0" max="100" name="'+ api +
+				'Perc" id="'+api+'Perc" value="0"/>';
+
+			  x.appendChild(new_row);
+	  }
+
+		function removeRow(){
 			var x = document.getElementById('dimensions');
-		  var new_row = x.rows[1].cloneNode(true);
-			//FIXME +5 is caluclated number as total dimensions are 12
-			//and len==8
-			//HACK if +5 number is changed, then change in utils.py as well
-		  var len = x.rows.length+5;
-			dimension = "dimension" + len;
-			api = "api" + len;
-			console.log(dimension, api);
-
-		  new_row.cells[0].innerHTML = '<input type="text" placeholder=\
-			"New Dimension" name="'+ dimension + '"/>';
-
-		  new_row.cells[1].innerHTML = '<input type="text" placeholder=\
-			"API for dimension" name="'+ api + '"/>';
-
-		  x.appendChild(new_row);
-  }
-
-	function checkGenre(){
-		var genre = {}
-		genre["g1"] = ['ads', 'inlinks', 'brokenlinks', 'domain', 'langcount',
-			'responsive', 'imgratio']
-		genre["g2"] = ['ads', 'inlinks',
-			'responsive', 'imgratio']
-		genre["g3"] = [
-			'lastmod', 'misspelled', 'outlinks', 'pageloadtime', 'hyperlinks',
-			'responsive', 'imgratio']
-		genre["g4"] = ['ads', 'inlinks', 'brokenlinks', 'domain', 'langcount',
-			'lastmod', 'misspelled', 'outlinks', 'pageloadtime', 'hyperlinks',
-		]
-		genre["other"] = [
-			'ads', 'inlinks', 'brokenlinks', 'domain', 'langcount',
-			'lastmod', 'misspelled', 'outlinks', 'pageloadtime', 'hyperlinks',
-			'responsive', 'imgratio'
-		]
-
-		for (var key in genre){
-			if (document.getElementById(key).checked == true){
-				// debugger;
-				var dimension = genre['other'];
-				for(var j=0; j<dimension.length; j++){
-					document.getElementById(dimension[j]).checked = false;
+			rows = x.rows.length;
+			if (rows>4){
+				x.deleteRow(rows-1);
+				if(rows==5){
+					document.getElementById("removerow").style.display = "none";
 				}
-				var dimension = genre[key];
-				// console.log("checking genre", key, dimension);
-				for(var j=0; j<dimension.length; j++){
-					document.getElementById(dimension[j]).checked = true;
+			}
+			else{
+				alert("No row  to remove");
+			}
+
+		}
+
+		function checkGenre(){
+			document.getElementById("tool").style.display = ""
+			var genre = {}
+			genre["g1"] = {'ads':"14.28", 'inlinks':"14.28", 'brokenlinks':"14.28",
+			'domain':"14.28", 'langcount':"14.28", 'responsive':"14.28", 'imgratio':"14.28"}
+			genre["g2"] = {'ads':"25", 'inlinks':"25",
+				'responsive':"25", 'imgratio':"25"}
+			genre["g3"] = {
+				'lastmod':"14.28", 'misspelled':"14.28", 'outlinks':"14.28",
+				'pageloadtime':"14.28", 'hyperlinks':"14.28", 'responsive':"14.28",
+				'imgratio':"14.28"}
+			genre["g4"] = {'ads':"10", 'inlinks':"10", 'brokenlinks':"10",
+			'domain':"10", 'langcount':"10", 'lastmod':"10", 'misspelled':"10",
+			'outlinks':"10", 'pageloadtime':"10", 'hyperlinks':"10",
+			}
+			genre["other"] = {
+				'ads':"8.33", 'inlinks':"8.33", 'brokenlinks':"8.33", 'domain':"8.33",
+				'langcount':"8.33", 'lastmod':"8.33", 'misspelled':"8.33",
+				'outlinks':"8.33", 'pageloadtime':"8.33", 'hyperlinks':"8.33",
+				'responsive':"8.33", 'imgratio':"8.33"
+			};
+
+			for(var key in genre){
+				if (document.getElementById(key).checked == true){
+					// debugger;
+					var dimension = genre['other'];
+
+					// reset check and Weightage value
+					for(var param in dimension){
+						document.getElementById(param).checked = false;
+						perc = param+"Perc"
+						document.getElementById(perc).value = '0';
+					}
+					var dimension = genre[key];
+					// console.log("checking genre", key, dimension);
+					for(var param in dimension){
+						document.getElementById(param).checked = true;
+						perc = param+"Perc"
+						document.getElementById(perc).value = dimension[param];
+					}
 				}
+			}
+
+		}
+
+		function validateForm(){
+			var dimensions = [
+						'ads', 'inlinks', 'brokenlinks', 'domain',
+						'langcount', 'lastmod', 'misspelled',
+						'outlinks', 'pageloadtime', 'hyperlinks',
+						'responsive', 'imgratio'
+					];
+
+			var percentage = 0;
+
+			// summation of Weightage value of dimensions
+			for (var j=0; j<dimensions.length; j++){
+				param = dimensions[j]
+				if(document.getElementById(param).checked==true){
+					perc = param + "Perc";
+					percentage += parseFloat(document.getElementById(perc).value);
+				}
+			}
+
+			// summation of Weightage value of added dimensions
+			// HACK refer to function addRow()
+			number = 13
+			while(true){
+				dimension = "dimension" + number
+				api = "api" + number
+				if(document.getElementById(dimension) &&
+						document.getElementById(api)){
+							perc = api + "Perc"
+							percentage += parseFloat(document.getElementById(perc).value);
+							number += 1
+						}
+				else{
+					break;
+				}
+			}
+
+			console.log(percentage)
+			// check sum of Weightage
+			if(percentage<99.9 || percentage>100.1){
+				alert("Sum of Weightage should be 100");
+				return false;
 			}
 		}
 
-	}
-  </script>
+	</script>
 
 {% endblock %}
