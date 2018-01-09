@@ -4,19 +4,57 @@
 	      <dl>
 					<dd>URL:<input type=url name=site size="50">
 
+					<!-- select genre id	<tab -->
+					<table cellpadding="5px" >
+
+						<tr>
+
+							<td>
+								<input type="radio" onclick="checkGenre()"name="genre"
+								 id="g1" value="g1" > Genre1
+							</td>
+
+							<td>
+								<input type="radio" onclick="checkGenre()"name="genre"
+								 id="g2" value="g2" > Genre2
+							</td>
+
+							<td>
+								<input type="radio" onclick="checkGenre()"name="genre"
+								 id="g3" value="g3" > Genre3
+							</td>
+
+							<td>
+								<input type="radio" onclick="checkGenre()"name="genre"
+								 id="g4" value="g4" > Genre4
+							</td>
+
+							<td>
+								<br>
+								<input type="radio" onclick="checkGenre()"name="genre"
+								 id="other" value="" >
+								 <input type='text' placeholder="Other genre"
+									 name="other_genre"/>
+							</td>
+
+						</tr>
+
+					</table>
+
+					<!-- select dimension -->
 					<table cellpadding="5px" id="dimensions">
 
 						<tr>
 
 							<td>
-								<input type="checkbox" name="ads" value="true" checked="checked"> Advertisement
+								<input type="checkbox" name="ads" id="ads" value="true" > Advertisement
 							</td>
 
 							<!-- <td>
-								<input type="checkbox" name="cohesion" value="true" checked="checked"> Cohesion
+								<input type="checkbox" name="cohesion" id="cohesion" value="true" > Cohesion
 							</td> -->
 							<td>
-								<input type="checkbox" name="inlinks" value="true" checked="checked"> Inlinks
+								<input type="checkbox" name="inlinks" id="inlinks" value="true" > Inlinks
 							</td>
 
 						</tr>
@@ -24,14 +62,14 @@
 						<tr>
 
 							<td>
-								<input type="checkbox" name="brokenlinks" value="true" checked="checked"> Broken Links
+								<input type="checkbox" name="brokenlinks" id="brokenlinks" value="true" > Broken Links
 							</td>
 
 							<!-- <td>
-								<input type="checkbox" name="domain_similarity" value="true" checked="checked"> Domain Similarity
+								<input type="checkbox" name="domain_similarity" id="domain_similarity" value="true" > Domain Similarity
 							</td> -->
 							<td>
-								<input type="checkbox" name="domain" value="true" checked="checked"> Internet Domain
+								<input type="checkbox" name="domain" id="domain" value="true" > Internet Domain
 							</td>
 
 						</tr>
@@ -39,14 +77,14 @@
 						<tr>
 
 							<td>
-								<input type="checkbox" name="langcount" value="true" checked="checked"> Internationalization
+								<input type="checkbox" name="langcount" id="langcount" value="true" > Internationalization
 							</td>
 
 							<!-- <td>
-								<input type="checkbox" name="genre" value="true" checked="checked"> Genre
+								<input type="checkbox" name="genre" id="genre" value="true" > Genre
 							</td> -->
 							<td>
-								<input type="checkbox" name="lastmod" value="true" checked="checked"> Lastmodified
+								<input type="checkbox" name="lastmod" id="lastmod" value="true" > Lastmodified
 							</td>
 
 						</tr>
@@ -54,11 +92,11 @@
 						<tr>
 
 							<td>
-								<input type="checkbox" name="misspelled" value="true" checked="checked"> Misspelled
+								<input type="checkbox" name="misspelled" id="misspelled" value="true" > Misspelled
 							</td>
 
 							<td>
-								<input type="checkbox" name="outlinks" value="true" checked="checked">  Outlinks
+								<input type="checkbox" name="outlinks" id="outlinks" value="true" >  Outlinks
 							</td>
 
 						</tr>
@@ -66,16 +104,7 @@
 						<tr>
 
 							<td>
-								<input type="checkbox" name="pageloadtime" value="true" checked="checked"> Pageloadtime
-							</td>
-
-
-						</tr>
-
-						<tr>
-
-							<td>
-								<input type="checkbox" name="hyperlinks" value="true" checked="checked"> Real World Presence
+								<input type="checkbox" name="pageloadtime" id="pageloadtime" value="true" > Pageloadtime
 							</td>
 
 
@@ -84,7 +113,7 @@
 						<tr>
 
 							<td>
-								<input type="checkbox" name="responsive" value="true" checked="checked"> Responsive Design
+								<input type="checkbox" name="hyperlinks" id="hyperlinks" value="true" > Real World Presence
 							</td>
 
 
@@ -93,7 +122,16 @@
 						<tr>
 
 							<td>
-								<input type="checkbox" name="imgratio" value="true" checked="checked"> Text2BodyRatio
+								<input type="checkbox" name="responsive" id="responsive" value="true" > Responsive Design
+							</td>
+
+
+						</tr>
+
+						<tr>
+
+							<td>
+								<input type="checkbox" name="imgratio" id="imgratio" value="true" > Text2BodyRatio
 							</td>
 
 						</tr>
@@ -102,34 +140,74 @@
 
 					<!-- Add more dimensions -->
 
-					<button type="button" onclick="myFunction()">Add more Dimensions</button>
+					<button type="button" onclick="myFunction()">Add more
+						Dimensions</button>
 
-	        <!-- <input type="checkbox" name="wot" value="true" checked="checked"> wot_score -->
-					<div class="g-recaptcha" data-sitekey="6LcsiCoUAAAAAM4y5pKsPEGfBasVYdkB0PvgpllL"></div>
+	        <!-- <input type="checkbox" name="wot" value="true" >
+					 wot_score -->
+					<div class="g-recaptcha" data-sitekey=
+						"6LcsiCoUAAAAAM4y5pKsPEGfBasVYdkB0PvgpllL"></div>
 
 					<dd><input type=submit value="Assess Credibility">
 	      </dl>
 	</form>
-	<script>
 
+	<script>
   function myFunction() {
       console.log("hello");
 			var x = document.getElementById('dimensions');
 		  var new_row = x.rows[1].cloneNode(true);
-			// FIXME +5 is caluclated number as of now total dimensions are 12
-			// and len==8
-			// HACK if this number is changed, then change accordingly in utils.py
+			//FIXME +5 is caluclated number as total dimensions are 12
+			//and len==8
+			//HACK if +5 number is changed, then change in utils.py as well
 		  var len = x.rows.length+5;
 			dimension = "dimension" + len;
 			api = "api" + len;
 			console.log(dimension, api);
 
-		  new_row.cells[0].innerHTML = '<input type="text" placeholder="New Dimension" name="'+ dimension + '"/>';
+		  new_row.cells[0].innerHTML = '<input type="text" placeholder=\
+			"New Dimension" name="'+ dimension + '"/>';
 
-		  new_row.cells[1].innerHTML = '<input type="text" placeholder="API for dimension" name="'+ api + '"/>';
+		  new_row.cells[1].innerHTML = '<input type="text" placeholder=\
+			"API for dimension" name="'+ api + '"/>';
 
 		  x.appendChild(new_row);
   }
+
+	function checkGenre(){
+		var genre = {}
+		genre["g1"] = ['ads', 'inlinks', 'brokenlinks', 'domain', 'langcount',
+			'responsive', 'imgratio']
+		genre["g2"] = ['ads', 'inlinks',
+			'responsive', 'imgratio']
+		genre["g3"] = [
+			'lastmod', 'misspelled', 'outlinks', 'pageloadtime', 'hyperlinks',
+			'responsive', 'imgratio']
+		genre["g4"] = ['ads', 'inlinks', 'brokenlinks', 'domain', 'langcount',
+			'lastmod', 'misspelled', 'outlinks', 'pageloadtime', 'hyperlinks',
+		]
+		genre["other"] = [
+			'ads', 'inlinks', 'brokenlinks', 'domain', 'langcount',
+			'lastmod', 'misspelled', 'outlinks', 'pageloadtime', 'hyperlinks',
+			'responsive', 'imgratio'
+		]
+
+		for (var key in genre){
+			if (document.getElementById(key).checked == true){
+				// debugger;
+				var dimension = genre['other'];
+				for(var j=0; j<dimension.length; j++){
+					document.getElementById(dimension[j]).checked = false;
+				}
+				var dimension = genre[key];
+				// console.log("checking genre", key, dimension);
+				for(var j=0; j<dimension.length; j++){
+					document.getElementById(dimension[j]).checked = true;
+				}
+			}
+		}
+
+	}
   </script>
 
 {% endblock %}
