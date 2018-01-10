@@ -1,0 +1,47 @@
+domain,ads,imgratio,inlinks,pageloadtime,misspelled,hyperlinks,brokenlinks,responsive,lastmod,langcount,outlinks,Alexa rank,,,,,
+2,0,1,0,0,0,0,0,0,1,0,0,15588,,,,,
+3,0,0,-1,0,0,-1,1,0,0,0,0,3032022,,,,,
+3,1,-1,0,0,0,0,0,0,1,0,1,3303229,,,,,
+3,0,0,-1,1,0,-1,0,0,1,1,0,13,,,,,
+6,0,0,-1,0,0,0,0,1,1,0,0,137,,,,,
+4,1,1,-1,-1,0,-1,1,0,0,0,1,2757,,,,,
+1,0,1,-1,0,0,-1,1,0,0,0,0,274595,,,,,
+4,0,0,-1,1,0,0,0,0,0,0,0,872,,,,,
+3,0,1,-1,0,0,-1,0,0,1,0,0,880303,,,,,
+3,0,-1,-1,0,0,0,0,0,0,1,0,147931,,,,,
+3,0,1,-1,-1,0,0,0,0,0,0,0,3885971,,,,,
+3,-1,0,0,0,0,0,0,1,1,1,0,3929,,,,,
+3,0,0,-1,0,0,0,1,1,1,0,0,Field NA,,,,,
+6,0,1,-1,0,0,0,0,0,1,0,-1,Field NA,,,,,
+3,-1,0,0,0,0,0,0,0,1,0,-1,Field NA,,,,,
+3,0,-1,0,0,0,-1,0,0,1,0,0,Field NA,,,,,
+,,,,,,,,,,,,,,,,,
+a,b,c,d,f,g,h,j,k,l,m,n,,,,,,
+,,,,,,,,,,,,,,,,,
+3,0,-1,-1,0,0,0,1,0,1,0,0,3356855,,,,,
+3,0,0,-1,0,0,-1,0,1,1,0,0,51137,,,,,
+,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,
+url,Error,domain,ads,imgratio,inlinks,wot,pageloadtime,misspelled,hyperlinks,cookie,brokenlinks,responsive,lastmod,langcount,outlinks,redirected,alexa rank
+"""http://www.zdnet.com/article/microsoft-beware-this-fake-windows-bsod-from-tech-support-scammers-malware/""",Field NA,3,0,0,-1,"[93, 63]",0,0,-1,"""Yes""",0,0,1,0,-1,Field NA,3347
+"""http://www.accessdata.fda.gov/scripts/cder/drugsatfda/index.cfm?fuseaction=Search.SearchAction&SearchTerm=Photofrin&SearchType=BasicSearch""",Field NA,6,0,1,-1,"[93, 60]",0,0,0,"""No""",0,0,1,0,-1,"""https://www.accessdata.fda.gov/scripts/cder/daf/""",5934
+"""http://anti-virus-software-review.toptenreviews.com/""",Field NA,3,-1,0,0,"[79, 37]",0,0,0,"""Yes""",0,0,1,0,-1,"""http://www.toptenreviews.com/software/security/best-antivirus-software/""",6649
+"""https://www.cnet.com/how-to/how-to-prepare-yourself-for-the-next-ddos-attack/""",Field NA,3,0,-1,0,"[92, 62]",0,0,-1,"""Yes""",0,0,1,0,0,Field NA,154
+"""http://www.cisco.com/c/en/us/td/docs/ios/sec_data_plane/configuration/guide/12_4/sec_data_plane_12_4_book.html""",Field NA,3,0,-1,-1,"[93, 61]",0,0,0,"""Yes""",1,0,1,0,0,"""https://www.cisco.com/c/en/us/td/docs/ios/sec_data_plane/configuration/guide/12_4/sec_data_plane_12_4_book.html""",848
+"""http://www.mpepil.com""",Field NA,3,0,-1,-1,"[67, 5]",0,0,0,"""Yes""",1,0,1,0,0,"""http://opil.ouplaw.com/home/EPIL""",115656
+"""http://bink.nu/news/new-microsoft-security-essentials-beta-now-public.aspx""",Field NA,1,0,-1,-1,"[89, 45]",0,0,-1,"""Yes""",0,0,1,0,0,Field NA,7588430
+"""http://snip.ly/6ne68""",Field NA,1,1,1,-1,"[83, 11]",0,0,-1,"""Yes""",1,0,1,0,1,Field NA,19843
+"""http://phish.net/discography#4""",Field NA,2,0,-1,0,"[76, 7]",0,0,0,"""Yes""",1,1,1,0,0,"""http://phish.net/albums/""",44444
+"""http://www.ccc-ltd.com/""",Field NA,3,0,0,0,"[68, 10]",0,0,0,"""Yes""",0,1,1,0,1,Field NA,9988430
+,,,,,,,,,,,,,,,,,
+domain,ads,imgratio,inlinks,pageloadtime,misspelled,hyperlinks,brokenlinks,responsive,lastmod,langcount,outlinks,alexa rank,wot,WEBCred Score,,,
+3,0,0,-1,0,0,-1,0,0,1,0,-1,3347,"[93, 63]",0.795536517,,,
+6,0,1,-1,0,0,0,0,0,1,0,-1,5934,"[93, 60]",-0.436319539,,,
+3,-1,0,0,0,0,0,0,0,1,0,-1,6649,"[79, 37]",0.759487849,,,
+3,0,-1,0,0,0,-1,0,0,1,0,0,154,"[92, 62]",0.533052894,,,
+3,0,-1,-1,0,0,0,1,0,1,0,0,848,"[93, 61]",1.00797524,,,
+3,0,-1,-1,0,0,0,1,0,1,0,0,115656,"[67, 5]",1.00797524,,,
+1,0,-1,-1,0,0,-1,0,0,1,0,0,7588430,"[89, 45]",0.759130858,,,
+1,1,1,-1,0,0,-1,1,0,1,0,1,19843,"[83, 11]",-0.465209998,,,
+2,0,-1,0,0,0,0,1,1,1,0,0,44444,"[76, 7]",1.728208867,,,
+3,0,0,0,0,0,0,0,1,1,0,1,9988430,"[68, 10]",1.495458495,,,

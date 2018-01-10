@@ -11,30 +11,30 @@
 
 							<td>
 								<input type="radio" onclick="checkGenre()"name="genre"
-								 id="g1" value="g1" > Genre1
+								 id="Shop" value="Shop" > Shop
 							</td>
 
 							<td>
 								<input type="radio" onclick="checkGenre()"name="genre"
-								 id="g2" value="g2" > Genre2
+								 id="Help/Discussion" value="Help/Discussion" > Help/Discussion
 							</td>
 
 							<td>
 								<input type="radio" onclick="checkGenre()"name="genre"
-								 id="g3" value="g3" > Genre3
+								 id="Portrayl-Individual" value="Portrayl-Individual" > Portrayl-Individual
 							</td>
 
 							<td>
 								<input type="radio" onclick="checkGenre()"name="genre"
-								 id="g4" value="g4" > Genre4
+								 id="Articles" value="Articles" > Articles
 							</td>
 
 							<td>
 								<br>
 								<input type="radio" onclick="checkGenre()"name="genre"
-								 id="other" value="" >
+								 id="other-genre" value="" >
 								 <input type='text' placeholder="Other Genre"
-									 name="other_genre"/>
+									 name="other-genre"/>
 							</td>
 
 						</tr>
@@ -240,29 +240,46 @@
 		function checkGenre(){
 			document.getElementById("tool").style.display = ""
 			var genre = {}
-			genre["g1"] = {'ads':"14.28", 'inlinks':"14.28", 'brokenlinks':"14.28",
-			'domain':"14.28", 'langcount':"14.28", 'responsive':"14.28", 'imgratio':"14.28"}
-			genre["g2"] = {'ads':"25", 'inlinks':"25",
-				'responsive':"25", 'imgratio':"25"}
-			genre["g3"] = {
-				'lastmod':"14.28", 'misspelled':"14.28", 'outlinks':"14.28",
-				'pageloadtime':"14.28", 'hyperlinks':"14.28", 'responsive':"14.28",
-				'imgratio':"14.28"}
-			genre["g4"] = {'ads':"10", 'inlinks':"10", 'brokenlinks':"10",
-			'domain':"10", 'langcount':"10", 'lastmod':"10", 'misspelled':"10",
-			'outlinks':"10", 'pageloadtime':"10", 'hyperlinks':"10",
-			}
-			genre["other"] = {
+			genre["Shop"] = {
+				'inlinks':"9.09", 'brokenlinks':"9.09", 'domain':"9.09",
+				'langcount':"9.09", 'lastmod':"9.09", 'misspelled':"9.09",
+				'outlinks':"9.09", 'pageloadtime':"9.09", 'hyperlinks':"9.09",
+				'responsive':"9.09", 'imgratio':"9.09"
+			};
+			genre["Help/Discussion"] = {
+				'ads':"14.285", 'inlinks':"14.285", 'domain':"14.285",'langcount':"14.285",
+				'lastmod':"14.285",'hyperlinks':"14.285", 'responsive':"14.285",
+			};
+			genre["Portrayl-Individual"] = {
+				'ads':"9.09", 'inlinks':"9.09", 'brokenlinks':"9.09", 'domain':"9.09",
+				'lastmod':"9.09", 'misspelled':"9.09",
+				'outlinks':"9.09", 'pageloadtime':"9.09", 'hyperlinks':"9.09",
+				'responsive':"9.09", 'imgratio':"9.09"
+			};
+			genre["Articles"] = {
 				'ads':"8.33", 'inlinks':"8.33", 'brokenlinks':"8.33", 'domain':"8.33",
 				'langcount':"8.33", 'lastmod':"8.33", 'misspelled':"8.33",
 				'outlinks':"8.33", 'pageloadtime':"8.33", 'hyperlinks':"8.33",
 				'responsive':"8.33", 'imgratio':"8.33"
 			};
+			genre["other-genre"] = {
+				'ads':"8.33", 'inlinks':"8.33", 'brokenlinks':"8.33", 'domain':"8.33",
+				'langcount':"8.33", 'lastmod':"8.33", 'misspelled':"8.33",
+				'outlinks':"8.33", 'pageloadtime':"8.33", 'hyperlinks':"8.33",
+				'responsive':"8.33", 'imgratio':"8.33"
+			};
+			// REVIEW negative number are not showing
+			// genre["other-genre"] = {
+			// 	'ads':"−24.0140441", 'inlinks':"−72.8650503", 'brokenlinks':"49.6275523", 'domain':"24.8023672",
+			// 	'langcount':"0.8516245", 'lastmod':"50.3201873", 'misspelled':"28.9997645",
+			// 	'outlinks':"47.4079554", 'pageloadtime':"−2.2339502", 'hyperlinks':"48.0862371",
+			// 	'responsive':"−0.6856424", 'imgratio':"−0.6922669"
+			// };
 
 			for(var key in genre){
 				if (document.getElementById(key).checked == true){
 					// debugger;
-					var dimension = genre['other'];
+					var dimension = genre['other-genre'];
 
 					// reset check and Weightage value
 					for(var param in dimension){

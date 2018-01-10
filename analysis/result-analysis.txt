@@ -1,0 +1,77 @@
+#analysis sample
+url	Alexa rank	domain	ads	imgratio	inlinks	wot	pageloadtime	misspelled	hyperlinks	cookie	brokenlinks	responsive	lastmod	langcount	outlinks	redirected
+"https://noscript.net/changelog"	15588	2	0	1	0	[94, 63]	0	0	0	"No"	0	0	1	0	0	Field NA
+"http://www.milincorporated.com/"	3032022	3	0	0	-1	[69, 7]	0	0	-1	"No"	1	0	0	0	0	Field NA
+"http://www.defcon-5.com/"	3303229	3	1	-1	0	[81, 10]	0	0	0	"No"	0	0	1	0	1	Field NA
+https://twitter.com/CTIN_Global/status/790670640642654208/photo/1	13	3	0	0	-1	"NA"	1	0	-1	"Yes"	0	0	1	1	0	Field NA
+"http://www.ncbi.nlm.nih.gov/pubmed/25204641"	137	6	0	0	-1	[94, 69]	0	0	0	"Yes"	0	1	1	0	0	"https://www.ncbi.nlm.nih.gov/pubmed/25204641"
+"http://www.cioforum.com/"	3356855	3	0	-1	-1	[59, 3]	0	0	0	"Yes"	1	0	1	0	0	Field NA
+"http://www.cc.gatech.edu/~wenke/project/id.html"	2757	4	1	1	-1	[63, 4]	-1	0	-1	"No"	1	0	0	0	1	"http://wenke.gtisc.gatech.edu/project/id.html"
+"http://safecurves.cr.yp.to/"	274595	1	0	1	-1	[94, 21]	0	0	-1	"No"	1	0	0	0	0	Field NA
+"http://howtodoinjava.com/spring/spring-aop/spring-aop-aspectj-example-tutorial-using-annotation-config/"	51137	3	0	0	-1	[86, 10]	0	0	-1	"Yes"	0	1	1	0	0	Field NA
+"http://adsabs.harvard.edu/abs/1970ApJ...159..379R"	872	4	0	0	-1	[93, 50]	1	0	0	"Yes"	0	0	0	0	0	Field NA
+"http://www.h-online.com/security/news/item/WhatsApp-no-longer-sends-plain-text-1674723.html"	880303	3	0	1	-1	[93, 55]	0	0	-1	"No"	0	0	1	0	0	Field NA
+"http://docs.saltstack.com/en/latest/"	147931	3	0	-1	-1	[63, 4]	0	0	0	"No"	0	0	0	1	0	"https://docs.saltstack.com/en/latest/"
+"http://www.bromba.com/faq/biofaqe.htm"	3885971	3	0	1	-1	[70, 6]	-1	0	0	"No"	0	0	0	0	0	Field NA
+"https://access.redhat.com/security/cve/"	3929	3	-1	0	0	[94, 53]	0	0	0	"Yes"	0	1	1	1	0	"https://access.redhat.com/security/security-updates/"
+"http://www.singularsecurity.com/"	Field NA	3	0	0	-1	[60, 3]	0	0	0	"Yes"	1	1	1	0	0	"https://www.singularsecurity.com/"
+"http://www.accessdata.fda.gov/scripts/cder/drugsatfda/index.cfm?fuseaction=Search.SearchAction&SearchTerm=Photofrin&SearchType=BasicSearch"	Field NA	6	0	1	-1	[93, 60]	0	0	0	"No"	0	0	1	0	-1	"https://www.accessdata.fda.gov/scripts/cder/daf/"
+"http://anti-virus-software-review.toptenreviews.com/"	Field NA	3	-1	0	0	[79, 37]	0	0	0	"Yes"	0	0	1	0	-1	"http://www.toptenreviews.com/software/security/best-antivirus-software/"
+"https://www.cnet.com/how-to/how-to-prepare-yourself-for-the-next-ddos-attack/"	Field NA	3	0	-1	0	[92, 62]	0	0	-1	"Yes"	0	0	1	0	0	Field NA
+
+		a	b	c	d	e	f	g	h	i	j	k	l	m	n
+
+
+# equation for weightages
+2a	+ 0b +1c+		1l =	1/15588
+3a+	-1d	-1h+	1j=	1/3032022
+3a+	1b	-1c+	1l + 1n =	1/3303229
+3a	-1d	+ 1f -1h+	1l+	1m + g=	1/13
+6a	-1d+	1k	+1l	+g=	1/137
+4a+	1b+	1c	-1d	-1f	-1h + 1j+	1n =	1/2757
+3a	-1d	-1h+ 	1k+	1l=	1/51137
+4a	-1d+	1f +g= 	1/872
+3a+	1c	-1d	-1h+	1l=	1/880303
+3a -1c	-1d+	1m =	1/147931
+3a+	1c	-1d	-1f=	1/3885971
+3a	-1b + 1k+	1l+	1m=	 1/3929
+
+#weightage value
+a = -0.067392
+b = -0.06525
+c = -0.001881
+d = -0.197986
+f = -0.00607
+g = 0.078797
+h = 0.130658
+j = 0.134846
+k = -0.001863
+l = 0.136728
+m = 0.002314
+n = 0.128815
+
+#calculation for alpha(proportinality constant for alexa rank and score,
+score = alpha/rank)
+
+3a 	-1c	-1d+	1j	+	1l = 	x*x/3356855
+a = -0.067392
+c = -0.001881
+d = -0.197986
+j = 0.134846
+l = 0.136728
+
+#alpha value
+alpha = 950.72791143155
+
+#validation sample
+url	Error	domain	ads	imgratio	inlinks	wot	pageloadtime	misspelled	hyperlinks	cookie	brokenlinks	responsive	lastmod	langcount	outlinks	redirected	alexa rank
+"http://www.zdnet.com/article/microsoft-beware-this-fake-windows-bsod-from-tech-support-scammers-malware/"	Field NA	3	0	0	-1	[93, 63]	0	0	-1	"Yes"	0	0	1	0	-1	Field NA	3347
+"http://www.accessdata.fda.gov/scripts/cder/drugsatfda/index.cfm?fuseaction=Search.SearchAction&SearchTerm=Photofrin&SearchType=BasicSearch"	Field NA	6	0	1	-1	[93, 60]	0	0	0	"No"	0	0	1	0	-1	"https://www.accessdata.fda.gov/scripts/cder/daf/"	5934
+"http://anti-virus-software-review.toptenreviews.com/"	Field NA	3	-1	0	0	[79, 37]	0	0	0	"Yes"	0	0	1	0	-1	"http://www.toptenreviews.com/software/security/best-antivirus-software/"	6649
+"https://www.cnet.com/how-to/how-to-prepare-yourself-for-the-next-ddos-attack/"	Field NA	3	0	-1	0	[92, 62]	0	0	-1	"Yes"	0	0	1	0	0	Field NA	154
+"http://www.cisco.com/c/en/us/td/docs/ios/sec_data_plane/configuration/guide/12_4/sec_data_plane_12_4_book.html"	Field NA	3	0	-1	-1	[93, 61]	0	0	0	"Yes"	1	0	1	0	0	"https://www.cisco.com/c/en/us/td/docs/ios/sec_data_plane/configuration/guide/12_4/sec_data_plane_12_4_book.html"	848
+"http://www.mpepil.com"	Field NA	3	0	-1	-1	[67, 5]	0	0	0	"Yes"	1	0	1	0	0	"http://opil.ouplaw.com/home/EPIL"	115656
+"http://bink.nu/news/new-microsoft-security-essentials-beta-now-public.aspx"	Field NA	1	0	-1	-1	[89, 45]	0	0	-1	"Yes"	0	0	1	0	0	Field NA	7588430
+"http://snip.ly/6ne68"	Field NA	1	1	1	-1	[83, 11]	0	0	-1	"Yes"	1	0	1	0	1	Field NA	19843
+"http://phish.net/discography#4"	Field NA	2	0	-1	0	[76, 7]	0	0	0	"Yes"	1	1	1	0	0	"http://phish.net/albums/"	44444
+"http://www.ccc-ltd.com/"	Field NA	3	0	0	0	[68, 10]	0	0	0	"Yes"	0	1	1	0	1	Field NA	9988430

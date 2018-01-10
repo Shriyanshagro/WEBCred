@@ -10,6 +10,8 @@ import time
 import statistics
 import requests
 import types
+from datetime import datetime as dt
+from pipeline import Pipeline
 
 global patternMatching
 patternMatching = None
@@ -18,6 +20,28 @@ patternMatching = None
 # normalizedData[dimension_name].getscore(dimension_value) gives normalized_value
 global normalizedData
 normalizedData = None
+
+global lastmodMaxMonths
+lastmodMaxMonths = 93
+
+# define rules to normalize data
+global normalizeCategory
+normalizeCategory = {
+    '3':{
+     'outlinks': 'reverse', 'inlinks': 'linear',
+     'ads':'reverse',
+     'brokenlinks': 'reverse', 'pageloadtime': 'reverse',
+     'imgratio': 'linear'
+     },
+    '2':{'misspelled': {0:1, 'else':0}, 'cookie': {'Yes':0, 'No':1},
+     'responsive': {'true':1, 'false':0}, 'langcount':
+     {1:0, 'else':1},'domain' :{'gov':6, 'org':5, 'edu':4,
+        'com':3, 'net':2, 'else':1},
+        "lastmod" : {lastmodMaxMonths: 1, 'else': 0,},
+     },
+    'misc': {'hyperlinks':"linear"},
+    'eval':['wot']
+ }
 
 # A class to catch error and exceptions
 class WebcredError(Exception):
@@ -138,8 +162,9 @@ class Normalize(object):
             NumberTypes = (types.IntType, types.LongType, types.FloatType, types.ComplexType)
             for element in self.data:
                 if element.get(self.name) and isinstance(element[self.name], NumberTypes):
-                    if isinstance(element[self.name], float):
-                        element[self.name] = int(element[self.name]*1000000)
+                    # # done for decimal values like 0.23
+                    # if isinstance(element[self.name], float):
+                    #     element[self.name] = int(element[self.name]*1000000)
                     dataList.append(element[self.name])
             self.dataList = dataList
 
@@ -161,8 +186,8 @@ class Normalize(object):
             return self.getscore(value)
 
         # case when dimension value throws error
-        # REVIEW
-        return -1
+        # 0 because it  neither add nor reduces credibility
+        return 0
 
     def getdata(self):
         return self.data
@@ -202,29 +227,59 @@ class Normalize(object):
 
     def getfactoise(self, value):
         modified = 0
-        for k,v in self.factorise.items():
-            if str(value) == str(k):
-                return v
-        if not modified:
-            if 'else' in self.factorise.keys():
-                return self.factorise.get('else')
+        global lastmodMaxMonths
 
+        # condition for lastmod
+        if self.name=="lastmod":
+            value = self.getDateDifference(value)
+            if value<lastmodMaxMonths:
+                return self.factorise.get(lastmodMaxMonths)
+
+        # condition for everthing else
+        else:
+            for k,v in self.factorise.items():
+                if str(value) == str(k):
+                    return v
+        if 'else' in self.factorise.keys():
+            return self.factorise.get('else')
+
+    # return dayDiffernce form now and value
+    def getDateDifference(self, value):
+        try:
+            # strptime  = string parse time
+            # strftime = string format time
+            lastmod = dt.strptime(value, '%Y-%m-%dT%H:%M:%S')
+            dayDiffernce = (dt.now() - lastmod).days
+            return dayDiffernce
+        except:
+            # in case of ValueError, lastmod will sum to WEBcred Score
+            return 1000000
 
     def factoise(self):
         if not self.factorise:
             raise WebcredError('Provide attr to factorise')
-
+        global lastmodMaxMonths
 
         for index in range(len(self.data)):
             if self.data[index].get(self.name):
                 modified = 0
-                for k,v in self.factorise.items():
+
+                # condition for lastmod
+                if self.name=="lastmod":
                     value = self.data[index][self.name]
-                    if str(value) == str(k):
-                        self.data[index][self.name] = v
+                    value = self.getDateDifference(value)
+                    if value<lastmodMaxMonths:
+                        self.data[index][self.name] = self.factorise.get(
+                            lastmodMaxMonths)
                         modified = 1
-                    # if value==0 and self.name == 'misspelled':
-                    #     pdb.set_trace()
+
+                # condition for everthing else
+                else:
+                    for k,v in self.factorise.items():
+                        value = self.data[index][self.name]
+                        if str(value) == str(k):
+                            self.data[index][self.name] = v
+                            modified = 1
                 if not modified:
                     if 'else' in self.factorise.keys():
                         self.data[index][self.name] = self.factorise.get('else')
@@ -240,6 +295,7 @@ class Urlattributes(object):
             print 'end patternMatching'
 
         global normalizedData
+        global normalizeCategory
         if not normalizedData:
             normalizedData = {}
             # read existing data
@@ -253,11 +309,11 @@ class Urlattributes(object):
             re_data = open(re_data, 'r').read()
             re_data = re_data.split('\n')
 
+            # list with string/buffer as values
             file_= list(set(new_data + old_data + re_data))
 
             # final json_List of data
             data = []
-
             for element in file_[:-1]:
                 try:
                     metadata = json.loads(str(element))
@@ -274,29 +330,11 @@ class Urlattributes(object):
                     continue
                 data.append(metadata)
 
-            normalizeCategory = {
-                '3':{
-                 'outlinks': 'reverse', 'inlinks': 'linear',
-                 'ads':'reverse',
-                 'brokenlinks': 'reverse', 'pageloadtime': 'reverse',
-                 'imgratio': 'linear', 'langcount': 'linear'
-                 },
-                '2':{'misspelled': {0:1, 'else':0}, 'cookie': {'Yes':0, 'No':1},
-                 'responsive': {'true':1, 'false':0},},
-                'not_sure': ['domain', 'lastmod'],
-                'misc': {'hyperlinks':"linear"},
-                'eval':['wot']
-             }
-
-            print 'normalize 3'
-
             it = normalizeCategory['3'].items()
             for k in it:
                 normalizedData[k[0]] = Normalize(data, k)
-                normalizedData[k[0]].normalize()
+                data = normalizedData[k[0]].normalize()
 
-            print 'normalize misc'
-            # it = ('hyperlinks', 'linear')
             it = normalizeCategory['misc'].items()[0]
             # summation of hyperlinks_attribute values
             for index in range(len(data)):
@@ -315,10 +353,18 @@ class Urlattributes(object):
             normalizedData[it[0]] = Normalize(data, it)
             data = normalizedData[it[0]].normalize()
 
-            print 'normalize 2'
             for k in normalizeCategory['2'].items():
+                print "normalizing", k
                 normalizedData[k[0]] = Normalize(data, k)
-                normalizedData[k[0]].factoise()
+                data = normalizedData[k[0]].factoise()
+
+            # csv_filename = 'WebcredNormalized.csv'
+            #
+            # pipe = Pipeline()
+            # csv = pipe.convertjson(data)
+            # f = open(csv_filename,'w')
+            # f.write(csv)
+            # f.close()
 
     except WebcredError as e:
         raise WebcredError(e.message)
@@ -578,7 +624,8 @@ class Webcred(object):
                 # to show wot ranking
                 req['args']['wot'] = "true"
 
-                data['url'] =  req['args']['site']
+                data['Url'] =  req['args']['site']
+                data['Genre'] =  str(request.get('genre')[0])
                 site = Urlattributes(url=req['args'].get('site', None))
 
                 if data['url'] != site.geturl():
@@ -640,34 +687,24 @@ class Webcred(object):
 
     def webcredScore(self, data, percentage):
         global normalizedData
-        normalizeCategory = {
-            '3':[
-             'outlinks', 'inlinks',
-             'ads', 'brokenlinks', 'pageloadtime',
-             'imgratio', 'langcount',
-             ],
-            '2':['misspelled', 'cookie',
-             'responsive'],
-            'not_sure': ['domain', 'lastmod'],
-            'misc': ['hyperlinks',],
-            'eval':['wot']
-         }
+        global normalizeCategory
 
+        # score varies from -1 to 1
         score = 0
         for k,v in data.items():
 
             try:
-                if k in normalizeCategory['3']:
+                if k in normalizeCategory['3'].keys():
                     name = k + "Norm"
                     data[name] = normalizedData[k].getnormalizedScore(v)
                     score += data[name]*float(percentage[k])
 
-                if k in normalizeCategory['2']:
+                if k in normalizeCategory['2'].keys():
                     name = k + "Norm"
                     data[name] = normalizedData[k].getfactoise(v)
                     score += data[name]*float(percentage[k])
 
-                if k in normalizeCategory['misc']:
+                if k in normalizeCategory['misc'].keys():
                     sum_hyperlinks_attributes = 0
                     try:
                         for key,value in v.items():
@@ -681,8 +718,9 @@ class Webcred(object):
             except:
                 import pdb; pdb.set_trace()
 
-        data["WEBCred Score"] = score
+        data["WEBCred Score"] = score/100
 
+        # REVIEW add Weightage score for new dimensions
         return data
 
 
