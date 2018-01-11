@@ -33,10 +33,10 @@ normalizeCategory = {
      'brokenlinks': 'reverse', 'pageloadtime': 'reverse',
      'imgratio': 'linear'
      },
-    '2':{'misspelled': {0:1, 'else':0}, 'cookie': {'Yes':0, 'No':1},
+    '2':{'misspelled': {0:1, 'else':0},
      'responsive': {'true':1, 'false':0}, 'langcount':
-     {1:0, 'else':1},'domain' :{'gov':6, 'org':5, 'edu':4,
-        'com':3, 'net':2, 'else':1},
+     {1:0, 'else':1}, 'domain' :{'gov':1, 'org':0, 'edu':1,
+        'com':0, 'net':0, 'else':-1},
         "lastmod" : {lastmodMaxMonths: 1, 'else': 0,},
      },
     'misc': {'hyperlinks':"linear"},
@@ -358,7 +358,7 @@ class Urlattributes(object):
                 normalizedData[k[0]] = Normalize(data, k)
                 data = normalizedData[k[0]].factoise()
 
-            # csv_filename = 'WebcredNormalized.csv'
+            # csv_filename = 'analysis/WebcredNormalized.csv'
             #
             # pipe = Pipeline()
             # csv = pipe.convertjson(data)
@@ -716,7 +716,7 @@ class Webcred(object):
                         # TimeOut error clause
                         pass
             except:
-                import pdb; pdb.set_trace()
+                pass
 
         data["WEBCred Score"] = score/100
 

@@ -2,10 +2,12 @@
 {% block body %}
 	<form action="start" method=get class=add-entry onsubmit="return validateForm()">
 	      <dl>
-					<dd>URL:<input type=url name=site size="50">
+					<dd>URL:<input type=url name=site size="70" placeholder="Input Url">
+
+					<p>Select Applicable Genre:</p>
 
 					<!-- select genre id	<tab -->
-					<table cellpadding="5px" >
+					<table >
 
 						<tr>
 
@@ -41,6 +43,7 @@
 
 					</table>
 
+					<hr>
 					<div id="tool" style="display:none">
 
 						<!-- select dimension -->
@@ -50,7 +53,7 @@
 
 								<td>
 									<input type="checkbox" name="ads" id="ads" value="true" >
-									 Less Ads
+									 Advertisement
 									<br>
 									<input type="number" step="any" min="0" max="100" \
 										name="adsPerc" id="adsPerc" value="0">
@@ -58,7 +61,7 @@
 
 								<td>
 									<input type="checkbox" name="brokenlinks" id="brokenlinks"
-									value="true" > Less BrokenLinks
+									value="true" > Broken Links
 									<br>
 									<input type="number" step="any" min="0" max="100" \
 										name="brokenlinksPerc" id="brokenlinksPerc" value="0">
@@ -66,7 +69,7 @@
 
 								<td>
 									<input type="checkbox" name="langcount" id="langcount"
-									value="true" > Multi Lingual
+									value="true" > Internationalization
 									<br>
 									<input type="number" step="any" min="0" max="100" \
 										name="langcountPerc" id="langcountPerc" value="0">
@@ -97,14 +100,14 @@
 								</td>
 
 								<td>
-									<input type="checkbox" name="inlinks" id="inlinks" value="true" > More Inlinks
+									<input type="checkbox" name="inlinks" id="inlinks" value="true" > Inlinks
 									<br>
 									<input type="number" step="any" min="0" max="100" \
 										name="inlinksPerc" id="inlinksPerc" value="0">
 								</td>
 
 								<td>
-									<input type="checkbox" name="lastmod" id="lastmod" value="true" > Lastmodified
+									<input type="checkbox" name="lastmod" id="lastmod" value="true" > Modified Date Time
 									<br>
 									<input type="number" step="any" min="0" max="100" \
 										name="lastmodPerc" id="lastmodPerc" value="0">
@@ -122,14 +125,14 @@
 								</td>
 
 								<td>
-									<input type="checkbox" name="outlinks" id="outlinks" value="true" >  Less Outlinks
+									<input type="checkbox" name="outlinks" id="outlinks" value="true" >  Outlinks
 									<br>
 									<input type="number" step="any" min="0" max="100" \
 										name="outlinksPerc" id="outlinksPerc" value="0">
 								</td>
 
 								<td>
-									<input type="checkbox" name="misspelled" id="misspelled" value="true" > Less Misspell
+									<input type="checkbox" name="misspelled" id="misspelled" value="true" > Misspell
 									<br>
 									<input type="number" step="any" min="0" max="100" \
 										name="misspelledPerc" id="misspelledPerc" value="0">
@@ -154,7 +157,7 @@
 								</td>
 
 								<td>
-									<input type="checkbox" name="pageloadtime" id="pageloadtime" value="true" > Pageloadtime
+									<input type="checkbox" name="pageloadtime" id="pageloadtime" value="true" > Page Load Time
 									<br>
 									<input type="number" step="any" min="0" max="100" \
 										name="pageloadtimePerc" id="pageloadtimePerc" value="0">
@@ -183,6 +186,7 @@
 
 						</table>
 
+						<hr>
 						<!-- google Captcha -->
 						<div class="g-recaptcha" data-sitekey=
 							"6LcsiCoUAAAAAM4y5pKsPEGfBasVYdkB0PvgpllL"></div>

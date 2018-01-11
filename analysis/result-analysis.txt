@@ -1,3 +1,4 @@
+[validation one]
 #analysis sample
 url	Alexa rank	domain	ads	imgratio	inlinks	wot	pageloadtime	misspelled	hyperlinks	cookie	brokenlinks	responsive	lastmod	langcount	outlinks	redirected
 "https://noscript.net/changelog"	15588	2	0	1	0	[94, 63]	0	0	0	"No"	0	0	1	0	0	Field NA
@@ -20,7 +21,6 @@ https://twitter.com/CTIN_Global/status/790670640642654208/photo/1	13	3	0	0	-1	"N
 "https://www.cnet.com/how-to/how-to-prepare-yourself-for-the-next-ddos-attack/"	Field NA	3	0	-1	0	[92, 62]	0	0	-1	"Yes"	0	0	1	0	0	Field NA
 
 		a	b	c	d	e	f	g	h	i	j	k	l	m	n
-
 
 # equation for weightages
 2a	+ 0b +1c+		1l =	1/15588
@@ -75,3 +75,34 @@ url	Error	domain	ads	imgratio	inlinks	wot	pageloadtime	misspelled	hyperlinks	coo
 "http://snip.ly/6ne68"	Field NA	1	1	1	-1	[83, 11]	0	0	-1	"Yes"	1	0	1	0	1	Field NA	19843
 "http://phish.net/discography#4"	Field NA	2	0	-1	0	[76, 7]	0	0	0	"Yes"	1	1	1	0	0	"http://phish.net/albums/"	44444
 "http://www.ccc-ltd.com/"	Field NA	3	0	0	0	[68, 10]	0	0	0	"Yes"	0	1	1	0	1	Field NA	9988430
+
+
+[validation 2]
+after normalizing gtld to [-1, 0, 1]
+
+# equation for weightages
+0b +1c+		1l =	1/15588
+	-1d	-1h+	1j=	1/3032022
+	1b	-1c+	1l + 1n =	1/3303229
+	-1d	+ 1f -1h+	1l+	1m + g=	1/13
+a	-1d+	1k	+1l	+g=	1/137
+a+	1b+	1c	-1d	-1f	-1h + 1j+	1n =	1/2757
+	-1d	-1h+ 	1k+	1l=	1/51137
+a	-1d+	1f +g= 	1/872
+	1c	-1d	-1h+	1l=	1/880303
+ -1c	-1d+	1m =	1/147931
+	1c	-1d	-1f=	1/3885971
+	-1b + 1k+	1l+	1m=	 1/3929
+
+a = -0.040435
+b = 0.029099
+c = 0.011597
+d = 0.017667
+f = -0.00607
+g = 0.065318
+h = -0.017604
+j = 6.3E-5
+k = 0.011616
+l = -0.011533
+m = 0.029271
+n = -0.005968
