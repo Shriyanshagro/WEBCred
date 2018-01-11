@@ -15,3 +15,50 @@ h2              { font-size: 1.2em; }
 .flash          { background: #cee5F5; padding: 0.5em;
                   border: 1px solid #aacbe2; }
 .error          { background: #f0d6d6; padding: 0.5em; }
+.header img  {
+  float: left;
+  width: 7%;
+  height: 7%;
+  /*display:  inline-block;*/
+  /*background: #555;*/
+}
+
+.header page {
+  /*display: inline;*/
+  position: relative;
+}
+.tooltip {
+    position: relative;
+    display: inline-block;
+    border-bottom: 0px dotted black;
+}
+
+.tooltip .tooltiptext {
+    visibility: hidden;
+    width: 120px;
+    background-color: grey;
+    color: #fff;
+    text-align: center;
+    border-radius: 0px;
+    padding: 0px 0;
+
+    /* Position the tooltip */
+    width: 120px;
+        top: 500%;
+        left: 50%;
+      margin-left: -60px; /* Use half of the width (120/2 = 60), to center the tooltip */}
+
+.tooltip:hover .tooltiptext {
+    visibility: visible;
+}
+
+.tooltip .tooltiptext::after {
+    content: " ";
+    position: absolute;
+    top: 0%; /* At the bottom of the tooltip */
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: black transparent transparent transparent;
+}

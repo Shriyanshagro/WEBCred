@@ -12,27 +12,40 @@
 						<tr>
 
 							<td>
-								<input type="radio" onclick="checkGenre()"name="genre"
-								 id="Shop" value="Shop" > Shop
+								<div class="tooltip">
+									<input type="radio" onclick="checkGenre()"name="genre"
+									 id="Shop" value="Shop" class="tooltip"> Shop
+									 <span class="tooltiptext">Product Informaation, shopping</span>
+							 </div>
 							</td>
 
 							<td>
-								<input type="radio" onclick="checkGenre()"name="genre"
-								 id="Help/Discussion" value="Help/Discussion" > Help
+								<div class="tooltip">
+									<input type="radio" onclick="checkGenre()"name="genre"
+									id="Help/Discussion" value="Help/Discussion" > Help
+									 <span class="tooltiptext">QA Forum, FAQs</span>
+							 </div>
+
 							</td>
 
 							<td>
-								<input type="radio" onclick="checkGenre()"name="genre"
-								 id="Portrayl-Individual" value="Portrayl-Individual" > Portrayl-Individual
+								<div class="tooltip">
+									<input type="radio" onclick="checkGenre()"name="genre"
+									id="Portrayl-Individual" value="Portrayl-Individual" > Portrayl-Individual
+									 <span class="tooltiptext">Companies,Universities, Government, Brochures</span>
+							 </div>
 							</td>
 
 							<td>
-								<input type="radio" onclick="checkGenre()"name="genre"
-								 id="Articles" value="Articles" > Articles
+								<div class="tooltip">
+									<input type="radio" onclick="checkGenre()"name="genre"
+									id="Articles" value="Articles" > Articles
+									 <span class="tooltiptext">Research, Newspaper, Reports</span>
+							 </div>
 							</td>
 
 							<td>
-								
+
 								<input type="radio" onclick="checkGenre()"name="genre"
 								 id="other-genre" value="other" >
 								 <input type='text' placeholder="Other Genre"
@@ -52,24 +65,41 @@
 							<tr>
 
 								<td>
-									<input type="checkbox" name="ads" id="ads" value="true" >
-									 Advertisement
+									<div class="tooltip">
+										<input type="checkbox" name="ads" id="ads" value="true" >
+										Advertisement
+										 <!-- <span class="tooltiptext">Banner advertisements reduce
+credibility of a webpage’s content especially when the
+advertising is unexpected.</span> -->
+								 </div>
 									<br>
 									<input type="number" step="any" min="0" max="100" \
 										name="adsPerc" id="adsPerc" value="0">
 								</td>
 
 								<td>
-									<input type="checkbox" name="brokenlinks" id="brokenlinks"
-									value="true" > Broken Links
+									<div class="tooltip">
+										<input type="checkbox" name="brokenlinks" id="brokenlinks"
+										value="true" > Broken Links
+										 <!-- <span class="tooltiptext">Linking webpages through hyperlinks
+is a fundamental feature to reuse existing content and
+cite other source of information. If the hyperlink is
+broken or not accessible (HTTP status code in 400
+and 500) it impacts the credibility of authority.</span> -->
+								 </div>
 									<br>
 									<input type="number" step="any" min="0" max="100" \
 										name="brokenlinksPerc" id="brokenlinksPerc" value="0">
 								</td>
 
 								<td>
-									<input type="checkbox" name="langcount" id="langcount"
-									value="true" > Internationalization
+									<div class="tooltip">
+										<input type="checkbox" name="langcount" id="langcount"
+										value="true" > Internationalization
+										 <!-- <span class="tooltiptext">With increasing spread of
+internet, a multilingual website opens an opportunity to wider range of
+audience across the globe.</span> -->
+								 </div>
 									<br>
 									<input type="number" step="any" min="0" max="100" \
 										name="langcountPerc" id="langcountPerc" value="0">
@@ -93,21 +123,41 @@
 							<tr>
 
 								<td>
-									<input type="checkbox" name="domain" id="domain" value="true" > Internet Domain
+									<div class="tooltip">
+										<input type="checkbox" name="domain" id="domain" value="true" > Internet Domain
+ 									 	<!-- <span class="tooltiptext">The gTLD
+of a webpage suggest that the page belongs to a set of
+trusted webpages. Our study ascertains that some
+domain types are more trustworthy as compared to
+others, e.g, a .gov domain type suggests that its
+content is approved by a governmental institution
+while a .com domain type suggests it belong to a
+commercial organization.</span> -->
+								 </div>
 									<br>
 									<input type="number" step="any" min="0" max="100" \
 										name="domainPerc" id="domainPerc" value="0">
 								</td>
 
 								<td>
-									<input type="checkbox" name="inlinks" id="inlinks" value="true" > Inlinks
+									<div class="tooltip">
+										<input type="checkbox" name="inlinks" id="inlinks" value="true" > Inlinks
+										 <!-- <span class="tooltiptext">The number of out-of-domain links
+pointing to a webpage has been the most preferred
+ranking method of the website since the pageRank
+algorithm</span> -->
+								 	</div>
 									<br>
 									<input type="number" step="any" min="0" max="100" \
 										name="inlinksPerc" id="inlinksPerc" value="0">
 								</td>
 
 								<td>
-									<input type="checkbox" name="lastmod" id="lastmod" value="true" > Modified Date Time
+									<div class="tooltip">
+										<input type="checkbox" name="lastmod" id="lastmod" value="true" > Modified Date Time
+									 	<!-- <span class="tooltiptext">Many webpages do not list the
+last date and time they updated, modified, or changed.</span> -->
+	 							 	</div>
 									<br>
 									<input type="number" step="any" min="0" max="100" \
 										name="lastmodPerc" id="lastmodPerc" value="0">
@@ -118,21 +168,38 @@
 							<tr>
 
 								<td>
-									<input type="checkbox" name="hyperlinks" id="hyperlinks" value="true" > Real World Presence
+									<div class="tooltip">
+										<input type="checkbox" name="hyperlinks" id="hyperlinks" value="true" > Real World Presence
+ 									 	<!-- <span class="tooltiptext">The realworld presence
+(Contact address, Telephone number, Email, Social
+Media presence) increases the credibility.</span> -->
+								 </div>
 									<br>
 									<input type="number" step="any" min="0" max="100" \
 										name="hyperlinksPerc" id="hyperlinksPerc" value="0">
 								</td>
 
 								<td>
-									<input type="checkbox" name="outlinks" id="outlinks" value="true" >  Outlinks
+									<div class="tooltip">
+										<input type="checkbox" name="outlinks" id="outlinks" value="true" >  Outlinks
+										<!-- <span class="tooltiptext">On the otherhand, too many outlinks
+(out-of-domain) on a page indicates that the site
+doesn’t have it’s own actual content and the users
+have to assess other web pages for credible
+information.</span> -->
+								 </div>
 									<br>
 									<input type="number" step="any" min="0" max="100" \
 										name="outlinksPerc" id="outlinksPerc" value="0">
 								</td>
 
 								<td>
-									<input type="checkbox" name="misspelled" id="misspelled" value="true" > Misspell
+									<div class="tooltip">
+										<input type="checkbox" name="misspelled" id="misspelled" value="true" > Misspell
+										 <!-- <span class="tooltiptext">Spell errors in a webpage is an indicator
+on lack of professionalism leading to a negative impact
+on credibility.</span> -->
+								 </div>
 									<br>
 									<input type="number" step="any" min="0" max="100" \
 										name="misspelledPerc" id="misspelledPerc" value="0">
@@ -143,21 +210,47 @@
 							<tr>
 
 								<td>
-									<input type="checkbox" name="imgratio" id="imgratio" value="true" > Text to Image Ratio
+									<div class="tooltip">
+ 										<input type="checkbox" name="imgratio" id="imgratio" value="true" > Text to Image Ratio
+										 <!-- <span class="tooltiptext">The ratio of text (post HTML
+tag removal) to the overall size of the webpage
+indicates the ability to build knowledge base.
+However, exceptions in some cases like, sites that
+belong to shopping contain images predominantly
+unlike other</span> -->
+								 </div>
 									<br>
 									<input type="number" step="any" min="0" max="100" \
 										name="imgratioPerc" id="imgratioPerc" value="0">
 								</td>
 
 								<td>
-									<input type="checkbox" name="responsive" id="responsive" value="true" > Responsive Design
+									<div class="tooltip">
+										<input type="checkbox" name="responsive" id="responsive" value="true" > Responsive Design
+ 									 	<!-- <span class="tooltiptext">Responsive web design is the
+automatic alteration of a webpage’s layout based on
+the screen resolution of device being used to view it.
+With mobile internet growing faster than desktop
+based internet usage, the necessity of web site to be
+navigable and functional over a range of devices is
+high.</span> -->
+								 </div>
 									<br>
 									<input type="number" step="any" min="0" max="100" \
 										name="responsivePerc" id="responsivePerc" value="0">
 								</td>
 
 								<td>
-									<input type="checkbox" name="pageloadtime" id="pageloadtime" value="true" > Page Load Time
+									<div class="tooltip">
+										<input type="checkbox" name="pageloadtime" id="pageloadtime" value="true" > Page Load Time
+									 	<!-- <span class="tooltiptext">With
+improved
+internet
+bandwidth, a recent survey states that users
+expectation on pageload is around 2 seconds. The
+pageload is an aesthetic and surface feature for
+improving credibility of a webpage.</span> -->
+									</div>
 									<br>
 									<input type="number" step="any" min="0" max="100" \
 										name="pageloadtimePerc" id="pageloadtimePerc" value="0">
