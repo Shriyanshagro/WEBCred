@@ -1,7 +1,6 @@
 import urllib2
 from urlparse import urlparse
 from bs4 import BeautifulSoup, SoupStrainer
-import pdb
 import validators
 import re
 import threading
@@ -63,12 +62,10 @@ class PatternMatching(object):
                 iso = open(lang_iso, "r")
                 self.isoList = iso.read().split()
                 isoList = []
-                # pdb.set_trace()
                 for code in self.isoList:
                     # isoList.pop(iso)
                     isoList.append(str('='+code))
                     isoList.append(str('="'+code+'"'))
-                # pdb.set_trace()
                 self.isoList = isoList
                 self.isoPattern = self.regexCompile(self.isoList)
                 iso.close()
@@ -113,7 +110,6 @@ class PatternMatching(object):
         for element in data:
             temp = re.compile(re.escape(element), re.X)
             pattern.append(temp)
-        # pdb.set_trace()
         return pattern
 
     def regexMatch(self, pattern=None, data=None):
@@ -169,7 +165,6 @@ class Normalize(object):
             self.dataList = dataList
 
         # print self.dataList
-        # pdb.set_trace()
         return self.dataList
 
     def normalize(self):
@@ -288,7 +283,6 @@ class Normalize(object):
 # A class to use extract url attributes
 class Urlattributes(object):
     try:
-        # pdb.set_trace()
         # TODO fetch ads list dynamically from org
         if not patternMatching:
             patternMatching = PatternMatching(lang_iso='lang_iso.txt', ads_list='ads.txt' )
@@ -320,7 +314,7 @@ class Urlattributes(object):
                     # if metadata.get('redirected'):
                     #     url = metadata['redirected']
                     # else:
-                    #     url = metadata['url']
+                    #     url = metadata['Url']
                     # obj = utils.Domain(url)
                     # url = obj.getnetloc()
                     # metadata['domain_similarity'] = scorefile_data.get(url)
@@ -371,7 +365,6 @@ class Urlattributes(object):
 
     def __init__(self, url=None):
         # print 'here'
-        # pdb.set_trace()
         if patternMatching:
             self.patternMatching = patternMatching
 
@@ -418,7 +411,6 @@ class Urlattributes(object):
         return self.requests
 
     def geturllibreq(self):
-        # pdb.set_trace()
         # with self.lock:
         if not self.urllibreq:
             try:
@@ -438,7 +430,6 @@ class Urlattributes(object):
     def gettext(self):
         if not self.text:
             try:
-                # pdb.set_trace()
                 self.text = self.getrequests().read()
             except WebcredError as e:
                 raise WebcredError(e.message)
@@ -451,7 +442,6 @@ class Urlattributes(object):
         return self.text
 
     def getsoup(self):
-        # pdb.set_trace()
         # with self.lock:
         # if not self.soup:
         data = self.gettext()
@@ -492,12 +482,10 @@ class Urlattributes(object):
 
     def getsize(self):
         if not self.size:
-            # pdb.set_  trace()
             t = self.gettext()
             try:
                 self.size = len(t)
             except:
-                # pdb.set_trace()
                 raise WebcredError('error in retrieving length')
         return self.size
 
@@ -532,7 +520,6 @@ class MyThread(threading.Thread):
         else:
             self.args = None
 
-        # pdb.set_trace()
 
     def run(self):
         try:
@@ -540,17 +527,14 @@ class MyThread(threading.Thread):
             if self.args:
                 self.result = self.func(self.url, self.args)
             else:
-                # pdb.set_trace()
                 self.result = self.func(self.url)
             # print 'Got {}'.format(self.name)
         except WebcredError as e:
             self.result = e.message
         except:
-            # pdb.set_trace()
             # if self.args:
             #     self.result = self.func(self.url, self.args)
             # else:
-            #     # pdb.set_trace()
             #     self.result = self.func(self.url)
             self.result = '+++'
 
@@ -623,12 +607,16 @@ class Webcred(object):
 
                 # to show wot ranking
                 req['args']['wot'] = "true"
-
                 data['Url'] =  req['args']['site']
-                data['Genre'] =  str(request.get('genre')[0])
+
+                if str(request.get('genre')[0])=='other':
+                    data['Genre'] =  str(request.get('other-genre')[0])
+                else:
+                    data['Genre'] =  str(request.get('genre')[0])
+
                 site = Urlattributes(url=req['args'].get('site', None))
 
-                if data['url'] != site.geturl():
+                if data['Url'] != site.geturl():
                     data['redirected'] = site.geturl()
 
                 # site is not a WEBCred parameter
@@ -688,7 +676,6 @@ class Webcred(object):
     def webcredScore(self, data, percentage):
         global normalizedData
         global normalizeCategory
-
         # score varies from -1 to 1
         score = 0
         for k,v in data.items():
@@ -717,7 +704,6 @@ class Webcred(object):
                         pass
             except:
                 pass
-
         data["WEBCred Score"] = score/100
 
         # REVIEW add Weightage score for new dimensions
