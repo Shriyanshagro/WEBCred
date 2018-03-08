@@ -39,6 +39,7 @@ def getFeatureValue(sampleSet, FeaturesName):
     # get feature Values out of dict
     featurevalue = []
     alexaScore = []
+    wotScore = []
     for i in range(len(sampleSet)):
         temp = []
         for j in FeaturesName:
@@ -49,7 +50,8 @@ def getFeatureValue(sampleSet, FeaturesName):
         # appending alexa score of each sample
         # 1000 is acting as a proportinality constant
         alexaScore.append("{:.15f}".format(1000/float(sampleSet[i].get('alexaRank'))))
-    return featurevalue, alexaScore
+        wotScore.append(sampleSet[i].get('wot'))
+    return featurevalue, alexaScore, wotScore
 
 import numpy as np
 
@@ -140,7 +142,7 @@ def calculateWeightage():
         # select sample sets
         while True:
             sample = getjsonData()
-            featurevalue, alexaScore  = getFeatureValue([sample], FeaturesName)
+            featurevalue, alexaScore, wotScore  = getFeatureValue([sample], FeaturesName)
             if checksimiliarData(featurevalue[0]):
                 Featureset.append(featurevalue[0])
                 alexaScoreSet.append(alexaScore)
@@ -177,7 +179,7 @@ if __name__ == "__main__":
 
     print '''
     w == calculateWeightage
-    s = similarity with Alexa
+    s = similarity with Alexa and WOT
     c = check corelation between features
     '''
     action = raw_input("what action would you like to perform?")
@@ -192,6 +194,7 @@ if __name__ == "__main__":
         global Featureset
         Featureset = []
         alexaScoreSet = []
+        wotScoreSet = []
         csv_filename = "WebcredNormalized.csv"
 
         f = open(csv_filename, 'r')
@@ -209,10 +212,11 @@ if __name__ == "__main__":
             tried += 1
             try:
                 sample = getjsonData()
-                featurevalue, alexaScore  = getFeatureValue([sample], FeaturesName)
+                featurevalue, alexaScore, wotScore  = getFeatureValue([sample], FeaturesName)
                 if checksimiliarData(featurevalue[0]):
                         Featureset.append(featurevalue[0])
                         alexaScoreSet.append(alexaScore)
+                        wotScoreSet.append(wotScore)
                         count += 1
                         print count
             except:
@@ -220,15 +224,10 @@ if __name__ == "__main__":
                     cPickle.dump(Featureset, output_file)
 
                 with open(r"alexaScoreSet.pickle", "wb") as output_score:
-                    cPickle.dump(alexaScore, output_score)
+                    cPickle.dump(alexaScoreSet, output_score)
 
-                # with open(r"Featureset.pickle", "rb") as input_file:
-                #     e = cPickle.load(input_file)
-                #     print e
-                #     print len(e)
-
-                # import pdb; pdb.set_trace()
-
+                with open(r"wotScoreSet.pickle", "wb") as output_score:
+                    cPickle.dump(wotScoreSet, output_score)
 
             if tried == totalSample:
 
@@ -236,7 +235,10 @@ if __name__ == "__main__":
                     cPickle.dump(Featureset, output_file)
 
                 with open(r"alexaScoreSet.pickle", "w") as output_score:
-                    cPickle.dump(alexaScore, output_score)
+                    cPickle.dump(alexaScoreSet, output_score)
+
+                with open(r"wotScoreSet.pickle", "w") as output_score:
+                    cPickle.dump(wotScoreSet, output_score)
 
                 with open(r"Featureset.pickle", "rb") as input_file:
                     e = cPickle.load(input_file)
@@ -252,14 +254,21 @@ if __name__ == "__main__":
         import pdb; pdb.set_trace()
         features = np.array(Featureset)
         alexa = np.array(alexaScoreSet, dtype='float')
+        # wot = np.array(wotScoreSet, dtype='float')
         weightage = np.transpose(np.array(weightage))
-        WebcredScore = np.matmul(a, b)
+        WebcredScore = np.matmul(features, weightage)
+
+        with open(r"WebcredScore.pickle", "w") as output_file:
+            cPickle.dump(WebcredScore, output_file)
+
 
     elif action == 'c':
         global totalSample
         global jsonData
         global Featureset
-
+        Featureset = []
+        alexaScoreSet = []
+        wotScoreSet = []
         csv_filename = "WebcredNormalized.csv"
 
         f = open(csv_filename, 'r')
@@ -268,6 +277,10 @@ if __name__ == "__main__":
         # get json data
         jsonData = pipe.converttojson(data)
         totalSample = int(subprocess.check_output(['wc', '-l', csv_filename]).split(' ')[0]) - 1
+        filterKeys = ['url', 'wot', 'cookie', 'redirected']
+        FeaturesName = list((set(jsonData[0].keys()) - set(filterKeys)))
+        count = 0
+        tried = 0
 
         # building matrix wiht 1000 samples
         while True:
