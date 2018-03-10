@@ -190,8 +190,6 @@ if __name__ == "__main__":
         csv_filename = 'normalized.csv'
 
     if work == 'csv':
-        # pdb.set_trace()
-        # pdb.set_trace()
         pipe = Pipeline()
         csv = pipe.convertjson(data)
         # pdb.set_trace()
