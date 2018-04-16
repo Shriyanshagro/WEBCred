@@ -18,6 +18,8 @@ global repetetion
 import pandas as pd
 import matplotlib.pyplot as pl
 import seaborn as sns
+from sklearn.model_selection import KFold
+
 repetetion = 0
 # filter data
 # data = json dict
@@ -241,25 +243,109 @@ def calculateWeightage():
 if __name__ == "__main__":
 
     print '''
-    w == calculateWeightage
+    w == calculateWeightage, wotSimilarity and alexaSimilarity
     bn = build Normalized_features matrix(Pickles under normlized directory)
-    c = check corelation between features(Pickles under Webcred directory)
+    c = check corelation between features(Pickles under Webcred_normalized directory)
     b = build features matrix(Pickles under Webcred directory) for features
         corelation heatmap
     '''
-    action = raw_input("what action would you like to perform?")
+    action = raw_input("what action would you like to perform: ")
 
 
     if action == 'w':
         # calculateWeightage()
-        FeaturesName = ['domain', 'ads', 'imgratio', 'inlinks', 'misspelled', 'pageloadtime', 'brokenlinks', 'hyperlinks', 'responsive', 'lastmod', 'langcount', 'outlinks']
-        genre = {'Article': FeaturesName,}
+        FeaturesName = ['domain',
+        'ads',
+         'imgratio', 'inlinks',
+          'misspelled',
+           'pageloadtime',
+            'brokenlinks', 'hyperlinks', 'responsive',
+             'lastmod',
+                  'langcount',
+                   'outlinks']
+        # TODO genre classification is not done, so weightage can be biased
+        genre = {'Article': FeaturesName, }
 
         weightage = {}
-        alexaSimilarity = {}
+        alexaSimilarityScore = {}
         wotSimilarity = {}
 
+        with open(r"normalized/Featureset.pickle", "rb") as input_file:
+            Featureset = cPickle.load(input_file)
 
+        with open(r"normalized/alexaScoreSet.pickle", "rb") as input_file:
+            alexaScoreSet = cPickle.load(input_file)
+
+        with open(r"normalized/wotScoreSet.pickle", "rb") as input_file:
+            wotScoreSet = cPickle.load(input_file)
+
+        for k,v in genre.items():
+
+            # numpy to pick particular columns based on featuresname(v) required
+            tempfeatureName = []
+
+            # pick column id
+            for i in range(len(FeaturesName)):
+                if FeaturesName[i] in v:
+                    tempfeatureName.append(i)
+
+            # prepare required feature set
+            tempFeatureSet = np.asarray(Featureset, dtype='float')[:, tempfeatureName]
+
+            # adding one extra columns at last for k(misc. value to score)
+            new_col = np.ones((len(tempFeatureSet), 1))
+            idx = tempFeatureSet.shape[1]
+            tempFeatureSet = np.insert(tempFeatureSet, idx, np.transpose(new_col), axis=1)
+
+            # adding one extra columns at last for alexaScore
+            alexa = np.asarray(alexaScoreSet)
+            idx = tempFeatureSet.shape[1]
+            tempFeatureSet = np.insert(tempFeatureSet, idx, np.transpose(alexa), axis=1)
+            # import pdb; pdb.set_trace()
+            # pp = tempFeatureSet.tolist()
+            # tt = pp
+            # tt = random.shuffle(pp)
+            # In loop of j, j can be 10
+            #  n = total samples
+            loop = 10
+            n = tempFeatureSet.shape[0]
+            kf = KFold(n_splits=loop)
+            i = 0
+            Weigh = []
+            alexaSimilarity = []
+            wotSimilarity = []
+            for train, test in kf.split(tempFeatureSet):
+                train_data = np.array(tempFeatureSet)[train]
+                test_data = np.array(tempFeatureSet)[test]
+                F = train_data[:, tempfeatureName+[-2]]
+                A = train_data[:, [-1]]
+
+                W = np.linalg.lstsq(F, A, rcond=None)[0]
+                W = np.transpose(W).tolist()[0]
+
+                score = np.matmul(test_data[:, tempfeatureName+[-2]] , W).reshape(test_data.shape[0],1)
+
+                AcorrScore = np.corrcoef(np.transpose(score), np.transpose(test_data[:, [-1]])).tolist()[0][1]
+                # 49%
+                print AcorrScore
+
+                # TODO normalize wot value to wotScore
+                # TODO correlation between WOT and score
+
+                Weigh.append(W)
+                alexaSimilarity.append(AcorrScore)
+                # wotSimilarity.append()
+
+
+            # get Weigh_avg(W), alexaSimilarity_avg, wotSimilarity_avg
+            Weigh_avg = np.mean(Weigh, axis=0).tolist()
+            alexaSimilarity_avg = np.mean(alexaSimilarity, axis=0).tolist()
+
+            weightage[k] = Weigh_avg
+            alexaSimilarityScore[k] = alexaSimilarity_avg
+            # TODO wotSimilarity[k] = wotSimilarity_avg
+
+        print weightage, alexaSimilarityScore
     elif action == 'bn':
         global totalSample
         global jsonData
@@ -403,6 +489,9 @@ if __name__ == "__main__":
         #     print len(e)
 
         FeaturesName = ['domain', 'ads', 'imgratio', 'inlinks', 'misspelled', 'pageloadtime', 'brokenlinks', 'hyperlinks', 'responsive', 'lastmod', 'langcount', 'outlinks']
+
+        with open(r"Webcred_normalized/Featureset.pickle", "rb") as input_file:
+            e = cPickle.load(input_file)
 
         dataframe = pd.DataFrame(data=np.asarray(e)[0:,0:], index=np.asarray(e)[0:,0],columns=FeaturesName)
         corr = dataframe.corr()
