@@ -2,8 +2,6 @@ import cStringIO
 import csv
 import json
 import operator
-import pdb
-import StringIO
 
 
 class Pipeline(object):
@@ -12,8 +10,8 @@ class Pipeline(object):
     def getcsvheaders(self, data=None):
 
         # pdb.set_trace()
-        if not data:
-            raise ImportExportError("Provide data to retrive headers")
+        # if not data:
+        #     raise ImportExportError("Provide data to retrive headers")
 
         # HACK to keep these fields at top in csv
         header = {'url': 33300, 'Error': 32000}
@@ -32,7 +30,8 @@ class Pipeline(object):
         # pdb.set_trace()
 
         header = sorted(
-            header.items(), key=operator.itemgetter(1), reverse=True)
+            header.items(), key=operator.itemgetter(1), reverse=True
+        )
         for key in header:
             result.append(key[0])
         # pdb.set_trace()
@@ -47,8 +46,8 @@ class Pipeline(object):
 
         csv_headers = self.getcsvheaders(data_list)
         # pdb.set_trace()
-        if not csv_headers:
-            raise BadRequest("check json data, no keys found")
+        # if not csv_headers:
+        #     raise BadRequest("check json data, no keys found")
 
         try:
             '''The optional restval parameter specifies the value to be written
@@ -63,7 +62,8 @@ class Pipeline(object):
                 fieldnames=csv_headers,
                 restval='Field NA',
                 extrasaction='raise',
-                dialect='excel')
+                dialect='excel'
+            )
             writer.writeheader()
             for data in data_list:
                 for key in data.keys():
@@ -82,8 +82,8 @@ class Pipeline(object):
         return data
 
     def converttojson(self, data=None):
-        if not data:
-            raise ImportExportError("Provide data to jsonify")
+        # if not data:
+        #     raise ImportExportError("Provide data to jsonify")
 
         reader = csv.DictReader(data)
         data = []
@@ -121,7 +121,8 @@ class Pipeline(object):
             for index in range(len(data)):
                 self.filter_keys(data[index], excluded)
         elif isinstance(data, dict):
-            for key in data.keys() or key in excluded:
+            for key in data.keys():
+                # or key in excluded:
                 if data[key] == "Field NA":
                     del data[key]
 

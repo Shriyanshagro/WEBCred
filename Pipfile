@@ -12,18 +12,9 @@ nltk = "*"
 requests = "*"
 isort = "*"
 yapf = "*"
-git-pre-commit-hook = "*"
-'''
-run this command at the end
-git-pre-commit-hook install \
-  --plugin flake8 \
-  --plugin frosted \
-  --plugin json \
-  --plugin file_size \
-  --plugin rst \
-  --plugin yaml
-
-'''
+numpy = "*"
+"flake8" = "*"
+# http://flake8.pycqa.org/en/latest/user/using-hooks.html
 
 [dev-packages]
 

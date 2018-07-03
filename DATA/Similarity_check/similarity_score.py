@@ -1,15 +1,17 @@
+from datetime import datetime as dt
+from utils.pipeline import Pipeline
+from utils.utils import WebcredError
+
+import bs4
 import copy
 import cPickle
 import json
+import numpy as np
 import statistics
 import sys
 import types
 import urllib
 
-import bs4
-
-import numpy as np
-from utils.pipeline import Pipeline
 
 sys.path.insert(0, r'../../')
 
@@ -110,11 +112,13 @@ class Normalize(object):
     def getdatalist(self):
         if not self.dataList:
             dataList = []
-            NumberTypes = (types.IntType, types.LongType, types.FloatType,
-                           types.ComplexType)
+            NumberTypes = (
+                types.IntType, types.LongType, types.FloatType,
+                types.ComplexType
+            )
             for element in self.data:
-                if element.get(self.name) and isinstance(
-                        element[self.name], NumberTypes):
+                if element.get(self.name) and isinstance(element[self.name],
+                                                         NumberTypes):
                     # # done for decimal values like 0.23
                     # if isinstance(element[self.name], float):
                     #     element[self.name] = int(element[self.name]*1000000)
@@ -125,18 +129,21 @@ class Normalize(object):
         return self.dataList
 
     def normalize(self):
-        NumberTypes = (types.IntType, types.LongType, types.FloatType,
-                       types.ComplexType)
+        NumberTypes = (
+            types.IntType, types.LongType, types.FloatType, types.ComplexType
+        )
         for index in range(len(self.data)):
             if isinstance(self.data[index].get(self.name), NumberTypes):
                 self.data[index][self.name] = self.getscore(
-                    self.data[index][self.name])
+                    self.data[index][self.name]
+                )
 
         return self.data
 
     def getnormalizedScore(self, value):
-        NumberTypes = (types.IntType, types.LongType, types.FloatType,
-                       types.ComplexType)
+        NumberTypes = (
+            types.IntType, types.LongType, types.FloatType, types.ComplexType
+        )
         if isinstance(value, NumberTypes):
             return self.getscore(value)
 
@@ -162,8 +169,10 @@ class Normalize(object):
     def getscore(self, value):
         mean = self.getmean()
         deviation = self.getdeviation()
-
-        # somtimes mean<deviation and surpass good reults, as no value is less than 0
+        """
+        somtimes mean<deviation and surpass good reults,
+        as no value is less than 0
+        """
         netmd = mean - deviation
         if netmd < 0:
             netmd = 0
@@ -181,7 +190,6 @@ class Normalize(object):
             return 0
 
     def getfactoise(self, value):
-        modified = 0
         global lastmodMaxMonths
 
         # condition for lastmod
@@ -224,8 +232,9 @@ class Normalize(object):
                     value = self.data[index][self.name]
                     value = self.getDateDifference(value)
                     if value < lastmodMaxMonths:
-                        self.data[index][self.name] = self.factorise.get(
-                            lastmodMaxMonths)
+                        self.data[index][
+                            self.name
+                        ] = self.factorise.get(lastmodMaxMonths)
                         modified = 1
 
                 # condition for everthing else
@@ -237,8 +246,8 @@ class Normalize(object):
                             modified = 1
                 if not modified:
                     if 'else' in self.factorise.keys():
-                        self.data[index][self.name] = self.factorise.get(
-                            'else')
+                        self.data[index][self.name
+                                         ] = self.factorise.get('else')
         return self.data
 
 
@@ -246,8 +255,10 @@ class Normalize(object):
 def getAlexarank(url):
     try:
         rank = bs4.BeautifulSoup(
-            urllib.urlopen("http://data.alexa.com/data?cli=10&dat=s&url=" +
-                           url).read(), "xml").find("REACH")['RANK']
+            urllib.
+            urlopen("http://data.alexa.com/data?cli=10&dat=s&url=" +
+                    url).read(), "xml"
+        ).find("REACH")['RANK']
     except:
         rank = '999999999'
     return rank
@@ -356,7 +367,8 @@ def getNormalize(data):
                         sum_hyperlinks_attributes += value
                     name = k
                     data[name] = normalizedData[k].getnormalizedScore(
-                        sum_hyperlinks_attributes)
+                        sum_hyperlinks_attributes
+                    )
                     # score += data[name]*float(percentage[k])
                 except:
                     # TimeOut error clause
@@ -379,8 +391,10 @@ if __name__ == '__main__':
         normalize()
         global genre_weightage
         # read data
-        genre_labelled = "/home/shriyanshagro/Academics/Research/WEBCred/DATA/Similarity_check/Genre-labelled Data.csv"
-        score_file = "/home/shriyanshagro/Academics/Research/WEBCred/DATA/Similarity_check/validation.csv"
+        genre_labelled = "/home/shriyanshagro/Academics/Research/WEBCred" \
+                         "/DATA/Similarity_check/Genre-labelled Data.csv"
+        score_file = "/home/shriyanshagro/Academics/Research/WEBCred/" \
+                     "DATA/Similarity_check/validation.csv"
 
         f = open(genre_labelled, 'r')
         data = f.readlines()
@@ -424,12 +438,14 @@ if __name__ == '__main__':
                 genre = jsonData[i].get('genre')
 
                 jsonData[i]['alexaScore'] = "{0:.7f}".format(
-                    (1.00) / (json.loads(getAlexarank(jsonData[i]['url']))))
+                    (1.00) / (json.loads(getAlexarank(jsonData[i]['url'])))
+                )
 
                 if isinstance(jsonData[i].get('wot'), list):
                     jsonData[i]['wotScore'] = "{0:.7f}".format(
                         (jsonData[i]['wot'][0] * jsonData[i]['wot'][1]) /
-                        (10000.00))
+                        (10000.00)
+                    )
                 else:
                     jsonData[i]['wotScore'] = 0.00
                 del jsonData[i]['wot']
@@ -475,10 +491,12 @@ if __name__ == '__main__':
 
             alexaSimilarity = np.corrcoef(
                 np.asarray(alexaScoreSet).astype(np.float),
-                np.asarray(WEBCredScoreSet).astype(np.float)).tolist()[0][1]
+                np.asarray(WEBCredScoreSet).astype(np.float)
+            ).tolist()[0][1]
             wotSimilarity = np.corrcoef(
                 np.asarray(wotScoreSet).astype(np.float),
-                np.asarray(WEBCredScoreSet).astype(np.float)).tolist()[0][1]
+                np.asarray(WEBCredScoreSet).astype(np.float)
+            ).tolist()[0][1]
 
             print m, FeaturesName
             print 'alexaSimilarity == ', alexaSimilarity
@@ -503,10 +521,12 @@ if __name__ == '__main__':
 
         alexaSimilarity = np.corrcoef(
             np.asarray(alexaScoreSet).astype(np.float),
-            np.asarray(WEBCredScoreSet).astype(np.float)).tolist()[0][1]
+            np.asarray(WEBCredScoreSet).astype(np.float)
+        ).tolist()[0][1]
         wotSimilarity = np.corrcoef(
             np.asarray(wotScoreSet).astype(np.float),
-            np.asarray(WEBCredScoreSet).astype(np.float)).tolist()[0][1]
+            np.asarray(WEBCredScoreSet).astype(np.float)
+        ).tolist()[0][1]
 
         print 'alexaSimilarity == ', alexaSimilarity
         print 'wotSimilarity == ', wotSimilarity

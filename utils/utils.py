@@ -1,21 +1,25 @@
+from bs4 import BeautifulSoup
+from datetime import datetime as dt
+from urlparse import urlparse
+
+import app
 import json
 import re
+import requests
 import statistics
 import threading
 import types
 import urllib2
-from datetime import datetime as dt
-from urlparse import urlparse
-
-import requests
 import validators
-from bs4 import BeautifulSoup
 
 global patternMatching
 patternMatching = None
 
 # represents the normalized class of each dimension
-# normalizedData[dimension_name].getscore(dimension_value) gives normalized_value
+"""
+normalizedData[dimension_name].getscore(dimension_value)
+gives normalized_value
+"""
 global normalizedData
 normalizedData = None
 
@@ -180,11 +184,13 @@ class Normalize(object):
     def getdatalist(self):
         if not self.dataList:
             dataList = []
-            NumberTypes = (types.IntType, types.LongType, types.FloatType,
-                           types.ComplexType)
+            NumberTypes = (
+                types.IntType, types.LongType, types.FloatType,
+                types.ComplexType
+            )
             for element in self.data:
-                if element.get(self.name) and isinstance(
-                        element[self.name], NumberTypes):
+                if element.get(self.name) and isinstance(element[self.name],
+                                                         NumberTypes):
                     # # done for decimal values like 0.23
                     # if isinstance(element[self.name], float):
                     #     element[self.name] = int(element[self.name]*1000000)
@@ -195,18 +201,21 @@ class Normalize(object):
         return self.dataList
 
     def normalize(self):
-        NumberTypes = (types.IntType, types.LongType, types.FloatType,
-                       types.ComplexType)
+        NumberTypes = (
+            types.IntType, types.LongType, types.FloatType, types.ComplexType
+        )
         for index in range(len(self.data)):
             if isinstance(self.data[index].get(self.name), NumberTypes):
                 self.data[index][self.name] = self.getscore(
-                    self.data[index][self.name])
+                    self.data[index][self.name]
+                )
 
         return self.data
 
     def getnormalizedScore(self, value):
-        NumberTypes = (types.IntType, types.LongType, types.FloatType,
-                       types.ComplexType)
+        NumberTypes = (
+            types.IntType, types.LongType, types.FloatType, types.ComplexType
+        )
         if isinstance(value, NumberTypes):
             return self.getscore(value)
 
@@ -232,8 +241,10 @@ class Normalize(object):
     def getscore(self, value):
         mean = self.getmean()
         deviation = self.getdeviation()
-
-        # somtimes mean<deviation and surpass good reults, as no value is less than 0
+        """
+        somtimes mean<deviation and surpass good reults,
+        as no value is less than 0
+        """
         netmd = mean - deviation
         if netmd < 0:
             netmd = 0
@@ -251,7 +262,6 @@ class Normalize(object):
             return 0
 
     def getfactoise(self, value):
-        modified = 0
         global lastmodMaxMonths
 
         # condition for lastmod
@@ -294,8 +304,9 @@ class Normalize(object):
                     value = self.data[index][self.name]
                     value = self.getDateDifference(value)
                     if value < lastmodMaxMonths:
-                        self.data[index][self.name] = self.factorise.get(
-                            lastmodMaxMonths)
+                        self.data[index][
+                            self.name
+                        ] = self.factorise.get(lastmodMaxMonths)
                         modified = 1
 
                 # condition for everthing else
@@ -307,8 +318,8 @@ class Normalize(object):
                             modified = 1
                 if not modified:
                     if 'else' in self.factorise.keys():
-                        self.data[index][self.name] = self.factorise.get(
-                            'else')
+                        self.data[index][self.name
+                                         ] = self.factorise.get('else')
         return self.data
 
 
@@ -318,7 +329,8 @@ class Urlattributes(object):
         # TODO fetch ads list dynamically from org
         if not patternMatching:
             patternMatching = PatternMatching(
-                lang_iso='APIs/lang_iso.txt', ads_list='APIs/easylist.txt')
+                lang_iso='APIs/lang_iso.txt', ads_list='APIs/easylist.txt'
+            )
             print 'end patternMatching'
 
         global normalizedData
@@ -492,7 +504,8 @@ class Urlattributes(object):
                 self.netloc = '{uri.netloc}'.format(uri=parsed_uri)
             except:
                 raise WebcredError(
-                    'Error while fetching attributes from parsed_uri')
+                    'Error while fetching attributes from parsed_uri'
+                )
 
         return self.netloc
 
@@ -528,14 +541,12 @@ class Urlattributes(object):
 
 
 class MyThread(threading.Thread):
-    def __init__(self,
-                 Module='api',
-                 Method=None,
-                 Name=None,
-                 Url=None,
-                 Args=None):
+    def __init__(
+            self, Module='api', Method=None, Name=None, Url=None, Args=None
+    ):
 
         threading.Thread.__init__(self)
+        from features import surface
 
         if Method and Module == 'api':
             self.func = getattr(surface, Method)
@@ -605,6 +616,8 @@ class Captcha(object):
 
 class Webcred(object):
     def assess(self, request):
+        from features import surface
+
         if not isinstance(request, dict):
             request = dict(request.args)
         try:
@@ -669,7 +682,8 @@ class Webcred(object):
                         Method=apiList[keys][0],
                         Name=keys,
                         Url=site,
-                        Args=apiList[keys][1])
+                        Args=apiList[keys][1]
+                    )
                     thread.start()
                     threads.append(thread)
 
@@ -683,7 +697,8 @@ class Webcred(object):
                     try:
                         data[request.get(dim)[0]] = surface.dimapi(
                             site.geturl(),
-                            request.get(API)[0])
+                            request.get(API)[0]
+                        )
                         perc = API + "Perc"
                         percentage[dim] = request.get(perc)[0]
                     except WebcredError as e:
@@ -702,8 +717,8 @@ class Webcred(object):
                 except WebcredError as e:
                     data[t.getName()] = e.message
                 except:
-                    data[t.getName()] = 'TimeOut Error, Max {} sec'.format(
-                        maxTime)
+                    data[t.getName()
+                         ] = 'TimeOut Error, Max {} sec'.format(maxTime)
                 finally:
                     print t.getName(), " = ", data[t.getName()]
 
@@ -743,7 +758,8 @@ class Webcred(object):
                             sum_hyperlinks_attributes += value
                         name = k + "Norm"
                         data[name] = normalizedData[k].getnormalizedScore(
-                            sum_hyperlinks_attributes)
+                            sum_hyperlinks_attributes
+                        )
                         score += data[name] * float(percentage[k])
                     except:
                         # TimeOut error clause
@@ -754,7 +770,3 @@ class Webcred(object):
 
         # REVIEW add Weightage score for new dimensions
         return data
-
-
-import app
-from features import surface
