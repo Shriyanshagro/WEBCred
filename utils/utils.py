@@ -1,14 +1,15 @@
-import urllib2
-from urlparse import urlparse
-from bs4 import BeautifulSoup
-import validators
-import re
-import threading
 import json
+import re
 import statistics
-import requests
+import threading
 import types
+import urllib2
 from datetime import datetime as dt
+from urlparse import urlparse
+
+import requests
+import validators
+from bs4 import BeautifulSoup
 
 global patternMatching
 patternMatching = None
@@ -24,21 +25,46 @@ lastmodMaxMonths = 93
 # define rules to normalize data
 global normalizeCategory
 normalizeCategory = {
-    '3':{
-     'outlinks': 'reverse', 'inlinks': 'linear',
-     'ads':'reverse',
-     'brokenlinks': 'reverse', 'pageloadtime': 'reverse',
-     'imgratio': 'linear'
-     },
-    '2':{'misspelled': {0:1, 'else':0},
-     'responsive': {'true':1, 'false':0}, 'langcount':
-     {1:0, 'else':1}, 'domain' :{'gov':1, 'org':0, 'edu':1,
-        'com':0, 'net':0, 'else':-1},
-        "lastmod" : {lastmodMaxMonths: 1, 'else': 0,},
-     },
-    'misc': {'hyperlinks':"linear"},
-    'eval':['wot']
- }
+    '3': {
+        'outlinks': 'reverse',
+        'inlinks': 'linear',
+        'ads': 'reverse',
+        'brokenlinks': 'reverse',
+        'pageloadtime': 'reverse',
+        'imgratio': 'linear'
+    },
+    '2': {
+        'misspelled': {
+            0: 1,
+            'else': 0
+        },
+        'responsive': {
+            'true': 1,
+            'false': 0
+        },
+        'langcount': {
+            1: 0,
+            'else': 1
+        },
+        'domain': {
+            'gov': 1,
+            'org': 0,
+            'edu': 1,
+            'com': 0,
+            'net': 0,
+            'else': -1
+        },
+        "lastmod": {
+            lastmodMaxMonths: 1,
+            'else': 0,
+        },
+    },
+    'misc': {
+        'hyperlinks': "linear"
+    },
+    'eval': ['wot']
+}
+
 
 # A class to catch error and exceptions
 class WebcredError(Exception):
@@ -51,9 +77,9 @@ class WebcredError(Exception):
     def __str__(self):
         return repr(self.message)
 
+
 # A class for pattern matching using re lib
 class PatternMatching(object):
-
     def __init__(self, lang_iso=None, ads_list=None):
         if lang_iso:
             try:
@@ -62,8 +88,8 @@ class PatternMatching(object):
                 isoList = []
                 for code in self.isoList:
                     # isoList.pop(iso)
-                    isoList.append(str('='+code))
-                    isoList.append(str('="'+code+'"'))
+                    isoList.append(str('=' + code))
+                    isoList.append(str('="' + code + '"'))
                 self.isoList = isoList
                 self.isoPattern = self.regexCompile(self.isoList)
                 iso.close()
@@ -128,6 +154,7 @@ class PatternMatching(object):
         else:
             return False, None
 
+
 # A class to get normalized score for given value based on collectData
 class Normalize(object):
 
@@ -144,7 +171,7 @@ class Normalize(object):
         self.name = name[0]
 
         if isinstance(name[1], str):
-            if  name[1] == 'reverse':
+            if name[1] == 'reverse':
                 self.reverse = True
 
         elif isinstance(name[1], dict):
@@ -153,9 +180,11 @@ class Normalize(object):
     def getdatalist(self):
         if not self.dataList:
             dataList = []
-            NumberTypes = (types.IntType, types.LongType, types.FloatType, types.ComplexType)
+            NumberTypes = (types.IntType, types.LongType, types.FloatType,
+                           types.ComplexType)
             for element in self.data:
-                if element.get(self.name) and isinstance(element[self.name], NumberTypes):
+                if element.get(self.name) and isinstance(
+                        element[self.name], NumberTypes):
                     # # done for decimal values like 0.23
                     # if isinstance(element[self.name], float):
                     #     element[self.name] = int(element[self.name]*1000000)
@@ -166,15 +195,18 @@ class Normalize(object):
         return self.dataList
 
     def normalize(self):
-        NumberTypes = (types.IntType, types.LongType, types.FloatType, types.ComplexType)
+        NumberTypes = (types.IntType, types.LongType, types.FloatType,
+                       types.ComplexType)
         for index in range(len(self.data)):
             if isinstance(self.data[index].get(self.name), NumberTypes):
-                self.data[index][self.name] = self.getscore(self.data[index][self.name])
+                self.data[index][self.name] = self.getscore(
+                    self.data[index][self.name])
 
         return self.data
 
     def getnormalizedScore(self, value):
-        NumberTypes = (types.IntType, types.LongType, types.FloatType, types.ComplexType)
+        NumberTypes = (types.IntType, types.LongType, types.FloatType,
+                       types.ComplexType)
         if isinstance(value, NumberTypes):
             return self.getscore(value)
 
@@ -187,13 +219,13 @@ class Normalize(object):
 
     def getmean(self):
         if not self.mean:
-            self.mean =statistics.mean(self.getdatalist())
+            self.mean = statistics.mean(self.getdatalist())
             print "mean=", self.mean, self.name
         return self.mean
 
     def getdeviation(self):
         if not self.deviation:
-            self.deviation =statistics.pstdev(self.getdatalist())
+            self.deviation = statistics.pstdev(self.getdatalist())
             print "deviation=", self.deviation, self.name
         return self.deviation
 
@@ -202,17 +234,17 @@ class Normalize(object):
         deviation = self.getdeviation()
 
         # somtimes mean<deviation and surpass good reults, as no value is less than 0
-        netmd = mean-deviation
-        if netmd<0:
+        netmd = mean - deviation
+        if netmd < 0:
             netmd = 0
 
-        if value<=(netmd):
+        if value <= (netmd):
             if self.reverse:
                 return 1
             return -1
 
-        else :
-            if value>=(mean+deviation):
+        else:
+            if value >= (mean + deviation):
                 if self.reverse:
                     return -1
                 return 1
@@ -223,14 +255,14 @@ class Normalize(object):
         global lastmodMaxMonths
 
         # condition for lastmod
-        if self.name=="lastmod":
+        if self.name == "lastmod":
             value = self.getDateDifference(value)
-            if value<lastmodMaxMonths:
+            if value < lastmodMaxMonths:
                 return self.factorise.get(lastmodMaxMonths)
 
         # condition for everthing else
         else:
-            for k,v in self.factorise.items():
+            for k, v in self.factorise.items():
                 if str(value) == str(k):
                     return v
         if 'else' in self.factorise.keys():
@@ -258,32 +290,35 @@ class Normalize(object):
                 modified = 0
 
                 # condition for lastmod
-                if self.name=="lastmod":
+                if self.name == "lastmod":
                     value = self.data[index][self.name]
                     value = self.getDateDifference(value)
-                    if value<lastmodMaxMonths:
+                    if value < lastmodMaxMonths:
                         self.data[index][self.name] = self.factorise.get(
                             lastmodMaxMonths)
                         modified = 1
 
                 # condition for everthing else
                 else:
-                    for k,v in self.factorise.items():
+                    for k, v in self.factorise.items():
                         value = self.data[index][self.name]
                         if str(value) == str(k):
                             self.data[index][self.name] = v
                             modified = 1
                 if not modified:
                     if 'else' in self.factorise.keys():
-                        self.data[index][self.name] = self.factorise.get('else')
+                        self.data[index][self.name] = self.factorise.get(
+                            'else')
         return self.data
+
 
 # A class to use extract url attributes
 class Urlattributes(object):
     try:
         # TODO fetch ads list dynamically from org
         if not patternMatching:
-            patternMatching = PatternMatching(lang_iso='APIs/lang_iso.txt', ads_list='APIs/easylist.txt' )
+            patternMatching = PatternMatching(
+                lang_iso='APIs/lang_iso.txt', ads_list='APIs/easylist.txt')
             print 'end patternMatching'
 
         global normalizedData
@@ -302,7 +337,7 @@ class Urlattributes(object):
             re_data = re_data.split('\n')
 
             # list with string/buffer as values
-            file_= list(set(new_data + old_data + re_data))
+            file_ = list(set(new_data + old_data + re_data))
 
             # final json_List of data
             data = []
@@ -334,7 +369,7 @@ class Urlattributes(object):
                     sum_hyperlinks_attributes = 0
                     tempData = data[index].get(it[0])
                     try:
-                        for k,v in tempData.items():
+                        for k, v in tempData.items():
                             sum_hyperlinks_attributes += v
                     except:
                         # TimeOut error clause
@@ -368,14 +403,14 @@ class Urlattributes(object):
 
         self.hdr = {'User-Agent': 'Mozilla/5.0'}
         self.requests = self.urllibreq = self.soup = self.text = None
-        self.netloc = self.header = self.size= self.domain = None
+        self.netloc = self.header = self.size = self.domain = None
         self.lock = threading.Lock()
         if url:
             if not validators.url(url):
                 raise WebcredError('Provide a valid url')
             self.originalUrl = self.url = str(url)
             # case of redirections
-            resp =self.getrequests()
+            resp = self.getrequests()
             self.url = str(resp.geturl())
             self.getsoup()
             # if url!= self.url:
@@ -394,14 +429,14 @@ class Urlattributes(object):
 
     def getheader(self):
         if not self.header:
-            self.header =  dict(self.geturllibreq().info())
+            self.header = dict(self.geturllibreq().info())
 
         return self.header
 
     def getrequests(self):
         if not self.requests:
             try:
-                self.requests =  self.geturllibreq()
+                self.requests = self.geturllibreq()
             except WebcredError as e:
                 raise WebcredError(e.message)
             # requestss.get(self.url, headers=self.hdr)
@@ -456,7 +491,8 @@ class Urlattributes(object):
                 parsed_uri = urlparse(self.geturl())
                 self.netloc = '{uri.netloc}'.format(uri=parsed_uri)
             except:
-                raise WebcredError('Error while fetching attributes from parsed_uri')
+                raise WebcredError(
+                    'Error while fetching attributes from parsed_uri')
 
         return self.netloc
 
@@ -490,15 +526,20 @@ class Urlattributes(object):
     def freemem(self):
         del self
 
-class MyThread(threading.Thread):
 
-    def __init__(self, Module='api', Method=None, Name=None, Url=None, Args=None):
+class MyThread(threading.Thread):
+    def __init__(self,
+                 Module='api',
+                 Method=None,
+                 Name=None,
+                 Url=None,
+                 Args=None):
 
         threading.Thread.__init__(self)
 
-        if Method and Module=='api':
+        if Method and Module == 'api':
             self.func = getattr(surface, Method)
-        elif Method and Module=='app':
+        elif Method and Module == 'app':
             self.func = getattr(app, Method)
         else:
             raise WebcredError('Provide method')
@@ -513,11 +554,10 @@ class MyThread(threading.Thread):
         else:
             raise WebcredError('Provide url')
 
-        if Args and Args!= '':
+        if Args and Args != '':
             self.args = Args
         else:
             self.args = None
-
 
     def run(self):
         try:
@@ -543,170 +583,178 @@ class MyThread(threading.Thread):
     def freemem(self):
         self.url.freemem()
 
-class Captcha(object):
 
+class Captcha(object):
     def __init__(self, resp=None, ip=None):
         google_api = 'https://www.google.com/recaptcha/api/siteverify'
         self.url = google_api
         self.key = '6LcsiCoUAAAAAL9TssWVBE0DBwA7pXPNklXU42Rk'
         self.resp = resp
         self.ip = ip
-        self.params = {'secret': self.key, 'response': self.resp,
-        'remoteip': self.ip }
+        self.params = {
+            'secret': self.key,
+            'response': self.resp,
+            'remoteip': self.ip
+        }
 
     def check(self):
         result = requests.post(url=self.url, params=self.params).text
         result = json.loads(result)
         return result.get('success', None)
 
+
 class Webcred(object):
-
     def assess(self, request):
-            if not isinstance(request, dict):
-                request = dict(request.args)
-            try:
-                data = {}
-                req = {}
-                req['args'] = {}
-                percentage = {}
-                hyperlinks_attributes = ['contact', 'email', 'help',
-                'sitemap']
-                apiList = {
-                    'lastmod': ['getDate', '', ''],
-                    'domain': ['getDomain', '', ''],
-                    'inlinks': ['getInlinks', '', ''],
-                    'outlinks': ['getOutlinks', '', ''],
-                    'hyperlinks': ['getHyperlinks', hyperlinks_attributes, ''],
-                    'imgratio': ['getImgratio', '', ''],
-                    'brokenlinks': ['getBrokenlinks', '', ''],
-                    'cookie': ['getCookie', '', ''],
-                    'langcount': ['getLangcount', '', ''],
-                    'misspelled': ['getMisspelled', '', ''],
-                    'wot': ['getWot', '', ''],
-                    'responsive': ['getResponsive', '', ''],
-                    'ads': ['getAds', '', ''],
-                    'pageloadtime': ['getPageloadtime', '', ''],
-                    'site': ['']
-                }
+        if not isinstance(request, dict):
+            request = dict(request.args)
+        try:
+            data = {}
+            req = {}
+            req['args'] = {}
+            percentage = {}
+            hyperlinks_attributes = ['contact', 'email', 'help', 'sitemap']
+            apiList = {
+                'lastmod': ['getDate', '', ''],
+                'domain': ['getDomain', '', ''],
+                'inlinks': ['getInlinks', '', ''],
+                'outlinks': ['getOutlinks', '', ''],
+                'hyperlinks': ['getHyperlinks', hyperlinks_attributes, ''],
+                'imgratio': ['getImgratio', '', ''],
+                'brokenlinks': ['getBrokenlinks', '', ''],
+                'cookie': ['getCookie', '', ''],
+                'langcount': ['getLangcount', '', ''],
+                'misspelled': ['getMisspelled', '', ''],
+                'wot': ['getWot', '', ''],
+                'responsive': ['getResponsive', '', ''],
+                'ads': ['getAds', '', ''],
+                'pageloadtime': ['getPageloadtime', '', ''],
+                'site': ['']
+            }
 
-                for keys in apiList.keys():
-                    if request.get(keys, None):
-                        # because request.args is of ImmutableMultiDict form
-                        if isinstance(request.get(keys, None), list):
-                            req['args'][keys] = str(request.get(keys)[0])
-                            perc = keys + "Perc"
-                            if request.get(perc):
-                                percentage[keys] = request.get(perc)[0]
-                        else:
-                            req['args'][keys] = request.get(keys)
-                            perc = keys + "Perc"
-                            if request.get(perc):
-                                percentage[keys] = request.get(perc)
-
-                # to show wot ranking
-                req['args']['wot'] = "true"
-                data['Url'] =  req['args']['site']
-
-                if str(request.get('genre')[0])=='other':
-                    data['Genre'] =  str(request.get('other-genre')[0])
-                else:
-                    data['Genre'] =  str(request.get('genre')[0])
-
-                site = Urlattributes(url=req['args'].get('site', None))
-
-                if data['Url'] != site.geturl():
-                    data['redirected'] = site.geturl()
-
-                # site is not a WEBCred parameter
-                del req['args']['site']
-                threads = []
-
-                for keys in req['args'].keys():
-                    if str(req['args'].get(keys, None))=="true":
-                            thread = MyThread(Method=apiList[keys][0], Name=keys, Url=site,
-                            Args=apiList[keys][1])
-                            thread.start()
-                            threads.append(thread)
-
-
-                # HACK 13 is calculated number, refer to index.html, where new
-                # dimensions are dynamically added
-                number = 13
-                while True:
-                    dim = "dimension"+str(number)
-                    API = "api"+str(number)
-                    if dim in request.keys():
-                        try:
-                            data[request.get(dim)[0]] = surface.dimapi(site.geturl(), request.get(API)[0])
-                            perc = API + "Perc"
-                            percentage[dim] = request.get(perc)[0]
-                        except WebcredError as e:
-                            data[request.get(dim)[0]] = e.message
-                        except:
-                            data[request.get(dim)[0]] = "Fatal ERROR"
+            for keys in apiList.keys():
+                if request.get(keys, None):
+                    # because request.args is of ImmutableMultiDict form
+                    if isinstance(request.get(keys, None), list):
+                        req['args'][keys] = str(request.get(keys)[0])
+                        perc = keys + "Perc"
+                        if request.get(perc):
+                            percentage[keys] = request.get(perc)[0]
                     else:
-                        break
-                    number += 1
+                        req['args'][keys] = request.get(keys)
+                        perc = keys + "Perc"
+                        if request.get(perc):
+                            percentage[keys] = request.get(perc)
 
-                maxTime = 130
-                for t in threads:
+            # to show wot ranking
+            req['args']['wot'] = "true"
+            data['Url'] = req['args']['site']
+
+            if str(request.get('genre')[0]) == 'other':
+                data['Genre'] = str(request.get('other-genre')[0])
+            else:
+                data['Genre'] = str(request.get('genre')[0])
+
+            site = Urlattributes(url=req['args'].get('site', None))
+
+            if data['Url'] != site.geturl():
+                data['redirected'] = site.geturl()
+
+            # site is not a WEBCred parameter
+            del req['args']['site']
+            threads = []
+
+            for keys in req['args'].keys():
+                if str(req['args'].get(keys, None)) == "true":
+                    thread = MyThread(
+                        Method=apiList[keys][0],
+                        Name=keys,
+                        Url=site,
+                        Args=apiList[keys][1])
+                    thread.start()
+                    threads.append(thread)
+
+            # HACK 13 is calculated number, refer to index.html, where new
+            # dimensions are dynamically added
+            number = 13
+            while True:
+                dim = "dimension" + str(number)
+                API = "api" + str(number)
+                if dim in request.keys():
                     try:
-                        t.join(maxTime)
-                        data[t.getName()] = t.getResult()
+                        data[request.get(dim)[0]] = surface.dimapi(
+                            site.geturl(),
+                            request.get(API)[0])
+                        perc = API + "Perc"
+                        percentage[dim] = request.get(perc)[0]
                     except WebcredError as e:
-                        data[t.getName()] = e.message
+                        data[request.get(dim)[0]] = e.message
                     except:
-                        data[t.getName()] = 'TimeOut Error, Max {} sec'.format(maxTime)
-                    finally:
-                        print t.getName()," = ", data[t.getName()]
+                        data[request.get(dim)[0]] = "Fatal ERROR"
+                else:
+                    break
+                number += 1
 
-            except WebcredError as e:
-                data['Error'] =  e.message
-            except:
-                data['Error'] = 'Fatal error'
-            finally:
+            maxTime = 130
+            for t in threads:
                 try:
-                    site.freemem()
+                    t.join(maxTime)
+                    data[t.getName()] = t.getResult()
+                except WebcredError as e:
+                    data[t.getName()] = e.message
+                except:
+                    data[t.getName()] = 'TimeOut Error, Max {} sec'.format(
+                        maxTime)
                 finally:
-                    data = self.webcredScore(data, percentage)
-                    return data
+                    print t.getName(), " = ", data[t.getName()]
+
+        except WebcredError as e:
+            data['Error'] = e.message
+        except:
+            data['Error'] = 'Fatal error'
+        finally:
+            try:
+                site.freemem()
+            finally:
+                data = self.webcredScore(data, percentage)
+                return data
 
     def webcredScore(self, data, percentage):
         global normalizedData
         global normalizeCategory
         # score varies from -1 to 1
         score = 0
-        for k,v in data.items():
+        for k, v in data.items():
 
             try:
                 if k in normalizeCategory['3'].keys():
                     name = k + "Norm"
                     data[name] = normalizedData[k].getnormalizedScore(v)
-                    score += data[name]*float(percentage[k])
+                    score += data[name] * float(percentage[k])
 
                 if k in normalizeCategory['2'].keys():
                     name = k + "Norm"
                     data[name] = normalizedData[k].getfactoise(v)
-                    score += data[name]*float(percentage[k])
+                    score += data[name] * float(percentage[k])
 
                 if k in normalizeCategory['misc'].keys():
                     sum_hyperlinks_attributes = 0
                     try:
-                        for key,value in v.items():
+                        for key, value in v.items():
                             sum_hyperlinks_attributes += value
                         name = k + "Norm"
-                        data[name] = normalizedData[k].getnormalizedScore(sum_hyperlinks_attributes)
-                        score += data[name]*float(percentage[k])
+                        data[name] = normalizedData[k].getnormalizedScore(
+                            sum_hyperlinks_attributes)
+                        score += data[name] * float(percentage[k])
                     except:
                         # TimeOut error clause
                         pass
             except:
                 pass
-        data["WEBCred Score"] = score/100
+        data["WEBCred Score"] = score / 100
 
         # REVIEW add Weightage score for new dimensions
         return data
 
 
-from features import surface
 import app
+from features import surface

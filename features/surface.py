@@ -1,16 +1,17 @@
-import re
+import ast
 import json
 import os
-from nltk.tokenize import word_tokenize
-from nltk.tag import pos_tag
-from nltk.corpus import wordnet
+import re
 from ast import literal_eval
 from datetime import datetime
-from utils.utils import WebcredError
-from utils.utils import Urlattributes
-from utils.utils import MyThread
+
 import validators
-import ast
+from nltk.corpus import wordnet
+from nltk.tag import pos_tag
+from nltk.tokenize import word_tokenize
+
+from utils.utils import MyThread, Urlattributes, WebcredError
+
 
 def funcBrokenllinks(url):
     # pdb.set_trace()
@@ -19,7 +20,7 @@ def funcBrokenllinks(url):
         try:
             uri = Urlattributes(url)
             resp = uri.geturllibreq()
-            if not resp.code/100<4:
+            if not resp.code / 100 < 4:
                 result = 'True'
             uri.freemem()
         except WebcredError as e:
@@ -27,6 +28,7 @@ def funcBrokenllinks(url):
         except:
             result = 'True'
     return result
+
 
 def funcImgratio(url):
     header = None
@@ -40,10 +42,12 @@ def funcImgratio(url):
         pass
     return size
 
+
 def getWot(url):
 
-    result = ("http://api.mywot.com/0.4/public_link_json2?hosts=" +
-    url.geturl() + "/&callback=&key=d60fa334759ae377ceb9cd679dfa22aec57ed998")
+    result = (
+        "http://api.mywot.com/0.4/public_link_json2?hosts=" + url.geturl() +
+        "/&callback=&key=d60fa334759ae377ceb9cd679dfa22aec57ed998")
     try:
         # pdb.set_trace()
         uri = Urlattributes(result)
@@ -55,9 +59,11 @@ def getWot(url):
     except:
         return 'NA'
 
+
 def getResponsive(url):
-    result = ("http://tools.mercenie.com/responsive-check/api/?format=json&url="
-    + url.geturl())
+    result = (
+        "http://tools.mercenie.com/responsive-check/api/?format=json&url=" +
+        url.geturl())
     try:
         # pdb.set_trace()
         uri = Urlattributes(result)
@@ -68,6 +74,7 @@ def getResponsive(url):
     except:
         # pdb.set_trace()
         return 'Info not NA'
+
 
 def getHyperlinks(url, attributes):
 
@@ -90,7 +97,7 @@ def getHyperlinks(url, attributes):
         if syn:
             syn = wordnet.synsets(element)[0].lemma_names()
         # pdb.set_trace()
-        lookup = {'header':0, 'footer':0}
+        lookup = {'header': 0, 'footer': 0}
         percentage = 10
 
         # looking for element in lookup
@@ -106,7 +113,8 @@ def getHyperlinks(url, attributes):
                             break
                         try:
                             pattern = url.getPatternObj().regexCompile([ss])
-                            match, matched = url.getPatternObj().regexMatch(pattern=pattern, data=str(index))
+                            match, matched = url.getPatternObj().regexMatch(
+                                pattern=pattern, data=str(index))
                         except:
                             # pdb.set_trace()
                             raise WebcredError('Error with patternmatching')
@@ -125,10 +133,10 @@ def getHyperlinks(url, attributes):
                 text = soup.find_all('a', href=True)
                 # text = url.gettext()
                 if tags == 'header':
-                    text = text[:(len(text)*(percentage/100))]
+                    text = text[:(len(text) * (percentage / 100))]
 
                 elif tags == 'footer':
-                    text = text[(len(text)*((100- percentage)/100)):]
+                    text = text[(len(text) * ((100 - percentage) / 100)):]
 
                 for ss in syn:
                     for index in text:
@@ -136,7 +144,8 @@ def getHyperlinks(url, attributes):
                             break
                         try:
                             pattern = url.getPatternObj().regexCompile([ss])
-                            match, matched = url.getPatternObj().regexMatch(pattern=pattern, data=str(index))
+                            match, matched = url.getPatternObj().regexMatch(
+                                pattern=pattern, data=str(index))
                         except:
                             # pdb.set_trace()
                             raise WebcredError('Error with patternmatching')
@@ -151,8 +160,10 @@ def getHyperlinks(url, attributes):
                         if data[element]:
                             break
                         try:
-                            pattern = url.getPatternObj().regexCompile([element])
-                            match, matched = url.getPatternObj().regexMatch(pattern=pattern, data=str(index))
+                            pattern = url.getPatternObj().regexCompile(
+                                [element])
+                            match, matched = url.getPatternObj().regexMatch(
+                                pattern=pattern, data=str(index))
                         except:
                             # pdb.set_trace()
                             raise WebcredError('Error with patternmatching')
@@ -163,6 +174,7 @@ def getHyperlinks(url, attributes):
     # pdb.set_trace()
     return data
 
+
 def getLangcount(url):
     '''
     idea is to find pattern 'lang' in tags and then iso_lang code in those tags
@@ -172,7 +184,7 @@ def getLangcount(url):
     '''
 
     try:
-        soup  = url.getsoup()
+        soup = url.getsoup()
     except WebcredError as e:
         raise WebcredError(e.message)
 
@@ -198,13 +210,14 @@ def getLangcount(url):
 
                 if pattern not in matched:
                     matched.append(pattern)
-                    count +=1
+                    count += 1
                 # pdb.set_trace()
 
     # some uni-lang websites didn't mention lang tags
-    if count==0:
+    if count == 0:
         count = 1
     return count
+
 
 def getImgratio(url):
 
@@ -230,7 +243,7 @@ def getImgratio(url):
                 t = MyThread(Method='funcImgratio', Name='Imgratio', Url=uri)
                 t.start()
                 threads.append(t)
-            except WebcredError as  e:
+            except WebcredError as e:
                 # even if particular image is not accessible, we don't mind it
                 pass
 
@@ -244,16 +257,17 @@ def getImgratio(url):
 
     try:
         total_size = total_img_size + text_size
-    	ratio = float(text_size)/total_size
+        ratio = float(text_size) / total_size
         # print ratio, text_size, total_size
     except ValueError:
         raise WebcredError('Error in fetching images')
 
     return ratio
 
+
 def getAds(url):
     try:
-        soup  = url.getsoup()
+        soup = url.getsoup()
     except webcredError as e:
         raise webcredError(e.message)
 
@@ -261,7 +275,7 @@ def getAds(url):
 
     for link in soup.find_all('a', href=True):
         href = str(link.get('href'))
-        if  href.startswith('http://') or href.startswith('https://'):
+        if href.startswith('http://') or href.startswith('https://'):
 
             # pdb.set_trace()
             try:
@@ -275,9 +289,10 @@ def getAds(url):
 
     return count
 
+
 def getCookie(url):
     try:
-    	header = url.getheader()
+        header = url.getheader()
     except WebcredError as e:
         raise WebcredError(e.message)
 
@@ -287,7 +302,8 @@ def getCookie(url):
         raise WebcredError(e.message)
     for key in header.keys():
         try:
-            match, matched = url.getPatternObj().regexMatch(pattern=pattern, data=key)
+            match, matched = url.getPatternObj().regexMatch(
+                pattern=pattern, data=key)
         except WebcredError as e:
             # pdb.set_trace()
             raise WebcredError(e.message)
@@ -298,12 +314,15 @@ def getCookie(url):
 
     return 'No'
 
+
 def getMisspelled(url):
     # pdb.set_trace()
-    text  = url.gettext()
+    text = url.gettext()
 
-    excluded_tags = ['NNP', 'NNPS', 'SYM', 'CD', 'IN', 'TO', 'CC','LS','POS',
-     '(',')',':','EX','FW','RP']
+    excluded_tags = [
+        'NNP', 'NNPS', 'SYM', 'CD', 'IN', 'TO', 'CC', 'LS', 'POS', '(', ')',
+        ':', 'EX', 'FW', 'RP'
+    ]
 
     try:
         text = word_tokenize(text)
@@ -315,8 +334,8 @@ def getMisspelled(url):
     # print text
     for texts in text:
         i = pos_tag(texts.split())
-        i =  i[0]
-        if i[1] not in excluded_tags and i[0]!=i[1]:
+        i = i[0]
+        if i[1] not in excluded_tags and i[0] != i[1]:
             tags.append(i[0])
 
     # pdb.set_trace()
@@ -332,10 +351,11 @@ def getMisspelled(url):
                 # print defi
         except:
             # pdb.set_trace()
-            count+= 1
+            count += 1
 
     # pdb.set_trace()
     return count
+
 
 def getDate(url):
     # pdb.set_trace()
@@ -344,31 +364,35 @@ def getDate(url):
     except WebcredError as e:
         raise WebcredError(e.message)
     # pdb.set_trace()
-    if resp.code/100<4:
-    	try:
-            lastmod=str(resp.info().getdate('last-modified'))
-            if lastmod == 'None' :
+    if resp.code / 100 < 4:
+        try:
+            lastmod = str(resp.info().getdate('last-modified'))
+            if lastmod == 'None':
                 # some page has key 'date' for same
-        		lastmod=str(resp.info().getdate('date'))
-            lastmod = datetime.strptime(str(lastmod), '(%Y, %m, %d, %H, %M, %S, %f, %W, %U)')
+                lastmod = str(resp.info().getdate('date'))
+            lastmod = datetime.strptime(
+                str(lastmod), '(%Y, %m, %d, %H, %M, %S, %f, %W, %U)')
             lastmod = lastmod.isoformat()
         except:
             raise WebcredError('Error with Requests')
     else:
-    	try:
+        try:
             # fetching data form archive
             uri = "http://archive.org/wayback/available?url=" + url.geturl()
             uri = Urlattributes(uri)
             resp = uri.geturllibreq()
-            data = (json.load(resp)['archived_snapshots']['closest']
-                    ['timestamp'])
-            lastmod= ('wr'+ '('+ data[0:4]+ ', '+ data[4:6]+ ', '+ data[6:8]+
-            ', '+ data[8:10]+ ', '+ data[10:12]+ ', '+ data[12:14]+')')
-    	except WebcredError as e:
-    		raise WebcredError(e.message)
-    	except:
-    		raise WebcredError('Error in fetching last-modified date from archive')
+            data = (
+                json.load(resp)['archived_snapshots']['closest']['timestamp'])
+            lastmod = ('wr' + '(' + data[0:4] + ', ' + data[4:6] + ', ' +
+                       data[6:8] + ', ' + data[8:10] + ', ' + data[10:12] +
+                       ', ' + data[12:14] + ')')
+        except WebcredError as e:
+            raise WebcredError(e.message)
+        except:
+            raise WebcredError(
+                'Error in fetching last-modified date from archive')
     return lastmod
+
 
 def getDomain(url):
     # a fascinating use of .format() syntax
@@ -377,6 +401,7 @@ def getDomain(url):
     except:
         raise WebcredError('urlparsing error')
     return domain
+
 
 def getBrokenlinks(url):
     broken_links = 0
@@ -396,7 +421,8 @@ def getBrokenlinks(url):
             uri = url.geturl() + uri
 
         if validators.url(uri):
-            t = MyThread(Method='funcBrokenllinks', Name='brokenlinks', Url=uri)
+            t = MyThread(
+                Method='funcBrokenllinks', Name='brokenlinks', Url=uri)
             t.start()
             threads.append(t)
 
@@ -408,6 +434,7 @@ def getBrokenlinks(url):
             broken_links += 1
 
     return broken_links
+
 
 def getOutlinks(url):
     outlinks = 0
@@ -438,44 +465,50 @@ def getOutlinks(url):
     # f.write(links_)
     return outlinks
 
+
 # total web-pages which redirect/mention url
 def getInlinks(url):
 
-    API_KEY='AIzaSyB5L_ZZZKg9OeOVLQpmfOiqaHZMg8r9FCc'
+    API_KEY = 'AIzaSyB5L_ZZZKg9OeOVLQpmfOiqaHZMg8r9FCc'
     try:
-        uri = ('https://www.googleapis.com/customsearch/v1?key='+
-        API_KEY+ '&cx=017576662512468239146:omuauf_lfve&q=link:'+
-        url.getoriginalurl())
+        uri = ('https://www.googleapis.com/customsearch/v1?key=' + API_KEY +
+               '&cx=017576662512468239146:omuauf_lfve&q=link:' +
+               url.getoriginalurl())
         uri = Urlattributes(uri)
         txt = uri.gettext()
         # except WebcredError as e:
         # 	raise WebcredError(e.message)
     except:
-    	raise WebcredError('GoogleApi limit is exceeded')
+        raise WebcredError('GoogleApi limit is exceeded')
 
     # txt=unicodedata.normalize('NFKD', txt).encode('ascii','ignore')
 
     for line in txt.splitlines():
-    	if "totalResults" in line:
-    		break
+        if "totalResults" in line:
+            break
     try:
-    	inlinks=int(re.sub("[^0-9]", "", line))
+        inlinks = int(re.sub("[^0-9]", "", line))
     except:
-    	raise WebcredError('Inlinks are hard to get for this URL')
+        raise WebcredError('Inlinks are hard to get for this URL')
 
     return inlinks
 
+
 '''install phantomjs and have yslow.js in the path to execute'''
+
+
 def getPageloadtime(url):
     # pdb.set_trace()
     try:
-        response=os.popen('phantomjs yslow.js --info basic '+ url.geturl()).read()
-        response=json.loads(response.split('\n')[1])
-        return (int)(response['lt'])/((int)(response['r']))
+        response = os.popen('phantomjs yslow.js --info basic ' +
+                            url.geturl()).read()
+        response = json.loads(response.split('\n')[1])
+        return (int)(response['lt']) / ((int)(response['r']))
     except ValueError:
         raise webcredError('FAIL to load')
     except:
         raise webcredError('Fatal error')
+
 
 def dimapi(url, api):
     # REVIEW

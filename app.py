@@ -1,15 +1,15 @@
-from flask import Flask, render_template, request
-from flask import jsonify
-from utils.utils import WebcredError
-from utils.utils import Captcha
-from utils.utils import Webcred
-import time
-import subprocess
 import os
+import subprocess
+import time
+
+from flask import Flask, jsonify, render_template, request
+
+from utils.utils import Captcha, Webcred, WebcredError
 
 app = Flask(__name__)
 
-@app.route("/start",methods=['GET'])
+
+@app.route("/start", methods=['GET'])
 def start():
 
     addr = request.environ.get('REMOTE_ADDR')
@@ -27,18 +27,21 @@ def start():
         data = Webcred()
         data = data.assess(request)
     except WebcredError as e:
-        data =  e.message
+        data = e.message
 
     data = jsonify(data)
     return data
+
 
 @app.route("/")
 def index():
     return render_template("index.html")
 
+
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html'), 404
+
 
 def collectData(url, request):
 
@@ -52,6 +55,7 @@ def collectData(url, request):
 
     print dt
     return dt
+
 
 def appinfo(url=None):
     pid = os.getpid()
@@ -70,7 +74,6 @@ def appinfo(url=None):
 
 if __name__ == "__main__":
     app.run(threaded=True, host='0.0.0.0', debug=True)
-
     '''
     BELOW ARE THE WORKER FUNCTIONS TO COLLECTDATA
     '''

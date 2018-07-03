@@ -1,9 +1,10 @@
-import csv
-import StringIO
 import cStringIO
+import csv
 import json
 import operator
 import pdb
+import StringIO
+
 
 class Pipeline(object):
 
@@ -25,13 +26,13 @@ class Pipeline(object):
                     header[key] += 1
             # except:
             #     pass
-                # pdb.set_trace()
+            # pdb.set_trace()
 
         result = []
         # pdb.set_trace()
 
-        header = sorted(header.items(), key=operator.itemgetter(1),
-                        reverse=True)
+        header = sorted(
+            header.items(), key=operator.itemgetter(1), reverse=True)
         for key in header:
             result.append(key[0])
         # pdb.set_trace()
@@ -57,9 +58,12 @@ class Pipeline(object):
             what action to take. If it is set to 'raise' a ValueError is
             raised. If it is set to 'ignore', extra values in the dictionary
             are ignored.'''
-            writer = csv.DictWriter(csv_output, fieldnames=csv_headers,
-                                    restval='Field NA', extrasaction='raise',
-                                    dialect='excel')
+            writer = csv.DictWriter(
+                csv_output,
+                fieldnames=csv_headers,
+                restval='Field NA',
+                extrasaction='raise',
+                dialect='excel')
             writer.writeheader()
             for data in data_list:
                 for key in data.keys():
@@ -71,9 +75,9 @@ class Pipeline(object):
 
                 writer.writerow(data)
         except IOError as (errno, strerror):
-                print("I/O error({0}): {1}".format(errno, strerror))
+            print("I/O error({0}): {1}".format(errno, strerror))
 
-        data =  csv_output.getvalue()
+        data = csv_output.getvalue()
         csv_output.close()
         return data
 
@@ -90,8 +94,8 @@ class Pipeline(object):
         self.filter_keys(data=data)
         # temp func to get good json data
         for index in range(len(data)):
-            for k,v in data[index].items():
-                if v=="Null":
+            for k, v in data[index].items():
+                if v == "Null":
                     data[index][k] = 0
 
         return data
