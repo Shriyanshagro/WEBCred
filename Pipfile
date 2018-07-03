@@ -14,7 +14,7 @@ isort = "*"
 yapf = "*"
 numpy = "*"
 "flake8" = "*"
-# http://flake8.pycqa.org/en/latest/user/using-hooks.html
+"html2text" = "*"
 
 [dev-packages]
 

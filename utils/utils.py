@@ -1,16 +1,20 @@
 from bs4 import BeautifulSoup
-from datetime import datetime as dt
+from datetime import datetime
+from html2text import html2text
 from urlparse import urlparse
 
-import app
 import json
+import logging
 import re
 import requests
 import statistics
 import threading
 import types
-import urllib2
 import validators
+
+
+logger = logging.getLogger('WEBCred.utils')
+logging.basicConfig(level=logging.INFO)
 
 global patternMatching
 patternMatching = None
@@ -283,8 +287,8 @@ class Normalize(object):
         try:
             # strptime  = string parse time
             # strftime = string format time
-            lastmod = dt.strptime(value, '%Y-%m-%dT%H:%M:%S')
-            dayDiffernce = (dt.now() - lastmod).days
+            lastmod = datetime.strptime(value, '%Y-%m-%dT%H:%M:%S')
+            dayDiffernce = (datetime.now() - lastmod).days
             return dayDiffernce
         except:
             # in case of ValueError, lastmod will sum to WEBcred Score
@@ -420,13 +424,13 @@ class Urlattributes(object):
         if url:
             if not validators.url(url):
                 raise WebcredError('Provide a valid url')
-            self.originalUrl = self.url = str(url)
+            self.originalUrl = self.url = url
+
             # case of redirections
             resp = self.getrequests()
-            self.url = str(resp.geturl())
+            self.url = resp.url
+
             self.getsoup()
-            # if url!= self.url:
-            #     print 'redirected', url,' >> ', self.url
         else:
             raise WebcredError('Provide a url')
 
@@ -459,37 +463,55 @@ class Urlattributes(object):
         # with self.lock:
         if not self.urllibreq:
             try:
-                # binding the request
-                # print self.url
-                req = urllib2.Request(self.url)
-                key = self.gethdr().keys()[0]
-                val = self.gethdr()[key]
-                req.add_header(key, val)
-                self.urllibreq = urllib2.urlopen(req)
+                self.urllibreq = requests.get(url=self.url)
             except:
-                raise WebcredError('Error in binding req to urllib2')
+                raise WebcredError('Error in binding req to given url')
 
         # print self.urllibreq.geturl()
         return self.urllibreq
 
+    def clean_html(self, html):
+        """
+        Copied from NLTK package.
+        Remove HTML markup from the given string.
+
+        :param html: the HTML string to be cleaned
+        :type html: str
+        :rtype: str
+        """
+
+        # First we remove inline JavaScript/CSS:
+        cleaned = re.sub(
+            r"(?is)<(script|style).*?>.*?(</\1>)", "", html.strip()
+        )
+        # Then we remove html comments.
+        # This has to be done before removing regular
+        # tags since comments can contain '>' characters.
+        cleaned = re.sub(r"(?s)<!--(.*?)-->[\n]?", "", cleaned)
+        # Next we can remove the remaining tags:
+        cleaned = re.sub(r"(?s)<.*?>", " ", cleaned)
+        # Finally, we deal with whitespace
+        cleaned = re.sub(r"&nbsp;", " ", cleaned)
+        cleaned = re.sub(r"  ", " ", cleaned)
+        cleaned = re.sub(r"  ", " ", cleaned)
+        return cleaned.strip()
+
     def gettext(self):
         if not self.text:
             try:
-                self.text = self.getrequests().read()
+                text = self.getrequests().text
+                text = self.clean_html(text)
+                self.text = html2text(text)
             except WebcredError as e:
                 raise WebcredError(e.message)
 
-            # try:
-            #     self.text = self.text.decode(url.getheader(
-            #     ).get('content-type').split(';')[1].split('=')[1])
-            # except:
-            #     self.text = self.text.decode('UTF-8')
         return self.text
 
     def getsoup(self):
         # with self.lock:
         # if not self.soup:
-        data = self.gettext()
+        # get html dump
+        data = self.getrequests().text
         try:
             self.soup = BeautifulSoup(data, "html.parser")
         except:
@@ -547,6 +569,7 @@ class MyThread(threading.Thread):
 
         threading.Thread.__init__(self)
         from features import surface
+        import app
 
         if Method and Module == 'api':
             self.func = getattr(surface, Method)
@@ -617,15 +640,19 @@ class Captcha(object):
 class Webcred(object):
     def assess(self, request):
         from features import surface
+        now = datetime.now()
 
         if not isinstance(request, dict):
             request = dict(request.args)
+
         try:
             data = {}
             req = {}
             req['args'] = {}
             percentage = {}
             hyperlinks_attributes = ['contact', 'email', 'help', 'sitemap']
+
+            # map feature to function name
             apiList = {
                 'lastmod': ['getDate', '', ''],
                 'domain': ['getDomain', '', ''],
@@ -644,6 +671,7 @@ class Webcred(object):
                 'site': ['']
             }
 
+            # get percentage of each feature
             for keys in apiList.keys():
                 if request.get(keys, None):
                     # because request.args is of ImmutableMultiDict form
@@ -662,10 +690,8 @@ class Webcred(object):
             req['args']['wot'] = "true"
             data['Url'] = req['args']['site']
 
-            if str(request.get('genre')[0]) == 'other':
-                data['Genre'] = str(request.get('other-genre')[0])
-            else:
-                data['Genre'] = str(request.get('genre')[0])
+            # get genre
+            data['Genre'] = str(request.get('genre', ['other'])[0])
 
             site = Urlattributes(url=req['args'].get('site', None))
 
@@ -675,7 +701,6 @@ class Webcred(object):
             # site is not a WEBCred parameter
             del req['args']['site']
             threads = []
-
             for keys in req['args'].keys():
                 if str(req['args'].get(keys, None)) == "true":
                     thread = MyThread(
@@ -709,7 +734,7 @@ class Webcred(object):
                     break
                 number += 1
 
-            maxTime = 130
+            maxTime = 180
             for t in threads:
                 try:
                     t.join(maxTime)
@@ -720,7 +745,7 @@ class Webcred(object):
                     data[t.getName()
                          ] = 'TimeOut Error, Max {} sec'.format(maxTime)
                 finally:
-                    print t.getName(), " = ", data[t.getName()]
+                    logger.debug(t.getName(), " = ", data[t.getName()])
 
         except WebcredError as e:
             data['Error'] = e.message
@@ -731,6 +756,9 @@ class Webcred(object):
                 site.freemem()
             finally:
                 data = self.webcredScore(data, percentage)
+                now = str((datetime.now() - now).total_seconds())
+                logger.info(data['Url'])
+                logger.info(now)
                 return data
 
     def webcredScore(self, data, percentage):

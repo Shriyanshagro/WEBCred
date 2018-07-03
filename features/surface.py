@@ -61,6 +61,7 @@ def getWot(url):
         return 'NA'
 
 
+# TODO: better api
 def getResponsive(url):
     result = (
         "http://tools.mercenie.com/responsive-check/api/?format=json&url=" +
@@ -225,6 +226,7 @@ def getLangcount(url):
     return count
 
 
+# TODO: think about this
 def getImgratio(url):
 
     total_img_size = 0
@@ -322,6 +324,7 @@ def getCookie(url):
     return 'No'
 
 
+# TODO: relook at it's implementation
 def getMisspelled(url):
     # pdb.set_trace()
     text = url.gettext()
@@ -361,6 +364,7 @@ def getMisspelled(url):
     return count
 
 
+# TODO: Relook at this
 def getDate(url):
     # pdb.set_trace()
     try:
@@ -508,6 +512,7 @@ def getInlinks(url):
 '''install phantomjs and have yslow.js in the path to execute'''
 
 
+# TODO: re-implement this
 def getPageloadtime(url):
     # pdb.set_trace()
     try:
