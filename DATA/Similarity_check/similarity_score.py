@@ -1,10 +1,9 @@
 import sys
 sys.path.insert(0,r'../../')
-import urllib, sys, bs4
-from pipeline import Pipeline
+import urllib, bs4
+from utils.pipeline import Pipeline
 import numpy as np
 import json
-import fnmatch
 import types
 import statistics
 import cPickle

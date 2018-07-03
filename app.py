@@ -1,21 +1,11 @@
-from flask import Flask, abort, flash, redirect, render_template, request
-from flask import url_for, jsonify, make_response
-from utils import WebcredError
-from utils import Urlattributes
-from utils import MyThread
-from utils import Captcha
-from utils import Webcred
-import utils
-import UserDict
-import pdb
-import json
-import threading
+from flask import Flask, render_template, request
+from flask import jsonify
+from utils.utils import WebcredError
+from utils.utils import Captcha
+from utils.utils import Webcred
 import time
-from random import randint
-from datetime import datetime
 import subprocess
 import os
-import gc
 
 app = Flask(__name__)
 
@@ -29,8 +19,9 @@ def start():
         response_captcha = Captcha(ip=addr, resp=g_recaptcha_response)
 
     if not g_recaptcha_response or not response_captcha.check():
-        result = "Robot not allowed"
-        return result
+        pass
+        # result = "Robot not allowed"
+        # return result
 
     try:
         data = Webcred()
@@ -78,7 +69,7 @@ def appinfo(url=None):
 
 
 if __name__ == "__main__":
-    app.run(threaded=True, host='0.0.0.0', debug=False)
+    app.run(threaded=True, host='0.0.0.0', debug=True)
 
     '''
     BELOW ARE THE WORKER FUNCTIONS TO COLLECTDATA
@@ -116,7 +107,7 @@ if __name__ == "__main__":
     #     new_id = 'data.{}.{:04d}'.format(
     #             now,
     #             randint(0, 9999))
-    #     new_id = 'DATA/' + str('data2')+'.json'
+    #     new_id = 'DATA/json/' + str('data2')+'.json'
     #
     #     data_file = open(new_id,'r')
     #     tempData = data_file.readlines()
@@ -136,7 +127,7 @@ if __name__ == "__main__":
     #                 counter += 1
     #
     # if not data:
-    #     file_ = 'DATA/data2.json'
+    #     file_ = 'DATA/json/data2.json'
     #     file_ = open(file_, 'r').read()
     #     file_ = file_.split('\n')
     #
@@ -204,7 +195,7 @@ if __name__ == "__main__":
     #     data = f.readlines()
     #     pipe = Pipeline()
     #     jsonData = pipe.converttojson(data)
-    #     file_ = 'DATA/data.json'
+    #     file_ = 'DATA/json/data.json'
     #     file_ = open(file_, 'a')
     #     for element in jsonData:
     #         element = json.dumps(element) + '\n'

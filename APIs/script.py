@@ -122,7 +122,7 @@ def check_language(url):
     global iso_lang_flag,iso_array
     if iso_lang_flag==0:
         # print "scanning array"
-        iso = open("lang_iso.txt", "r")
+        iso = open("APIs/lang_iso.txt", "r")
         iso_array = iso.read().split(",")
         iso.close()
         iso_lang_flag=1
