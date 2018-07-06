@@ -9,21 +9,25 @@ Collect Urls from urls.txt file
 Require Phantom.Js and yslow.js(in working directory)
 Currently throwing data in CSV file generated in Working
 '''
-import json
-import os
-import re
-import threading
-import unicodedata
-import urllib2
-from urlparse import urlparse
-
-import requests
 from bs4 import BeautifulSoup
 from nltk.corpus import wordnet
 from nltk.tag import pos_tag
 from nltk.tokenize import word_tokenize
+from urlparse import urlparse
 
-global i, urls, check_hyperlink, check_ratio, check_link_ads, broken_links, cookie, language, spell_check, ads_list_flag, ads_list, iso_lang_flag, iso_array
+import json
+import os
+import re
+import requests
+import threading
+import unicodedata
+import urllib2
+
+
+global i, urls, check_hyperlink, check_ratio, \
+    check_link_ads, broken_links, cookie, language,\
+    spell_check, ads_list_flag, ads_list, iso_lang_flag,\
+    iso_array
 i = 0
 ads_list = []
 iso_lang_flag = 0
@@ -45,7 +49,11 @@ temp.close()
 
 # file to be edited
 temp2 = open('data.csv', 'w')
-string = "URL , " + "Contact , " + "Email , " + "Help , " + "Recommend , " + "Sitemap , " + "Text:Page Ratio , " + "Ad Count , " + "Broken Links , " + 'Cookies , ' + "Total supported Lang , " + "Misspelled words , " + "Last Modified , " + "Domain , " + "Inlinks , " + "Oulinks , "
+string = "URL , " + "Contact , " + "Email , " +\
+         "Help , " + "Recommend , " + "Sitemap , " +\
+         "Text:Page Ratio , " + "Ad Count , " + "Broken Links , " +\
+         'Cookies , ' + "Total supported Lang , " + "Misspelled words , " +\
+         "Last Modified , " + "Domain , " + "Inlinks , " + "Oulinks , "
 temp2.write(string + '\n')
 
 
@@ -70,9 +78,11 @@ def check_hyperlinks(url):
         'sitemap': 'Page NA'
     }
 
-    # need to specify header for scrapping otherwise some websites doesn't allow bot to scrap
+    # need to specify header for scrapping otherwise some
+    # websites doesn't allow bot to scrap
     hdr = {'User-Agent': 'Mozilla/5.0'}
-    # You should use the HEAD Request for this, it asks the webserver for the headers without the body.
+    # You should use the HEAD Request for this,
+    # it asks the webserver for the headers without the body.
     try:
         raw = requests.get(url, headers=hdr)
     except:
@@ -89,16 +99,16 @@ def check_hyperlinks(url):
         'recommend': 'NA',
         'sitemap': 'NA'
     }
-    for link in soup.find_all(
-            'a', string=re.compile("contact", re.I), href=True):
+    for link in soup.find_all('a', string=re.compile("contact", re.I),
+                              href=True):
         links = link.get('href')
         if links:
             # print 'contact',
             data['contact'] = 1
             break
 
-    for link in soup.find_all(
-            'a', string=re.compile("email", re.I), href=True):
+    for link in soup.find_all('a', string=re.compile("email", re.I),
+                              href=True):
         links = link.get('href')
         if links:
             # print 'email',
@@ -112,16 +122,16 @@ def check_hyperlinks(url):
             data['help'] = 1
             break
 
-    for link in soup.find_all(
-            'a', string=re.compile("recommend", re.I), href=True):
+    for link in soup.find_all('a', string=re.compile("recommend", re.I),
+                              href=True):
         links = link.get('href')
         if links:
             # print 'recommend',
             data['recommend'] = 1
             break
 
-    for link in soup.find_all(
-            'a', string=re.compile("sitemap", re.I), href=True):
+    for link in soup.find_all('a', string=re.compile("sitemap", re.I),
+                              href=True):
         links = link.get('href')
         if links:
             # print 'sitemap',
@@ -143,9 +153,11 @@ def check_language(url):
         iso_lang_flag = 1
 
     count = {"Total supported Lang": "Page NA"}
-    # need to specify header for scrapping otherwise some websites doesn't allow bot to scrap
+    # need to specify header for scrapping otherwise
+    #  some websites doesn't allow bot to scrap
     hdr = {'User-Agent': 'Mozilla/5.0'}
-    # You should use the HEAD Request for this, it asks the webserver for the headers without the body.
+    # You should use the HEAD Request for this,
+    # it asks the webserver for the headers without the body.
     try:
         raw = requests.get(url, headers=hdr)
     except:
@@ -166,7 +178,8 @@ def check_language(url):
             # print tag
             for code in iso_array:
                 if code in tag:
-                    if not code in done.keys():
+                    if code not \
+                            in done.keys():
                         done[code] = 1
                         # print code
                         count += 1
@@ -180,9 +193,11 @@ def check_language(url):
 
 def check_size_ratio(url):
     ratio = "Page NA"
-    # need to specify header for scrapping otherwise some websites doesn't allow bot to scrap
+    # need to specify header for scrapping
+    # otherwise some websites doesn't allow bot to scrap
     hdr = {'User-Agent': 'Mozilla/5.0'}
-    # You should use the HEAD Request for this, it asks the webserver for the headers without the body.
+    # You should use the HEAD Request for this,
+    # it asks the webserver for the headers without the body.
     try:
         raw = requests.get(url, headers=hdr)
     except:
@@ -253,12 +268,14 @@ def compile_ads():
         ! GitHub issues: https://github.com/easylist/easylist/issues
         ! GitHub pull requests: https://github.com/easylist/easylist/pulls
         !
-        ! -----------------------General advert blocking filters-----------------------!
+        ! -----------------------General advert blocking filters!
         ! *** easylist:easylist/easylist_general_block.txt ***
     '''
     easylist.close()
     for ads in ads_list_raw:
-        # use of re.escape so that if your text has special characters(#,?,/,\,.), they won't be interpreted as such.
+        # use of re.escape so that
+        # if your text has special characters(#,?,/,\,.),
+        #  they won't be interpreted as such.
         ads = re.compile(re.escape(ads), re.X)
         ads_list.append(ads)
     ads_list_flag = 1
@@ -314,9 +331,11 @@ def check_brokenlinks(url):
         'total_external_links': "Page NA",
         'broken_links': "Page NA"
     }
-    # need to specify header for scrapping otherwise some websites doesn't allow bot to scrap
+    # need to specify header for scrapping otherwise
+    # some websites doesn't allow bot to scrap
     hdr = {'User-Agent': 'Mozilla/5.0'}
-    # You should use the HEAD Request for this, it asks the webserver for the headers without the body.
+    # You should use the HEAD Request for this,
+    # it asks the webserver for the headers without the body.
     try:
         raw = requests.get(url, headers=hdr)
     except:
@@ -335,9 +354,11 @@ def check_brokenlinks(url):
         if href.startswith('http://') or href.startswith('https://'):
             total_external_links += 1
             # now only allowed for external links
-            # header is mentioned because some robots don't allow bot to crawl their pages
+            # header is mentioned because
+            # some robots don't allow bot to crawl their pages
             hdr = {'User-Agent': 'Mozilla/5.0'}
-            # You should use the HEAD Request for this, it asks the webserver for the headers without the body.
+            # You should use the HEAD Request for this,
+            # it asks the webserver for the headers without the body.
             try:
                 raw = requests.head(url, headers=hdr)
             except:
@@ -365,7 +386,8 @@ def check_brokenlinks(url):
 def check_cookie(url):
 
     hdr = {'User-Agent': 'Mozilla/5.0'}
-    # You should use the HEAD Request for this, it asks the webserver for the headers without the body.
+    # You should use the HEAD Request for this,
+    # it asks the webserver for the headers without the body.
     try:
         raw = requests.head(url, headers=hdr)
     except:
@@ -383,7 +405,8 @@ def check_cookie(url):
 def spell_checker(url):
     array = {"Misspelled words": "Page NA", "total words": "Page NA"}
     hdr = {'User-Agent': 'Mozilla/5.0'}
-    # You should use the HEAD Request for this, it asks the webserver for the headers without the body.
+    # You should use the HEAD Request for this,
+    # it asks the webserver for the headers without the body.
     try:
         raw = requests.get(url, headers=hdr)
     except:
@@ -400,7 +423,8 @@ def spell_checker(url):
         'NNP', 'NNPS', 'SYM', 'CD', 'IN', 'TO', 'CC', 'LS', 'POS', '(', ')',
         ':', 'EX', 'FW', 'RP'
     ]
-    # text  = re.split(' {?}| ?:[ -]|\,|\.* |\\n|!|\?|\)|-|\(|!|;|\[|\]|\"|',text)
+    # text  = re.split(' {?}| ?:[ -]|\,|\.* |\\n|!|\?|\)|-
+    # |\(|!|;|\[|\]|\"|',text)
     text = word_tokenize(text)
     tags = []
     # print text
@@ -410,7 +434,8 @@ def spell_checker(url):
         if i[1] not in excluded_tags and i[0] != i[1]:
             tags.append(i[0])
             # print i
-    # tags = [i[0] for i in pos_tag(text.split()) if i[1] not in excluded_tags]
+    # tags = [i[0] for i in pos_tag(text.split()) if
+    # i[1] not in excluded_tags]
 
     total_tags = len(tags)
     # count of undefined words
@@ -420,7 +445,7 @@ def spell_checker(url):
         # print tag
         syns = wordnet.synsets(tag)
         try:
-            defi = syns[0].definition()
+            syns[0].definition()
             # print tag,"=",defi
         except:
             # print tag,"naa ho paayega"
@@ -445,16 +470,14 @@ def getDate(url):
     else:
         try:
             response = urllib2.urlopen(
-                "http://archive.org/wayback/available?url=" + url)
-            data = json.load(response)['archived_snapshots']['closest'][
-                'timestamp']
-            lastmod = 'wr' + '(' + data[0:
-                                        4] + ', ' + data[4:
-                                                         6] + ', ' + data[6:
-                                                                          8] + ', ' + data[8:
-                                                                                           10] + ', ' + data[10:
-                                                                                                             12] + ', ' + data[12:
-                                                                                                                               14] + ')'
+                "http://archive.org/wayback/available?url=" + url
+            )
+            data = json.load(response)['archived_snapshots']['closest'
+                                                             ]['timestamp']
+            lastmod = 'wr' + '(' + data[0:4] + ', ' + data[4:6] + ', ' + data[
+                6:8
+            ] + ', ' + data[8:10] + ', ' + data[10:12] + ', ' + data[12:14
+                                                                     ] + ')'
         except:
             lastmod = 'NA'
     return lastmod
@@ -482,7 +505,8 @@ def getLinks(url):
     r = requests.get(
         'https://www.googleapis.com/customsearch/v1?key=' + API_KEY +
         '&cx=017576662512468239146:omuauf_lfve&q=link:' + url,
-        headers={'User-Agent': 'Mozilla/5.0'})
+        headers={'User-Agent': 'Mozilla/5.0'}
+    )
     txt = r.text
     txt = unicodedata.normalize('NFKD', txt).encode('ascii', 'ignore')
     for line in txt.splitlines():
@@ -512,14 +536,16 @@ def crawler(threadName):
         url = urls[i]
         # print "Started", i
         i += 1
-        if url != "" and not (url.startswith('http://')
-                              or url.startswith('https://')):
+        if url != "" and (not (url.startswith('http://')
+                               or url.startswith('https://'))):
             print "Nope"
         else:
 
-            # need to specify header for scrapping otherwise some websites doesn't allow bot to scrap
+            # need to specify header for scrapping otherwise
+            #  some websites doesn't allow bot to scrap
             # hdr = {'User-Agent': 'Mozilla/5.0'}
-            # You should use the HEAD Request for this, it asks the webserver for the headers without the body.
+            # You should use the HEAD Request for this,
+            # it asks the webserver for the headers without the body.
             # raw  = requests.get(url,headers=hdr)
 
             # data = raw.text
@@ -531,7 +557,10 @@ def crawler(threadName):
 
             string = str(url)
             # Contact,Help,Email,Recommendations,Sitemap - check for hyperlink
-            # idea ->  Scrap web>> parse using Soup>> find_all_lines(having='anchor tag', string=="contacts|Help|Email|Recommendations|Sitemap")>> check if href?>>
+            # idea ->  Scrap web>> parse using Soup>>
+            # find_all_lines(having='anchor tag',
+            # string=="contacts|Help|Email|Recommendations|Sitemap")>>
+            #  check if href?>>
             if check_hyperlink == 1:
                 count = check_hyperlinks(url)
                 # print url,count

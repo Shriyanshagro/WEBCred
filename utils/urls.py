@@ -2,6 +2,7 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 from html2text import html2text
 from urlparse import urlparse
+from utils.essentials import WebcredError
 
 import json
 import logging
@@ -11,7 +12,6 @@ import statistics
 import threading
 import types
 import validators
-
 
 logger = logging.getLogger('WEBCred.utils')
 logging.basicConfig(level=logging.INFO)
@@ -74,18 +74,6 @@ normalizeCategory = {
 }
 
 
-# A class to catch error and exceptions
-class WebcredError(Exception):
-    """An error happened during assessment of site.
-    """
-
-    def __init__(self, message):
-        self.message = message
-
-    def __str__(self):
-        return repr(self.message)
-
-
 # A class for pattern matching using re lib
 class PatternMatching(object):
     def __init__(self, lang_iso=None, ads_list=None):
@@ -106,7 +94,7 @@ class PatternMatching(object):
             except:
                 raise WebcredError('Unable to open {} file'.format(lang_iso))
         else:
-            raise WebcredError('Provide Language iso file')
+            logger.debug('Provide Language iso file')
 
         if ads_list:
             try:
@@ -120,7 +108,7 @@ class PatternMatching(object):
             except:
                 raise WebcredError('Unable to open {} file'.format(ads_list))
         else:
-            raise WebcredError('Provide a good ads list')
+            logger.debug('Provide a good ads list')
 
     def getIsoList(self):
         return self.isoList
@@ -329,11 +317,13 @@ class Normalize(object):
 
 # A class to use extract url attributes
 class Urlattributes(object):
+    # HACK come back and do this properly
     try:
         # TODO fetch ads list dynamically from org
         if not patternMatching:
             patternMatching = PatternMatching(
-                lang_iso='APIs/lang_iso.txt', ads_list='APIs/easylist.txt'
+                lang_iso='data/essentials/lang_iso.txt',
+                ads_list='data/essentials/easylist.txt'
             )
             print 'end patternMatching'
 
@@ -342,13 +332,13 @@ class Urlattributes(object):
         if not normalizedData:
             normalizedData = {}
             # read existing data
-            old_data = 'DATA/json/data2.json'
+            old_data = 'data/json/data2.json'
             old_data = open(old_data, 'r').read()
             old_data = old_data.split('\n')
-            new_data = 'DATA/json/new_data.json'
+            new_data = 'data/json/new_data.json'
             new_data = open(new_data, 'r').read()
             new_data = new_data.split('\n')
-            re_data = 'DATA/json/re_data.json'
+            re_data = 'data/json/re_data.json'
             re_data = open(re_data, 'r').read()
             re_data = re_data.split('\n')
 
@@ -510,7 +500,7 @@ class Urlattributes(object):
     def getsoup(self):
         # with self.lock:
         # if not self.soup:
-        # get html dump
+        # get html data
         data = self.getrequests().text
         try:
             self.soup = BeautifulSoup(data, "html.parser")
@@ -560,241 +550,3 @@ class Urlattributes(object):
 
     def freemem(self):
         del self
-
-
-class MyThread(threading.Thread):
-    def __init__(
-            self, Module='api', Method=None, Name=None, Url=None, Args=None
-    ):
-
-        threading.Thread.__init__(self)
-        from features import surface
-        import app
-
-        if Method and Module == 'api':
-            self.func = getattr(surface, Method)
-        elif Method and Module == 'app':
-            self.func = getattr(app, Method)
-        else:
-            raise WebcredError('Provide method')
-
-        if Name:
-            self.name = Name
-        else:
-            raise WebcredError('Provide name')
-
-        if Url:
-            self.url = Url
-        else:
-            raise WebcredError('Provide url')
-
-        if Args and Args != '':
-            self.args = Args
-        else:
-            self.args = None
-
-    def run(self):
-        try:
-            # print 'Fetching {}'.format(self.name)
-            if self.args:
-                self.result = self.func(self.url, self.args)
-            else:
-                self.result = self.func(self.url)
-            # print 'Got {}'.format(self.name)
-        except WebcredError as e:
-            self.result = e.message
-        except:
-            # if self.args:
-            #     self.result = self.func(self.url, self.args)
-            # else:
-            #     self.result = self.func(self.url)
-            self.result = '+++'
-
-    def getResult(self):
-        return self.result
-
-    # clear url if Urlattributes object
-    def freemem(self):
-        self.url.freemem()
-
-
-class Captcha(object):
-    def __init__(self, resp=None, ip=None):
-        google_api = 'https://www.google.com/recaptcha/api/siteverify'
-        self.url = google_api
-        self.key = '6LcsiCoUAAAAAL9TssWVBE0DBwA7pXPNklXU42Rk'
-        self.resp = resp
-        self.ip = ip
-        self.params = {
-            'secret': self.key,
-            'response': self.resp,
-            'remoteip': self.ip
-        }
-
-    def check(self):
-        result = requests.post(url=self.url, params=self.params).text
-        result = json.loads(result)
-        return result.get('success', None)
-
-
-class Webcred(object):
-    def assess(self, request):
-        from features import surface
-        now = datetime.now()
-
-        if not isinstance(request, dict):
-            request = dict(request.args)
-
-        try:
-            data = {}
-            req = {}
-            req['args'] = {}
-            percentage = {}
-            hyperlinks_attributes = ['contact', 'email', 'help', 'sitemap']
-
-            # map feature to function name
-            apiList = {
-                'lastmod': ['getDate', '', ''],
-                'domain': ['getDomain', '', ''],
-                'inlinks': ['getInlinks', '', ''],
-                'outlinks': ['getOutlinks', '', ''],
-                'hyperlinks': ['getHyperlinks', hyperlinks_attributes, ''],
-                'imgratio': ['getImgratio', '', ''],
-                'brokenlinks': ['getBrokenlinks', '', ''],
-                'cookie': ['getCookie', '', ''],
-                'langcount': ['getLangcount', '', ''],
-                'misspelled': ['getMisspelled', '', ''],
-                'wot': ['getWot', '', ''],
-                'responsive': ['getResponsive', '', ''],
-                'ads': ['getAds', '', ''],
-                'pageloadtime': ['getPageloadtime', '', ''],
-                'site': ['']
-            }
-
-            # get percentage of each feature
-            for keys in apiList.keys():
-                if request.get(keys, None):
-                    # because request.args is of ImmutableMultiDict form
-                    if isinstance(request.get(keys, None), list):
-                        req['args'][keys] = str(request.get(keys)[0])
-                        perc = keys + "Perc"
-                        if request.get(perc):
-                            percentage[keys] = request.get(perc)[0]
-                    else:
-                        req['args'][keys] = request.get(keys)
-                        perc = keys + "Perc"
-                        if request.get(perc):
-                            percentage[keys] = request.get(perc)
-
-            # to show wot ranking
-            req['args']['wot'] = "true"
-            data['Url'] = req['args']['site']
-
-            # get genre
-            data['Genre'] = str(request.get('genre', ['other'])[0])
-
-            site = Urlattributes(url=req['args'].get('site', None))
-
-            if data['Url'] != site.geturl():
-                data['redirected'] = site.geturl()
-
-            # site is not a WEBCred parameter
-            del req['args']['site']
-            threads = []
-            for keys in req['args'].keys():
-                if str(req['args'].get(keys, None)) == "true":
-                    thread = MyThread(
-                        Method=apiList[keys][0],
-                        Name=keys,
-                        Url=site,
-                        Args=apiList[keys][1]
-                    )
-                    thread.start()
-                    threads.append(thread)
-
-            # HACK 13 is calculated number, refer to index.html, where new
-            # dimensions are dynamically added
-            number = 13
-            while True:
-                dim = "dimension" + str(number)
-                API = "api" + str(number)
-                if dim in request.keys():
-                    try:
-                        data[request.get(dim)[0]] = surface.dimapi(
-                            site.geturl(),
-                            request.get(API)[0]
-                        )
-                        perc = API + "Perc"
-                        percentage[dim] = request.get(perc)[0]
-                    except WebcredError as e:
-                        data[request.get(dim)[0]] = e.message
-                    except:
-                        data[request.get(dim)[0]] = "Fatal ERROR"
-                else:
-                    break
-                number += 1
-
-            maxTime = 180
-            for t in threads:
-                try:
-                    t.join(maxTime)
-                    data[t.getName()] = t.getResult()
-                except WebcredError as e:
-                    data[t.getName()] = e.message
-                except:
-                    data[t.getName()
-                         ] = 'TimeOut Error, Max {} sec'.format(maxTime)
-                finally:
-                    logger.debug(t.getName(), " = ", data[t.getName()])
-
-        except WebcredError as e:
-            data['Error'] = e.message
-        except:
-            data['Error'] = 'Fatal error'
-        finally:
-            try:
-                site.freemem()
-            finally:
-                data = self.webcredScore(data, percentage)
-                now = str((datetime.now() - now).total_seconds())
-                logger.info(data['Url'])
-                logger.info(now)
-                return data
-
-    def webcredScore(self, data, percentage):
-        global normalizedData
-        global normalizeCategory
-        # score varies from -1 to 1
-        score = 0
-        for k, v in data.items():
-
-            try:
-                if k in normalizeCategory['3'].keys():
-                    name = k + "Norm"
-                    data[name] = normalizedData[k].getnormalizedScore(v)
-                    score += data[name] * float(percentage[k])
-
-                if k in normalizeCategory['2'].keys():
-                    name = k + "Norm"
-                    data[name] = normalizedData[k].getfactoise(v)
-                    score += data[name] * float(percentage[k])
-
-                if k in normalizeCategory['misc'].keys():
-                    sum_hyperlinks_attributes = 0
-                    try:
-                        for key, value in v.items():
-                            sum_hyperlinks_attributes += value
-                        name = k + "Norm"
-                        data[name] = normalizedData[k].getnormalizedScore(
-                            sum_hyperlinks_attributes
-                        )
-                        score += data[name] * float(percentage[k])
-                    except:
-                        # TimeOut error clause
-                        pass
-            except:
-                pass
-        data["WEBCred Score"] = score / 100
-
-        # REVIEW add Weightage score for new dimensions
-        return data

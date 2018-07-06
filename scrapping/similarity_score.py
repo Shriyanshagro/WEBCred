@@ -1,6 +1,6 @@
 from datetime import datetime as dt
+from utils.essentials import WebcredError
 from utils.pipeline import Pipeline
-from utils.utils import WebcredError
 
 import bs4
 import copy
@@ -391,10 +391,8 @@ if __name__ == '__main__':
         normalize()
         global genre_weightage
         # read data
-        genre_labelled = "/home/shriyanshagro/Academics/Research/WEBCred" \
-                         "/DATA/Similarity_check/Genre-labelled Data.csv"
-        score_file = "/home/shriyanshagro/Academics/Research/WEBCred/" \
-                     "DATA/Similarity_check/validation.csv"
+        genre_labelled = "data/Similarity_check/Genre-labelled Data.csv"
+        score_file = "data/Similarity_check/validation.csv"
 
         f = open(genre_labelled, 'r')
         data = f.readlines()
@@ -480,13 +478,13 @@ if __name__ == '__main__':
                 # print WEBCredScoreSet, alexaScoreSet, wotScoreSet
 
             # with open(r"WEBCredScoreSet.pickle", "w") as output_file:
-            #     cPickle.dump(WEBCredScoreSet, output_file)
+            #     cPickle.data(WEBCredScoreSet, output_file)
             #
             # with open(r"alexaScoreSet.pickle", "w") as output_file:
-            #     cPickle.dump(alexaScoreSet, output_file)
+            #     cPickle.data(alexaScoreSet, output_file)
             #
             # with open(r"wotScoreSet.pickle", "w") as output_file:
-            #     cPickle.dump(wotScoreSet, output_file)
+            #     cPickle.data(wotScoreSet, output_file)
             #
 
             alexaSimilarity = np.corrcoef(

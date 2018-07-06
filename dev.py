@@ -3,11 +3,11 @@
 BELOW ARE THE WORKER FUNCTIONS TO COLLECTDATA
 '''
 
+from app import collectData
 from datetime import datetime
 from random import randint
-from utils import utils
+from utils import urls
 from utils.pipeline import Pipeline
-from utils.utils import Webcred
 
 import json
 import logging
@@ -47,7 +47,7 @@ if work == 'collectData':
 
     now = datetime.now().time().isoformat()
     new_id = 'data.{}.{:04d}'.format(now, randint(0, 9999))
-    new_id = 'DATA/json/' + str(new_id) + '.json'
+    new_id = 'data/json/' + str(new_id) + '.json'
 
     # while we recurring over urls
     # data_file = open(new_id, 'r')
@@ -58,8 +58,8 @@ if work == 'collectData':
     # tempcounter = counter = len(tempData)
     for url in links[:10]:
         request['site'] = url[:-2]
-        dt = Webcred()
-        dt = dt.assess(request)
+        dt = collectData()
+        dt = dt.assess()
         data_file = open(new_id, 'a')
         data.append(dt)
         content = json.dumps(dt) + '\n'
@@ -67,11 +67,9 @@ if work == 'collectData':
         data_file.close()
 
 if not data:
-    file_ = 'DATA/json/data2.json'
+    file_ = 'data/json/data2.json'
     file_ = open(file_, 'r').read()
     file_ = file_.split('\n')
-
-    import json
 
     truncate_char = 0
     for element in file_[:-1]:
@@ -114,13 +112,13 @@ if work == 'normalize':
     }
 
     for k in normalizeCategory['3'].items():
-        norm = utils.Normalize(data, k)
+        norm = urls.Normalize(data, k)
         data = norm.normalize()
     # pdb.set_trace()
 
     for k in normalizeCategory['2'].items():
         # pdb.set_trace()
-        norm = utils.Normalize(data, k)
+        norm = urls.Normalize(data, k)
         data = norm.factoise()
 
     for index in range(len(data)):
@@ -150,7 +148,7 @@ if work == 'json':
     data = f.readlines()
     pipe = Pipeline()
     jsonData = pipe.converttojson(data)
-    file_ = 'DATA/json/data.json'
+    file_ = 'data/json/data.json'
     file_ = open(file_, 'a')
     for element in jsonData:
         element = json.dumps(element) + '\n'

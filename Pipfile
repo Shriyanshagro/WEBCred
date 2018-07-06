@@ -10,11 +10,14 @@ validators = "*"
 flask = "*"
 nltk = "*"
 requests = "*"
-isort = "*"
 yapf = "*"
 numpy = "*"
-"flake8" = "*"
 "html2text" = "*"
+flask-sqlalchemy = "*"
+sqlalchemy = "*"
+"psycopg2-binary" = "*"
+isort = "*"
+"flake8" = "*"
 
 [dev-packages]
 

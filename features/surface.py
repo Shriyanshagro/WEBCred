@@ -3,9 +3,9 @@ from datetime import datetime
 from nltk.corpus import wordnet
 from nltk.tag import pos_tag
 from nltk.tokenize import word_tokenize
-from utils.utils import MyThread
-from utils.utils import Urlattributes
-from utils.utils import WebcredError
+from utils.essentials import MyThread
+from utils.essentials import WebcredError
+from utils.urls import Urlattributes
 
 import ast
 import json
@@ -248,7 +248,11 @@ def getImgratio(url):
         if validators.url(uri):
             try:
                 uri = Urlattributes(uri)
-                t = MyThread(Method='funcImgratio', Name='Imgratio', Url=uri)
+                Method = 'funcImgratio'
+                Name = 'Imgratio'
+                Url = uri
+                func = getattr(Method)
+                t = MyThread(func, Name, Url)
                 t.start()
                 threads.append(t)
             except WebcredError as e:
@@ -434,9 +438,11 @@ def getBrokenlinks(url):
             uri = url.geturl() + uri
 
         if validators.url(uri):
-            t = MyThread(
-                Method='funcBrokenllinks', Name='brokenlinks', Url=uri
-            )
+            Method = 'funcBrokenllinks'
+            Name = 'brokenlinks'
+            Url = uri
+            func = getattr(Method)
+            t = MyThread(func, Name, Url)
             t.start()
             threads.append(t)
 
