@@ -4,6 +4,7 @@ from html2text import html2text
 from urlparse import urlparse
 from utils.essentials import WebcredError
 
+import arrow
 import json
 import logging
 import re
@@ -13,8 +14,9 @@ import threading
 import types
 import validators
 
-logger = logging.getLogger('WEBCred.utils')
-logging.basicConfig(level=logging.INFO)
+
+logger = logging.getLogger('WEBCred.urls')
+logging.basicConfig(level=logging.DEBUG)
 
 global patternMatching
 patternMatching = None
@@ -331,6 +333,7 @@ class Urlattributes(object):
         global normalizeCategory
         if not normalizedData:
             normalizedData = {}
+            # TODO read data from db
             # read existing data
             old_data = 'data/json/data2.json'
             old_data = open(old_data, 'r').read()
@@ -409,7 +412,8 @@ class Urlattributes(object):
 
         self.hdr = {'User-Agent': 'Mozilla/5.0'}
         self.requests = self.urllibreq = self.soup = self.text = None
-        self.netloc = self.header = self.size = self.domain = None
+        self.netloc = self.header = self.lastmod = self.size = \
+            self.domain = self.loadTime = None
         self.lock = threading.Lock()
         if url:
             if not validators.url(url):
@@ -420,9 +424,11 @@ class Urlattributes(object):
             resp = self.getrequests()
             self.url = resp.url
 
-            self.getsoup()
         else:
             raise WebcredError('Provide a url')
+
+    def getloadtime(self):
+        return self.loadTime
 
     def getoriginalurl(self):
         return self.originalUrl
@@ -453,7 +459,9 @@ class Urlattributes(object):
         # with self.lock:
         if not self.urllibreq:
             try:
+                now = datetime.now()
                 self.urllibreq = requests.get(url=self.url)
+                self.loadTime = int((datetime.now() - now).total_seconds())
             except:
                 raise WebcredError('Error in binding req to given url')
 
@@ -498,9 +506,6 @@ class Urlattributes(object):
         return self.text
 
     def getsoup(self):
-        # with self.lock:
-        # if not self.soup:
-        # get html data
         data = self.getrequests().text
         try:
             self.soup = BeautifulSoup(data, "html.parser")
@@ -547,6 +552,45 @@ class Urlattributes(object):
             except:
                 raise WebcredError('error in retrieving length')
         return self.size
+
+    def getlastmod(self):
+
+        if self.lastmod:
+            return self.lastmod
+
+        try:
+            data = None
+            # fetching data form archive
+            for i in range(10):
+                uri = "http://archive.org/wayback/available?url=" + \
+                      self.geturl()
+                uri = Urlattributes(uri)
+                resp = uri.geturllibreq()
+                if resp.status_code / 100 < 4:
+                    resp = resp.json()
+                    data = arrow.get(
+                        resp['archived_snapshots']['closest']['timestamp'],
+                        'YYYYMMDDHHmmss'
+                    ).timestamp
+                if data:
+                    self.lastmod = data
+                    break
+            if not data:
+                resp = self.geturllibreq()
+                if resp.status_code / 100 < 4:
+                    lastmod = str(resp.headers().getdate('last-modified'))
+                    if lastmod == 'None':
+                        # some page has key 'date' for same
+                        lastmod = str(resp.info().getdate('date'))
+                    lastmod = datetime.strptime(
+                        str(lastmod), '(%Y, %m, %d, %H, %M, %S, %f, %W, %U)'
+                    )
+                    self.lastmod = lastmod.isoformat()
+        except Exception as er:
+            logger.debug(er)
+            self.lastmod = None
+
+        return self.lastmod
 
     def freemem(self):
         del self

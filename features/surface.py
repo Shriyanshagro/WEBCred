@@ -1,5 +1,5 @@
 from ast import literal_eval
-from datetime import datetime
+from dotenv import load_dotenv
 from nltk.corpus import wordnet
 from nltk.tag import pos_tag
 from nltk.tokenize import word_tokenize
@@ -7,11 +7,13 @@ from utils.essentials import MyThread
 from utils.essentials import WebcredError
 from utils.urls import Urlattributes
 
-import ast
-import json
 import os
 import re
+import requests
 import validators
+
+
+load_dotenv()
 
 
 def funcBrokenllinks(url):
@@ -63,20 +65,27 @@ def getWot(url):
 
 # TODO: better api
 def getResponsive(url):
-    result = (
-        "http://tools.mercenie.com/responsive-check/api/?format=json&url=" +
-        url.geturl()
-    )
+
+    api_url = 'https://searchconsole.googleapis.com/v1/urlTestingTools/' \
+              'mobileFriendlyTest:run'
+
+    response = requests.post(
+        api_url,
+        json={
+            'url': url.geturl()
+        },
+        params={
+            'fields': 'mobileFriendliness',
+            'key': os.environ['GOOGLE_API_KEY']
+        }
+    ).json()
+
     try:
-        # pdb.set_trace()
-        uri = Urlattributes(result)
-        result = ast.literal_eval(re.search('({.+})', uri.gettext()).group(0))
-        return result['responsive']
-    except WebcredError as e:
-        raise WebcredError(e.message)
-    except:
-        # pdb.set_trace()
-        return 'Info not NA'
+        state = response['mobileFriendliness']
+    except KeyError:
+        state = response['error']['message']
+
+    return state
 
 
 def getHyperlinks(url, attributes):
@@ -368,47 +377,8 @@ def getMisspelled(url):
     return count
 
 
-# TODO: Relook at this
 def getDate(url):
-    # pdb.set_trace()
-    try:
-        resp = url.geturllibreq()
-    except WebcredError as e:
-        raise WebcredError(e.message)
-    # pdb.set_trace()
-    if resp.code / 100 < 4:
-        try:
-            lastmod = str(resp.info().getdate('last-modified'))
-            if lastmod == 'None':
-                # some page has key 'date' for same
-                lastmod = str(resp.info().getdate('date'))
-            lastmod = datetime.strptime(
-                str(lastmod), '(%Y, %m, %d, %H, %M, %S, %f, %W, %U)'
-            )
-            lastmod = lastmod.isoformat()
-        except:
-            raise WebcredError('Error with Requests')
-    else:
-        try:
-            # fetching data form archive
-            uri = "http://archive.org/wayback/available?url=" + url.geturl()
-            uri = Urlattributes(uri)
-            resp = uri.geturllibreq()
-            data = (
-                json.load(resp)['archived_snapshots']['closest']['timestamp']
-            )
-            lastmod = (
-                'wr' + '(' + data[0:4] + ', ' + data[4:6] + ', ' + data[6:8] +
-                ', ' + data[8:10] + ', ' + data[10:12] + ', ' + data[12:14] +
-                ')'
-            )
-        except WebcredError as e:
-            raise WebcredError(e.message)
-        except:
-            raise WebcredError(
-                'Error in fetching last-modified date from archive'
-            )
-    return lastmod
+    return url.getlastmod()
 
 
 def getDomain(url):
@@ -488,7 +458,7 @@ def getOutlinks(url):
 # total web-pages which redirect/mention url
 def getInlinks(url):
 
-    API_KEY = 'AIzaSyB5L_ZZZKg9OeOVLQpmfOiqaHZMg8r9FCc'
+    API_KEY = os.environ.get('Inlinks_key')
     try:
         uri = (
             'https://www.googleapis.com/customsearch/v1?key=' + API_KEY +
@@ -520,16 +490,18 @@ def getInlinks(url):
 
 # TODO: re-implement this
 def getPageloadtime(url):
+
+    return url.getloadTime()
     # pdb.set_trace()
-    try:
-        response = os.popen('phantomjs yslow.js --info basic ' +
-                            url.geturl()).read()
-        response = json.loads(response.split('\n')[1])
-        return (int)(response['lt']) / ((int)(response['r']))
-    except ValueError:
-        raise WebcredError('FAIL to load')
-    except:
-        raise WebcredError('Fatal error')
+    # try:
+    #     response = os.popen('phantomjs yslow.js --info basic ' +
+    #                         url.geturl()).read()
+    #     response = json.loads(response.split('\n')[1])
+    #     return (int)(response['lt']) / ((int)(response['r']))
+    # except ValueError:
+    #     raise WebcredError('FAIL to load')
+    # except:
+    #     raise WebcredError('Fatal error')
 
 
 def dimapi(url, api):

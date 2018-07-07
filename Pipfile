@@ -18,6 +18,8 @@ sqlalchemy = "*"
 "psycopg2-binary" = "*"
 isort = "*"
 "flake8" = "*"
+arrow = "*"
+python-dotenv = "*"
 
 [dev-packages]
 

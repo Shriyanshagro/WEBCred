@@ -3,3 +3,4 @@ node_modules/*
 jsondata.json
 *.pyc
 *bibtex*
+.env

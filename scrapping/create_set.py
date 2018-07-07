@@ -4,6 +4,8 @@ One can set total sets
 One can set total urls to be present in each set
 '''
 
+import sys
+sys.path.insert(0, '../')
 from random import randint
 from urlparse import urlparse
 from utils.urls import PatternMatching
@@ -12,7 +14,6 @@ import copy
 import logging
 import os
 import shutil
-
 
 logger = logging.getLogger('WEBCred.scrapping')
 logging.basicConfig(level=logging.DEBUG)
@@ -57,7 +58,7 @@ def getSheets(max_sets, common_entries, filterList):
 
     print('preparing sheets')
 
-    urlFile = open('../data/essentials/urls.txt', 'r')
+    urlFile = open('../data/essentials/complete_urls.txt', 'r')
     urlList = urlFile.read().split()
     urlFile.close()
 

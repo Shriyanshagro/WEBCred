@@ -1,34 +1,66 @@
+from dotenv import load_dotenv
 from flask import Flask
-from flask import jsonify
 from flask import render_template
 from flask import request
 from flask_sqlalchemy import SQLAlchemy
 from utils.essentials import WebcredError
+from utils.webcred import apiList
 from utils.webcred import Webcred
 
 import json
+import logging
 import os
+# TODO put me inside env variable
+import pdb
 import requests
 import subprocess
 import time
 
 
+load_dotenv()
+logger = logging.getLogger('WEBCred.app')
+logging.basicConfig(level=logging.INFO)
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://localhost/webcred'
+pdb.set_trace()
+
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DB_URL')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
+'''
+To create our database based off our model, run the following commands
+$ python
+>>> from app import db
+>>> db.create_all()
+>>> exit()'''
+
+table_name = 'features'
 
 
-# Create our database model
+# Our database model
 class Features(db.Model):
-    __tablename__ = "features"
-    id = db.Column(db.Integer, primary_key=True)
-    url = db.Column(db.String(120), unique=True)
+    __tablename__ = table_name
 
-    def __init__(self, url):
-        self.url = url
+    # TODO come back and update column data types
+    id = db.Column(db.Integer, primary_key=True)
+    Url = db.Column(db.String(120), unique=True)
+    redirected = db.Column(db.String(120))
+    genre = db.Column(db.String(120))
+    webcred_score = db.Column(db.String(120))
+    Error = db.Column(db.String(120))
+    assess_time = db.Column(db.String(120))
+    # create columns of features
+    # TODO redefine data type for hyperlinks, dict
+    for key in apiList.keys():
+        exec (key + " = db.Column(db.String(120))")
+        norm = key + 'Norm'
+        exec (norm + " = db.Column(db.String(120))")
+
+    def __init__(self, data):
+        for key in data.keys():
+            setattr(self, key, str(data[key]))
 
     def __repr__(self):
-        return '<URL %r>' % self.url
+        return '<URL %r>' % self.Url
 
 
 class Captcha(object):
@@ -58,8 +90,9 @@ def start():
     response_captcha = Captcha(ip=addr, resp=g_recaptcha_response)
 
     if not response_captcha.check():
-        result = "Robot not allowed"
-        return result
+        pass
+        # result = "Robot not allowed"
+        # return result
 
     data = collectData(request)
 
@@ -79,14 +112,20 @@ def page_not_found(e):
 def collectData(request):
 
     try:
+        engine = db.engine
+        # check existence of table in database
+        if not engine.dialect.has_table(engine, table_name):
+            db.create_all()
+
+        # TODO if column not in table, then add
+
         dt = Webcred(db, Features, request)
         data = dt.assess()
-        data = jsonify(data)
 
     except WebcredError as e:
         data['Error'] = {e.message}
 
-    print data
+    # logger.info(data)
     return data
 
 

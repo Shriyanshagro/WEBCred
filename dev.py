@@ -23,7 +23,7 @@ data = []
 
 if work == 'collectData':
     # all urls
-    link = open('APIs/urls.txt', 'r')
+    link = open('data/essentials/urls.txt', 'r')
     links = link.readlines()
     link.close()
 
@@ -31,17 +31,17 @@ if work == 'collectData':
     request = {
         'lastmod': 'true',
         'domain': 'true',
-        'inlinks': 'false',
-        'outlinks': 'false',
-        'hyperlinks': 'true',
+        'inlinks': 'true',
+        'outlinks': 'true',
+        'hyperlinks': 'false',
         'imgratio': 'true',
-        'brokenlinks': 'false',
-        'cookie': 'false',
+        'brokenlinks': 'true',
+        'cookie': 'true',
         'langcount': 'true',
         'misspelled': 'true',
         'wot': 'true',
         'responsive': 'true',
-        'pageloadtime': 'false',
+        'pageloadtime': 'true',
         'ads': 'true',
     }
 
@@ -56,15 +56,14 @@ if work == 'collectData':
 
     # count = len(links)
     # tempcounter = counter = len(tempData)
-    for url in links[:10]:
+    for url in links[:5]:
         request['site'] = url[:-2]
-        dt = collectData()
-        dt = dt.assess()
-        data_file = open(new_id, 'a')
-        data.append(dt)
-        content = json.dumps(dt) + '\n'
-        data_file.write(content)
-        data_file.close()
+        data = collectData(request)
+        # data_file = open(new_id, 'a')
+        # data.append(dt)
+        # content = json.dumps(dt) + '\n'
+        # data_file.write(content)
+        # data_file.close()
 
 if not data:
     file_ = 'data/json/data2.json'
