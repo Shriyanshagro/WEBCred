@@ -2,7 +2,7 @@ import logging
 import threading
 
 
-logger = logging.getLogger('WEBCred.utils')
+logger = logging.getLogger('WEBCred.essentials')
 logging.basicConfig(level=logging.INFO)
 
 
@@ -28,37 +28,24 @@ class MyThread(threading.Thread):
 
         threading.Thread.__init__(self)
 
-        # if Method and Module == 'api':
-        #     self.func = getattr(surface, Method)
-        # elif Method and Module == 'app':
-        #     logger.info("app is called")
-        #     import pdb
-        #     pdb.set_trace()
-        #     # self.func = getattr(app, Method)
         self.func = func
         self.name = Name
         self.url = Url
         self.args = Args
+        self.result = None
 
         if Args and Args != '':
             self.args = Args
 
     def run(self):
         try:
-            # print 'Fetching {}'.format(self.name)
             if self.args:
                 self.result = self.func(self.url, self.args)
             else:
                 self.result = self.func(self.url)
-            # print 'Got {}'.format(self.name)
-        except WebcredError as e:
-            self.result = e.message
-        except:
-            # if self.args:
-            #     self.result = self.func(self.url, self.args)
-            # else:
-            #     self.result = self.func(self.url)
-            self.result = '+++'
+        except Exception as e:
+            logger.debug(e)
+            self.result = None
 
     def getResult(self):
         return self.result

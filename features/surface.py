@@ -3,45 +3,36 @@ from dotenv import load_dotenv
 from nltk.corpus import wordnet
 from nltk.tag import pos_tag
 from nltk.tokenize import word_tokenize
+from urlparse import urlparse
 from utils.essentials import MyThread
 from utils.essentials import WebcredError
 from utils.urls import Urlattributes
 
+import logging
 import os
 import re
 import requests
 import validators
 
+logger = logging.getLogger('WEBCred.surface')
+logging.basicConfig(level=logging.info())
 
 load_dotenv()
 
 
 def funcBrokenllinks(url):
-    # pdb.set_trace()
-    result = None
+    result = False
     if url:
         try:
-            uri = Urlattributes(url)
-            resp = uri.geturllibreq()
-            if not resp.code / 100 < 4:
-                result = 'True'
-            uri.freemem()
+            Urlattributes(url)
         except WebcredError:
-            result = 'True'
-        except:
-            result = 'True'
+            result = True
     return result
 
 
 def funcImgratio(url):
     size = 0
-    try:
-        size = url.getsize()
-        # print url.geturl(), size
-    except WebcredError:
-        pass
-    except:
-        pass
+    size = url.getsize()
     return size
 
 
@@ -52,20 +43,19 @@ def getWot(url):
         "/&callback=&key=d60fa334759ae377ceb9cd679dfa22aec57ed998"
     )
     try:
-        # pdb.set_trace()
         uri = Urlattributes(result)
         raw = uri.gettext()
         result = literal_eval(raw[1:-2])
         return list(result.values())[0]['0']
-    except WebcredError as e:
-        raise WebcredError(e.message)
-    except:
-        return 'NA'
+    except Exception as er:
+        logger.debug(er)
+        return None
 
 
-# TODO: better api
+# TODO Update key
 def getResponsive(url):
 
+    # should output boolean value
     api_url = 'https://searchconsole.googleapis.com/v1/urlTestingTools/' \
               'mobileFriendlyTest:run'
 
@@ -76,7 +66,7 @@ def getResponsive(url):
         },
         params={
             'fields': 'mobileFriendliness',
-            'key': os.environ['GOOGLE_API_KEY']
+            'key': os.environ['Responsive_API_KEY']
         }
     ).json()
 
@@ -84,6 +74,8 @@ def getResponsive(url):
         state = response['mobileFriendliness']
     except KeyError:
         state = response['error']['message']
+        logger.debug(state)
+        state = None
 
     return state
 
@@ -92,10 +84,8 @@ def getHyperlinks(url, attributes):
 
     try:
         soup = url.getsoup()
-    except WebcredError as e:
-        raise WebcredError(e.message)
-    except:
-        raise WebcredError('Error while parsing Page')
+    except Exception as e:
+        logger.debug(e)
 
     data = {}
     for element in attributes:
@@ -108,7 +98,6 @@ def getHyperlinks(url, attributes):
         syn = wordnet.synsets(element)
         if syn:
             syn = wordnet.synsets(element)[0].lemma_names()
-        # pdb.set_trace()
         lookup = {'header': 0, 'footer': 0}
         percentage = 10
 
@@ -129,22 +118,17 @@ def getHyperlinks(url, attributes):
                                 pattern=pattern, data=str(index)
                             )
                         except:
-                            # pdb.set_trace()
-                            raise WebcredError('Error with patternmatching')
+                            logger.debug('Error with patternmatching')
+                            return None
 
                         if match:
                             data[element] = 1
-                            # print element, matched
                             break
-
-        # pdb.set_trace()
         '''if lookup tags are not found, then we check in upper and lower
         percentage of text'''
         for tags in lookup.keys():
-            # pdb.set_trace()
             if not data[element] and not lookup[tags]:
                 text = soup.find_all('a', href=True)
-                # text = url.gettext()
                 if tags == 'header':
                     text = text[:(len(text) * (percentage / 100))]
 
@@ -161,8 +145,8 @@ def getHyperlinks(url, attributes):
                                 pattern=pattern, data=str(index)
                             )
                         except:
-                            # pdb.set_trace()
-                            raise WebcredError('Error with patternmatching')
+                            logger.debug('Error with patternmatching')
+                            return None
                         if match:
                             data[element] = 1
                             break
@@ -181,13 +165,12 @@ def getHyperlinks(url, attributes):
                                 pattern=pattern, data=str(index)
                             )
                         except:
-                            # pdb.set_trace()
-                            raise WebcredError('Error with patternmatching')
+                            logger.debug('Error with patternmatching')
+                            return None
                         if match:
                             data[element] = 1
                             break
 
-    # pdb.set_trace()
     return data
 
 
@@ -199,10 +182,7 @@ def getLangcount(url):
         =en
     '''
 
-    try:
-        soup = url.getsoup()
-    except WebcredError as e:
-        raise WebcredError(e.message)
+    soup = url.getsoup()
 
     count = 0
     matched = []
@@ -227,7 +207,6 @@ def getLangcount(url):
                 if pattern not in matched:
                     matched.append(pattern)
                     count += 1
-                # pdb.set_trace()
 
     # some uni-lang websites didn't mention lang tags
     if count == 0:
@@ -241,10 +220,7 @@ def getImgratio(url):
     total_img_size = 0
     threads = []
 
-    try:
-        text_size = url.getsize()
-    except WebcredError as e:
-        return e.message
+    text_size = url.getsize()
 
     soup = url.getsoup()
 
@@ -257,21 +233,20 @@ def getImgratio(url):
         if validators.url(uri):
             try:
                 uri = Urlattributes(uri)
-                Method = 'funcImgratio'
+                Method = funcImgratio
                 Name = 'Imgratio'
                 Url = uri
-                func = getattr(Method)
+                func = Method
                 t = MyThread(func, Name, Url)
                 t.start()
                 threads.append(t)
-            except WebcredError as e:
-                # even if particular image is not accessible, we don't mind it
-                pass
+            except Exception as e:
+                logger.debug(e)
 
     for t in threads:
         t.join()
-        t.freemem()
         size = t.getResult()
+        t.freemem()
         if isinstance(size, int):
             total_img_size += size
         # print total_img_size
@@ -279,67 +254,50 @@ def getImgratio(url):
     try:
         total_size = total_img_size + text_size
         ratio = float(text_size) / total_size
-        # print ratio, text_size, total_size
     except ValueError:
-        raise WebcredError('Error in fetching images')
+        logger.debug('Error in fetching images')
+        return None
 
     return ratio
 
 
 def getAds(url):
-    try:
-        soup = url.getsoup()
-    except WebcredError as e:
-        raise WebcredError(e.message)
-
+    soup = url.getsoup()
     count = 0
 
     for link in soup.find_all('a', href=True):
         href = str(link.get('href'))
         if href.startswith('http://') or href.startswith('https://'):
 
-            # pdb.set_trace()
-            try:
-                pattern = url.getPatternObj().getAdsPattern()
-                match, pattern = url.getPatternObj().regexMatch(pattern, href)
-            except WebcredError as e:
-                raise WebcredError(e.message)
+            pattern = url.getPatternObj().getAdsPattern()
+            match, pattern = url.getPatternObj().regexMatch(pattern, href)
             if match:
                 count += 1
-                # print pattern, href
 
     return count
 
 
 def getCookie(url):
-    try:
-        header = url.getheader()
-    except WebcredError as e:
-        raise WebcredError(e.message)
 
-    try:
-        pattern = url.getPatternObj().regexCompile(['cookie'])
-    except WebcredError as e:
-        raise WebcredError(e.message)
+    header = url.getheader()
+    pattern = url.getPatternObj().regexCompile(['cookie'])
+
     for key in header.keys():
         try:
             match, matched = url.getPatternObj().regexMatch(
                 pattern=pattern, data=key
             )
-        except WebcredError as e:
-            # pdb.set_trace()
-            raise WebcredError(e.message)
+        except Exception as e:
+            logger.debug(e)
 
         if match:
             # print key
-            return 'Yes'
+            return 1
 
-    return 'No'
+    return 0
 
 
-# TODO: relook at it's implementation
 def getMisspelled(url):
-    # pdb.set_trace()
     text = url.gettext()
 
     excluded_tags = [
@@ -370,10 +328,8 @@ def getMisspelled(url):
                 # [0] is in the closest sense
                 syns[0].definition()
         except Exception:
-            # pdb.set_trace()
             count += 1
 
-    # pdb.set_trace()
     return count
 
 
@@ -383,83 +339,71 @@ def getDate(url):
 
 def getDomain(url):
     # a fascinating use of .format() syntax
+    domain = None
     try:
         domain = url.getdomain()
-    except:
-        raise WebcredError('urlparsing error')
+    except Exception as er:
+        logger.debug(er)
     return domain
 
 
 def getBrokenlinks(url):
     broken_links = 0
     threads = []
-    try:
-        soup = url.getsoup()
-    except WebcredError as e:
-        raise WebcredError(e.message)
-    except:
-        raise WebcredError('Url is broken')
+    soup = url.getsoup()
 
     for link in soup.find_all('a', href=True):
         uri = link.get('href')
 
-        # TODO should it inlude inner links as well?
+        # to include inner links as well
         if not uri.startswith('http://') and not uri.startswith('https://'):
             uri = url.geturl() + uri
 
         if validators.url(uri):
-            Method = 'funcBrokenllinks'
+            Method = funcBrokenllinks
             Name = 'brokenlinks'
             Url = uri
-            func = getattr(Method)
+            func = Method
             t = MyThread(func, Name, Url)
             t.start()
             threads.append(t)
 
     for t in threads:
-        # pdb.set_trace()
         t.join()
-        # t.freemem()
         if t.getResult():
             broken_links += 1
 
+    logger.debug('broken_links {}'.format(broken_links))
     return broken_links
 
 
 def getOutlinks(url):
     outlinks = 0
 
-    try:
-        soup = url.getsoup()
-    except WebcredError as e:
-        raise WebcredError(e.message)
-    except:
-        # pdb.set_trace()
-        raise WebcredError('Url is broken')
-
+    soup = url.getsoup()
     for link in soup.find_all('a', href=True):
         uri = link.get('href')
         if uri.startswith('https://') or uri.startswith('http://'):
-            try:
-                uri = Urlattributes(uri)
-                if url.getnetloc() != uri.getnetloc():
-                    outlinks += 1
-                    # uri = uri.geturl()
-                    # list_.append(uri)
-            except WebcredError as e:
-                pass
-                # raise WebcredError(e.message)
-    # pdb.set_trace()
-    # f = open('outlinks.text','w')
-    # f.write(links_)
+
+            parsed_uri = urlparse(uri)
+            netloc = '{uri.netloc}'.format(uri=parsed_uri)
+
+            if url.getnetloc() != netloc:
+                outlinks += 1
+                logger.debug('outlinks = {}'.format(outlinks))
     return outlinks
 
 
-# total web-pages which redirect/mention url
-def getInlinks(url):
+def googleinlink(url):
 
-    API_KEY = os.environ.get('Inlinks_key')
+    # TODO take recent API into account to save time
+    #  TODO get list of API
+    API_KEY = os.environ.get('Google_Inlinks_key')
+
+    inlinks = None
+
     try:
+        # keyword link is used in search query to search only hyperlinks
         uri = (
             'https://www.googleapis.com/customsearch/v1?key=' + API_KEY +
             '&cx=017576662512468239146:omuauf_lfve&q=link:' +
@@ -467,20 +411,66 @@ def getInlinks(url):
         )
         uri = Urlattributes(uri)
         txt = uri.gettext()
-        # except WebcredError as e:
-        # 	raise WebcredError(e.message)
-    except:
-        raise WebcredError('GoogleApi limit is exceeded')
 
-    # txt=unicodedata.normalize('NFKD', txt).encode('ascii','ignore')
+        try:
+            for line in txt.splitlines():
+                if "totalResults" in line:
+                    break
+            inlinks = str(re.sub("[^0-9]", "", line))
+        except:
+            logger.debug('Google Inlinks not found')
 
-    for line in txt.splitlines():
-        if "totalResults" in line:
-            break
-    try:
-        inlinks = int(re.sub("[^0-9]", "", line))
-    except:
-        raise WebcredError('Inlinks are hard to get for this URL')
+    except Exception as e:
+        logger.debug(e)
+
+    return inlinks
+
+
+# TODO
+def yahooinlink(url):
+    pass
+
+
+# TODO
+def binginlink(url):
+    pass
+
+
+# total web-pages which points url
+def getInlinks(url):
+
+    inlinks = None
+    # request google, yahoo, bing for inlinks
+    # take average of there results
+    queries = {
+        'google': googleinlink,
+        # 'yahoo': yahooinlink,
+        # 'bing': binginlink,
+    }
+    threads = []
+    for keys in queries.keys():
+        Method = queries[keys]
+        Name = keys
+        func = Method
+        Url = url
+        thread = MyThread(func, Name, Url)
+        thread.start()
+        threads.append(thread)
+    score = 0
+    length = 0
+    for t in threads:
+        try:
+            t.join()
+            if t.getResult():
+                # HACK to incorporate 0 values
+                score = str(int(t.getResult()) + int(score))
+                length += 1
+        except Exception as er:
+            logger.debug(er)
+
+    if score:
+        inlinks = (int(score) / length)
+        logger.debug('inlinks {}'.format(inlinks))
 
     return inlinks
 
@@ -488,11 +478,9 @@ def getInlinks(url):
 '''install phantomjs and have yslow.js in the path to execute'''
 
 
-# TODO: re-implement this
 def getPageloadtime(url):
 
-    return url.getloadTime()
-    # pdb.set_trace()
+    return url.getloadtime()
     # try:
     #     response = os.popen('phantomjs yslow.js --info basic ' +
     #                         url.geturl()).read()
@@ -507,7 +495,6 @@ def getPageloadtime(url):
 def dimapi(url, api):
     # REVIEW
     try:
-        # pdb.set_trace()
         uri = Urlattributes(api)
         raw = uri.gettext()
         # result = literal_eval(raw[1:-2])

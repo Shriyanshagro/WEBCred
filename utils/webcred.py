@@ -8,7 +8,8 @@ from utils.urls import Urlattributes
 
 import logging
 
-logger = logging.getLogger('WEBCred.utils')
+
+logger = logging.getLogger('WEBCred.webcred')
 logging.basicConfig(level=logging.INFO)
 
 # keywords used to check real_world_presence
@@ -17,21 +18,41 @@ hyperlinks_attributes = ['contact', 'email', 'help', 'sitemap']
 # map feature to function name
 # these keys() are also used to define db columns
 apiList = {
-    'lastmod': ['getDate', '', ''],
-    'domain': ['getDomain', '', ''],
-    'inlinks': ['getInlinks', '', ''],
-    'outlinks': ['getOutlinks', '', ''],
-    'hyperlinks': ['getHyperlinks', hyperlinks_attributes, ''],
-    'imgratio': ['getImgratio', '', ''],
-    'brokenlinks': ['getBrokenlinks', '', ''],
-    'cookie': ['getCookie', '', ''],
-    'langcount': ['getLangcount', '', ''],
-    'misspelled': ['getMisspelled', '', ''],
-    'wot': ['getWot', '', ''],
-    'responsive': ['getResponsive', '', ''],
-    'ads': ['getAds', '', ''],
-    'pageloadtime': ['getPageloadtime', '', ''],
-    'site': [''],
+    'lastmod': ['getDate', '', '', 'Integer'],
+    'domain': ['getDomain', '', '', 'String(120)'],
+    'inlinks': [
+        'getInlinks',
+        '',
+        '',
+        'Integer',
+    ],
+    'outlinks': [
+        'getOutlinks',
+        '',
+        '',
+        'Integer',
+    ],
+    'hyperlinks': [
+        'getHyperlinks',
+        hyperlinks_attributes,
+        '',
+        'JSON',
+    ],
+    'imgratio': ['getImgratio', '', '', 'FLOAT'],
+    'brokenlinks': ['getBrokenlinks', '', '', 'Integer'],
+    'cookie': ['getCookie', '', '', 'Boolean'],
+    'langcount': ['getLangcount', '', '', 'Integer'],
+    'misspelled': ['getMisspelled', '', '', 'Integer'],
+    'wot': ['getWot', '', 'JSON'],
+    'responsive': ['getResponsive', '', '', 'Boolean'],
+    'ads': ['getAds', '', 'Integer'],
+    'pageloadtime': ['getPageloadtime', '', '', 'Integer'],
+    'site': [
+        '',
+        '',
+        '',
+        'String(120)',
+    ],
 }
 
 
@@ -49,11 +70,11 @@ class Webcred(object):
             self.request = dict(self.request.args)
 
         modified = 0
+        data = {}
+        req = {}
+        req['args'] = {}
+        percentage = {}
         try:
-            data = {}
-            req = {}
-            req['args'] = {}
-            percentage = {}
 
             # get percentage of each feature
             for keys in apiList.keys():
@@ -77,6 +98,7 @@ class Webcred(object):
             site = Urlattributes(url=req['args'].get('site', None))
 
             # get genre
+            # TODO fetch other weightages
             data['genre'] = str(self.request.get('genre', ['other'])[0])
 
             if data['Url'] != site.geturl():
@@ -89,42 +111,31 @@ class Webcred(object):
 
             # check database,
             # if url is already present?
-            # TODO check data types issue
             if self.db.session.query(
                     self.Features).filter(self.Features.Url == data['Url']
                                           ).count():
-                # if lastmod is not changed?
-                # HACK self.Features.lastmod doesn't show None value
+                # is lastmod changed?
                 if self.db.session.query(
                         self.Features
-                ).filter(self.Features.lastmod == str(data['lastmod'])
+                ).filter(self.Features.lastmod == data['lastmod']
                          ).count() or not data['lastmod']:
                     # get all existing data in dict format
                     dbData = self.db.session.query(
                         self.Features
                     ).filter(self.Features.Url == data['Url']
                              ).all()[0].__dict__
-                    # HACK for few cases, this should not be done?
-                    # check the ones from apilist which have non None value
-                    # put them as False
+                    # check the ones from columns which have non None value
                     '''
-                    None value indicates that feature has not been
-                    evaluated yet
+                    None value indicates that feature has not
+                    successfully extracted yet
                     '''
                     for k, v in dbData.items():
                         if v:
                             req['args'][k] = 'false'
-                    # for values
-                    # update the database
-                    data = self.extractValue(req, apiList, data, site)
-                    modified = 1
-                # assess all data again
-                else:
-                    data = self.extractValue(req, apiList, data, site)
-
+                # update the database
+                modified = 1
             # else create new entry, url
-            else:
-                data = self.extractValue(req, apiList, data, site)
+            data = self.extractValue(req, apiList, data, site)
 
             # HACK 13 is calculated number, refer to index.html, where new
             # dimensions are dynamically added
@@ -153,10 +164,13 @@ class Webcred(object):
 
         except WebcredError as e:
             data['Error'] = e.message
-            logger.debug('Webcred Issue with webcred.assess')
-        except Exception as e:
-            data['Error'] = 'Fatal error'
             logger.info(e)
+        except Exception as e:
+            logger.info(e)
+            # HACK if it's not webcred error,
+            #  then probably it's python error
+            data['Error'] = 'Fatal Error'
+            modified = 1
         finally:
 
             now = str((datetime.now() - now).total_seconds())
@@ -183,9 +197,10 @@ class Webcred(object):
                 ).filter(self.Features.Url == data['Url']).all()[0].__dict__
 
             except Exception as e:
-                logger.info(e)
+                self.db.session.rollback()
+                logger.debug(e)
 
-            logger.info(now)
+            logger.info('Time = {}'.format(now))
 
             return data
 
@@ -223,15 +238,12 @@ class Webcred(object):
                         logger.info('Issue with misc normalizing categories')
                         # TimeOut error clause
             except:
-                import pdb
-                pdb.set_trace()
                 logger.info('Not able to calculate webcred score')
         data["webcred_score"] = score / 100
 
-        # REVIEW add Weightage score for new dimensions
+        # TODO add Weightage score for new dimensions
         return data
 
-    # TODO put assessed but NONE value with some string
     # to differentiate it with DB null value
     def extractValue(self, req, apiList, data, site):
         # assess requested features
@@ -248,16 +260,15 @@ class Webcred(object):
                 threads.append(thread)
 
         # wait to join all threads in order to get all results
-        maxTime = 180
+        maxTime = 300
         for t in threads:
             try:
                 t.join(maxTime)
                 data[t.getName()] = t.getResult()
-            except WebcredError as e:
-                data[t.getName()] = e.message
-            except:
-                data[t.getName()] = 'TimeOut Error, Max {} sec'.format(maxTime)
+            except Exception as er:
+                logger.debug(er)
+                data[t.getName()] = None
             finally:
-                logger.debug(t.getName(), " = ", data[t.getName()])
+                logger.debug('{} = {}'.format(t.getName(), data[t.getName()]))
 
         return data

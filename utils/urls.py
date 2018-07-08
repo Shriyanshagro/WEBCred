@@ -5,6 +5,7 @@ from urlparse import urlparse
 from utils.essentials import WebcredError
 
 import arrow
+import copy
 import json
 import logging
 import re
@@ -13,7 +14,6 @@ import statistics
 import threading
 import types
 import validators
-
 
 logger = logging.getLogger('WEBCred.urls')
 logging.basicConfig(level=logging.DEBUG)
@@ -418,10 +418,13 @@ class Urlattributes(object):
         if url:
             if not validators.url(url):
                 raise WebcredError('Provide a valid url')
-            self.originalUrl = self.url = url
+            self.url = url
+            self.originalUrl = copy.deepcopy(url)
 
             # case of redirections
             resp = self.getrequests()
+            if resp.status_code / 100 >= 4:
+                raise WebcredError('Response 202')
             self.url = resp.url
 
         else:
@@ -432,6 +435,9 @@ class Urlattributes(object):
 
     def getoriginalurl(self):
         return self.originalUrl
+
+    def getjson(self):
+        return self.getrequests().json()
 
     def geturl(self):
         return self.url
@@ -447,11 +453,7 @@ class Urlattributes(object):
 
     def getrequests(self):
         if not self.requests:
-            try:
-                self.requests = self.geturllibreq()
-            except WebcredError as e:
-                raise WebcredError(e.message)
-            # requestss.get(self.url, headers=self.hdr)
+            self.requests = self.geturllibreq()
 
         return self.requests
 
@@ -520,9 +522,7 @@ class Urlattributes(object):
                 parsed_uri = urlparse(self.geturl())
                 self.netloc = '{uri.netloc}'.format(uri=parsed_uri)
             except:
-                raise WebcredError(
-                    'Error while fetching attributes from parsed_uri'
-                )
+                logger.debug('Error while fetching attributes from parsed_uri')
 
         return self.netloc
 
@@ -561,7 +561,7 @@ class Urlattributes(object):
         try:
             data = None
             # fetching data form archive
-            for i in range(10):
+            for i in range(15):
                 uri = "http://archive.org/wayback/available?url=" + \
                       self.geturl()
                 uri = Urlattributes(uri)
@@ -579,7 +579,7 @@ class Urlattributes(object):
                 resp = self.geturllibreq()
                 if resp.status_code / 100 < 4:
                     lastmod = str(resp.headers().getdate('last-modified'))
-                    if lastmod == 'None':
+                    if not lastmod:
                         # some page has key 'date' for same
                         lastmod = str(resp.info().getdate('date'))
                     lastmod = datetime.strptime(

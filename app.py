@@ -10,8 +10,6 @@ from utils.webcred import Webcred
 import json
 import logging
 import os
-# TODO put me inside env variable
-import pdb
 import requests
 import subprocess
 import time
@@ -21,7 +19,6 @@ load_dotenv()
 logger = logging.getLogger('WEBCred.app')
 logging.basicConfig(level=logging.INFO)
 app = Flask(__name__)
-pdb.set_trace()
 
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DB_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -40,24 +37,23 @@ table_name = 'features'
 class Features(db.Model):
     __tablename__ = table_name
 
-    # TODO come back and update column data types
     id = db.Column(db.Integer, primary_key=True)
-    Url = db.Column(db.String(120), unique=True)
-    redirected = db.Column(db.String(120))
+    Url = db.Column(db.String(), unique=True)
+    redirected = db.Column(db.String())
     genre = db.Column(db.String(120))
-    webcred_score = db.Column(db.String(120))
+    webcred_score = db.Column(db.FLOAT)
     Error = db.Column(db.String(120))
-    assess_time = db.Column(db.String(120))
+    assess_time = db.Column(db.Float)
     # create columns of features
-    # TODO redefine data type for hyperlinks, dict
     for key in apiList.keys():
-        exec (key + " = db.Column(db.String(120))")
+        dataType = apiList[key][-1]
+        exec (key + " = db.Column(db." + dataType + ")")
         norm = key + 'Norm'
-        exec (norm + " = db.Column(db.String(120))")
+        exec (norm + " = db.Column(db.Integer)")
 
     def __init__(self, data):
         for key in data.keys():
-            setattr(self, key, str(data[key]))
+            setattr(self, key, data[key])
 
     def __repr__(self):
         return '<URL %r>' % self.Url
@@ -116,8 +112,7 @@ def collectData(request):
         # check existence of table in database
         if not engine.dialect.has_table(engine, table_name):
             db.create_all()
-
-        # TODO if column not in table, then add
+            logger.info('Created table {}'.format(table_name))
 
         dt = Webcred(db, Features, request)
         data = dt.assess()
