@@ -62,7 +62,7 @@ if work == 'collectData':
 
     # count = len(links)
     # tempcounter = counter = len(tempData)
-    for url in links[:50]:
+    for url in links:
         request['site'] = url[:-2]
         data = collectData(request)
         # data_file = open(new_id, 'a')
@@ -119,10 +119,8 @@ if work == 'normalize':
     for k in normalizeCategory['3'].items():
         norm = urls.Normalize(data, k)
         data = norm.normalize()
-    # pdb.set_trace()
 
     for k in normalizeCategory['2'].items():
-        # pdb.set_trace()
         norm = urls.Normalize(data, k)
         data = norm.factoise()
 
@@ -134,16 +132,12 @@ if work == 'normalize':
                 data[index][k] = v
 
     # print dt
-    # pdb.set_trace()
     work = 'csv'
     csv_filename = 'normalized.csv'
 
 if work == 'csv':
-    # pdb.set_trace()
-    # pdb.set_trace()
     pipe = Pipeline()
     csv = pipe.convertjson(data)
-    # pdb.set_trace()
     f = open(csv_filename, 'w')
     f.write(csv)
     f.close()

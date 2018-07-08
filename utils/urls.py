@@ -419,7 +419,7 @@ class Urlattributes(object):
         self.hdr = {'User-Agent': 'Mozilla/5.0'}
         self.requests = self.urllibreq = self.soup = self.text = None
         self.netloc = self.header = self.lastmod = self.size = \
-            self.domain = self.loadTime = None
+            self.html = self.domain = self.loadTime = None
         self.lock = threading.Lock()
         if url:
             if not validators.url(url):
@@ -504,14 +504,16 @@ class Urlattributes(object):
 
     def gettext(self):
         if not self.text:
-            try:
-                text = self.getrequests().text
-                text = self.clean_html(text)
-                self.text = html2text(text)
-            except WebcredError as e:
-                raise WebcredError(e.message)
+            text = self.gethtml()
+            text = self.clean_html(text)
+            self.text = html2text(text)
 
         return self.text
+
+    def gethtml(self):
+        if not self.html:
+            self.html = self.getrequests().text
+        return self.html
 
     def getsoup(self):
         data = self.getrequests().text

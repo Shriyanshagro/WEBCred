@@ -49,7 +49,10 @@ class Features(db.Model):
     genre = db.Column(db.String(120))
     webcred_score = db.Column(db.FLOAT)
     Error = db.Column(db.String(120))
+    html = db.Column(db.String())
+    text = db.Column(db.String())
     assess_time = db.Column(db.Float)
+
     # create columns of features
     for key in apiList.keys():
         dataType = apiList[key][-1]
@@ -135,7 +138,6 @@ def appinfo(url=None):
     # print pid
     cmd = ['ps', '-p', str(pid), '-o', "%cpu,%mem,cmd"]
     # print
-    # pdb.set_trace()
     while True:
         info = subprocess.check_output(cmd)
         print info
@@ -147,4 +149,3 @@ def appinfo(url=None):
 
 if __name__ == "__main__":
     app.run(threaded=True, host='0.0.0.0', debug=False, port=5050)
-
