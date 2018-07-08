@@ -8,7 +8,6 @@ from utils.urls import Urlattributes
 
 import logging
 
-
 logger = logging.getLogger('WEBCred.webcred')
 logging.basicConfig(level=logging.INFO)
 
