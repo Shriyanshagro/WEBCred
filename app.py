@@ -15,7 +15,7 @@ import subprocess
 import time
 
 
-load_dotenv()
+load_dotenv(dotenv_path='.env')
 logger = logging.getLogger('WEBCred.app')
 logging.basicConfig(level=logging.INFO)
 app = Flask(__name__)
@@ -140,4 +140,5 @@ def appinfo(url=None):
 
 
 if __name__ == "__main__":
-    app.run(threaded=True, host='0.0.0.0', debug=True, port=5050)
+    app.run(threaded=True, host='0.0.0.0', debug=False, port=5050)
+
