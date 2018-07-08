@@ -14,8 +14,9 @@ import re
 import requests
 import validators
 
+
 logger = logging.getLogger('WEBCred.surface')
-logging.basicConfig(level=logging.info())
+logging.basicConfig(level=logging.INFO)
 
 load_dotenv()
 
