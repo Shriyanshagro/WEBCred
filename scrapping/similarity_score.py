@@ -12,7 +12,6 @@ import sys
 import types
 import urllib
 
-
 sys.path.insert(0, r'../../')
 
 global genre_weightage
@@ -416,7 +415,6 @@ if __name__ == '__main__':
         FeaturesName += presence
         FeaturesName += others
         # print FeaturesName
-        # import pdb; pdb.set_trace()
         # FeaturesName += 'inlinks'
 
         FeaturesNaming = [

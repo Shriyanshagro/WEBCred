@@ -9,7 +9,6 @@ class Pipeline(object):
     # return unique keys from list
     def getcsvheaders(self, data=None):
 
-        # pdb.set_trace()
         # if not data:
         #     raise ImportExportError("Provide data to retrive headers")
 
@@ -24,18 +23,14 @@ class Pipeline(object):
                     header[key] += 1
             # except:
             #     pass
-            # pdb.set_trace()
 
         result = []
-        # pdb.set_trace()
 
         header = sorted(
             header.items(), key=operator.itemgetter(1), reverse=True
         )
         for key in header:
             result.append(key[0])
-        # pdb.set_trace()
-        # pdb.set_trace()
         return result
 
     def convertjson(self, data_list):
@@ -45,7 +40,6 @@ class Pipeline(object):
         # id_ = urlparse(url).path.split('/')[1]
 
         csv_headers = self.getcsvheaders(data_list)
-        # pdb.set_trace()
         # if not csv_headers:
         #     raise BadRequest("check json data, no keys found")
 

@@ -7,6 +7,8 @@ from utils.urls import normalizedData
 from utils.urls import Urlattributes
 
 import logging
+import os
+import re
 
 logger = logging.getLogger('WEBCred.webcred')
 logging.basicConfig(
@@ -79,6 +81,8 @@ class Webcred(object):
         req = {}
         req['args'] = {}
         percentage = {}
+        site = None
+        dump = True
         try:
 
             # get percentage of each feature
@@ -119,7 +123,11 @@ class Webcred(object):
             if self.db.session.query(
                     self.Features).filter(self.Features.Url == data['Url']
                                           ).count():
-                # is lastmod changed?
+                '''
+                if lastmod not changed
+                    update only the columns with None value
+                else update every column
+                '''
                 if self.db.session.query(
                         self.Features
                 ).filter(self.Features.lastmod == data['lastmod']
@@ -137,6 +145,7 @@ class Webcred(object):
                     for k, v in dbData.items():
                         if v:
                             req['args'][k] = 'false'
+                    dump = False
                 # update the database
                 modified = 1
             # else create new entry, url
@@ -170,44 +179,96 @@ class Webcred(object):
         except WebcredError as e:
             data['Error'] = e.message
             logger.info(e)
+            dump = False
         except Exception as e:
             logger.info(e)
             # HACK if it's not webcred error,
             #  then probably it's python error
             data['Error'] = 'Fatal Error'
             modified = 1
+            dump = False
         finally:
 
             now = str((datetime.now() - now).total_seconds())
             # store it in data
             try:
                 if modified:
-                    logger.info('updating entry')
+                    logger.debug('updating entry')
                     logger.info(data['Url'])
                     self.db.session.query(
                         self.Features
                     ).filter(self.Features.Url == data['Url']).update(data)
+                    self.db.session.commit()
 
                 else:
-                    logger.info('creating new entry')
+                    logger.debug('creating new entry')
                     logger.info(data['Url'])
                     data['assess_time'] = now
                     reg = self.Features(data)
                     self.db.session.add(reg)
+                    self.db.session.commit()
 
-                self.db.session.commit()
+                # dump text and html of html
+                if dump:
+                    self.dumpRaw(site)
 
                 data = self.db.session.query(
                     self.Features
                 ).filter(self.Features.Url == data['Url']).all()[0].__dict__
 
+                # delete dump location
+                del data['html']
+                del data['text']
+
             except Exception as e:
                 self.db.session.rollback()
                 logger.debug(e)
 
-            logger.info('Time = {}'.format(now))
+            logger.debug('Time = {}'.format(now))
 
             return data
+
+    # dump text and html of html
+    def dumpRaw(self, site):
+        if not site:
+            return
+
+        # location where this data will be dumped
+        loct = 'data/dump/'
+
+        dump = {
+            'html': {
+                'function': 'gethtml'
+            },
+            'text': {
+                'function': 'gettext'
+            },
+        }
+        data = {}
+        filename = re.sub('^http*://', '', site.getoriginalurl())
+        for i in dump.keys():
+            location = (os.sep).join([
+                loct, i,
+                (os.sep).join(filename.split('/')[:-1])
+            ])
+            if not os.path.exists(location):
+                os.makedirs(location)
+            location = (os.sep).join([location, filename.split('/')[-1]])
+            fi = open(location, 'w')
+            func = getattr(site, dump[i]['function'])
+            data[i] = location
+            raw = func()
+            try:
+                fi.write(raw)
+            except UnicodeEncodeError:
+                fi.write(raw.encode('utf-8'))
+            fi.close()
+
+        # update db with locations of their dump
+        self.db.session.query(
+            self.Features
+        ).filter(self.Features.Url == site.getoriginalurl()).update(data)
+        self.db.session.commit()
 
     def webcredScore(self, data, percentage):
         # score varies from -1 to 1
@@ -271,7 +332,7 @@ class Webcred(object):
                 t.join(maxTime)
                 data[t.getName()] = t.getResult()
             except Exception as er:
-                logger.debug(er)
+                logger.info(er)
                 data[t.getName()] = None
             finally:
                 logger.debug('{} = {}'.format(t.getName(), data[t.getName()]))
