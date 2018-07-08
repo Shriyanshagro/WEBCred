@@ -4,3 +4,5 @@ jsondata.json
 *.pyc
 *bibtex*
 .env
+dump/*
+log/*

@@ -62,7 +62,7 @@ if work == 'collectData':
 
     # count = len(links)
     # tempcounter = counter = len(tempData)
-    for url in links[:50]:
+    for url in links:
         request['site'] = url[:-2]
         data = collectData(request)
         # data_file = open(new_id, 'a')
