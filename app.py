@@ -17,7 +17,13 @@ import time
 
 load_dotenv(dotenv_path='.env')
 logger = logging.getLogger('WEBCred.app')
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    filename='log/logging.log',
+    filemode='a',
+    format='%(asctime)s %(message)s',
+    datefmt='%m/%d/%Y %I:%M:%S %p',
+    level=logging.INFO
+)
 app = Flask(__name__)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DB_URL')

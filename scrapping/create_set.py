@@ -18,7 +18,13 @@ import sys
 sys.path.insert(0, '../')
 
 logger = logging.getLogger('WEBCred.scrapping')
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    filename='log/logging.log',
+    filemode='a',
+    format='%(asctime)s %(message)s',
+    datefmt='%m/%d/%Y %I:%M:%S %p',
+    level=logging.INFO
+)
 
 max_sets = 15
 common_entries = 3

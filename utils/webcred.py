@@ -9,7 +9,13 @@ from utils.urls import Urlattributes
 import logging
 
 logger = logging.getLogger('WEBCred.webcred')
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    filename='log/logging.log',
+    filemode='a',
+    format='%(asctime)s %(message)s',
+    datefmt='%m/%d/%Y %I:%M:%S %p',
+    level=logging.INFO
+)
 
 # keywords used to check real_world_presence
 hyperlinks_attributes = ['contact', 'email', 'help', 'sitemap']

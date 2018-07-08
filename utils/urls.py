@@ -16,7 +16,13 @@ import types
 import validators
 
 logger = logging.getLogger('WEBCred.urls')
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(
+    filename='log/logging.log',
+    filemode='a',
+    format='%(asctime)s %(message)s',
+    datefmt='%m/%d/%Y %I:%M:%S %p',
+    level=logging.DEBUG
+)
 
 global patternMatching
 patternMatching = None

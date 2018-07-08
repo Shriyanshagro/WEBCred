@@ -3,7 +3,13 @@ import threading
 
 
 logger = logging.getLogger('WEBCred.essentials')
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    filename='log/logging.log',
+    filemode='a',
+    format='%(asctime)s %(message)s',
+    datefmt='%m/%d/%Y %I:%M:%S %p',
+    level=logging.INFO
+)
 
 
 # A class to catch error and exceptions

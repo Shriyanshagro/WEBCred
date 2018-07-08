@@ -14,7 +14,13 @@ import logging
 
 
 logger = logging.getLogger('WEBCred.dev')
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    filename='log/logging.log',
+    filemode='a',
+    format='%(asctime)s %(message)s',
+    datefmt='%m/%d/%Y %I:%M:%S %p',
+    level=logging.INFO
+)
 
 # collectData, normalize, csv, json
 work = 'collectData'

@@ -14,9 +14,14 @@ import re
 import requests
 import validators
 
-
 logger = logging.getLogger('WEBCred.surface')
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    filename='log/logging.log',
+    filemode='a',
+    format='%(asctime)s %(message)s',
+    datefmt='%m/%d/%Y %I:%M:%S %p',
+    level=logging.INFO
+)
 
 load_dotenv()
 
