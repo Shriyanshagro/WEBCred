@@ -68,20 +68,25 @@ def getResponsive(url):
     api_url = 'https://searchconsole.googleapis.com/v1/urlTestingTools/' \
               'mobileFriendlyTest:run'
 
-    try:
-        response = requests.post(
-            api_url,
-            json={'url': url.geturl()},
-            params={
-                'fields': 'mobileFriendliness',
-                'key': os.environ['Google_API_KEY']
-            }
-        )
-        if response.status_code / 100 >= 4:
-            return None
-        response = response.json()
+    response = requests.post(
+        api_url,
+        json={'url': url.geturl()},
+        params={
+            'fields': 'mobileFriendliness',
+            'key': os.environ['Google_API_KEY']
+        }
+    )
+    if response.status_code / 100 >= 4:
+        return None
+    response = response.json()
 
-        state = response['mobileFriendliness']
+    state = 0
+
+    try:
+        if response['mobileFriendliness'] == 'MOBILE_FRIENDLY':
+            state = 1
+        else:
+            logger.info(response['mobileFriendliness'])
     except KeyError:
         logger.warning(response['error']['message'])
         state = None
@@ -286,13 +291,16 @@ def getAds(url):
     count = 0
 
     for link in soup.find_all('a', href=True):
-        href = str(link.get('href'))
-        if href.startswith('http://') or href.startswith('https://'):
+        try:
+            href = str(link.get('href'))
+            if href.startswith('http://') or href.startswith('https://'):
 
-            pattern = url.getPatternObj().getAdsPattern()
-            match, pattern = url.getPatternObj().regexMatch(pattern, href)
-            if match:
-                count += 1
+                pattern = url.getPatternObj().getAdsPattern()
+                match, pattern = url.getPatternObj().regexMatch(pattern, href)
+                if match:
+                    count += 1
+        except UnicodeEncodeError:
+            pass
 
     return count
 
@@ -528,3 +536,4 @@ def dimapi(url, api):
         raise WebcredError("Give valid API")
     except:
         return 'NA'
+
