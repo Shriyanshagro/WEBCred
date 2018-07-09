@@ -86,7 +86,9 @@ def getResponsive(url):
         if response['mobileFriendliness'] == 'MOBILE_FRIENDLY':
             state = 1
         else:
-            logger.info(response['mobileFriendliness'])
+            pass
+            # NOT_MOBILE_FRIENDLY
+            # logger.debug(response['mobileFriendliness'])
     except KeyError:
         logger.warning(response['error']['message'])
         state = None
