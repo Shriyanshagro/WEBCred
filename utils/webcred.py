@@ -178,9 +178,6 @@ class Webcred(object):
 
         except WebcredError as e:
             data['Error'] = e.message
-            if e.message != 'Response 202':
-                logger.info(e)
-                logger.info(data['Url'])
             dump = False
         except Exception as e:
             logger.info(e)

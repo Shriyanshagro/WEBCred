@@ -15,7 +15,6 @@ import threading
 import types
 import validators
 
-
 logger = logging.getLogger('WEBCred.urls')
 logging.basicConfig(
     filename='log/logging.log',
@@ -454,7 +453,7 @@ class Urlattributes(object):
 
     def getheader(self):
         if not self.header:
-            self.header = dict(self.geturllibreq().info())
+            self.header = self.geturllibreq().headers
 
         return self.header
 
@@ -584,17 +583,20 @@ class Urlattributes(object):
                 if data:
                     self.lastmod = data
                     break
-            if not data:
-                resp = self.geturllibreq()
-                if resp.status_code / 100 < 4:
-                    lastmod = str(resp.headers().getdate('last-modified'))
-                    if not lastmod:
-                        # some page has key 'date' for same
-                        lastmod = str(resp.info().getdate('date'))
-                    lastmod = datetime.strptime(
-                        str(lastmod), '(%Y, %m, %d, %H, %M, %S, %f, %W, %U)'
-                    )
-                    self.lastmod = lastmod.isoformat()
+        #     if not data:
+        #         resp = self.geturllibreq()
+        #         lastmod = str(resp.headers.getdate('Date'))
+        #             'Mon, 09 Jul 2018 07:29:16 GMT'
+        #              Error z directive is bad format
+        #         lastmod = datetime.strptime(
+        #             str(lastmod), '(%a, %d %b %Y %H:%M:%S %z)'
+        #         )
+        #         lastmod = datetime.strptime(
+        #             we.headers.get('Date'), '(%a, %d %b %Y %H:%M:%S %z)'
+        #         )
+        #             str(lastmod), '(%Y, %m, %d, %H, %M, %S, %f, %W, %U)'
+        #         )
+        #         self.lastmod = lastmod.isoformat()
         except Exception as er:
             logger.info(er)
             self.lastmod = None
