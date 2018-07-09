@@ -596,7 +596,7 @@ class Urlattributes(object):
                     )
                     self.lastmod = lastmod.isoformat()
         except Exception as er:
-            logger.debug(er)
+            logger.info(er)
             self.lastmod = None
 
         return self.lastmod

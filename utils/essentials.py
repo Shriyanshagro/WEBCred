@@ -50,7 +50,7 @@ class MyThread(threading.Thread):
             else:
                 self.result = self.func(self.url)
         except Exception as e:
-            logger.debug(e)
+            logger.info(e)
             self.result = None
 
     def getResult(self):

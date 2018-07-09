@@ -48,14 +48,10 @@ def getWot(url):
         "http://api.mywot.com/0.4/public_link_json2?hosts=" + url.geturl() +
         "/&callback=&key=d60fa334759ae377ceb9cd679dfa22aec57ed998"
     )
-    try:
-        uri = Urlattributes(result)
-        raw = uri.gettext()
-        result = literal_eval(raw[1:-2])
-        return list(result.values())[0]['0']
-    except Exception as er:
-        logger.debug(er)
-        return None
+    uri = Urlattributes(result)
+    raw = uri.gettext()
+    result = literal_eval(raw[1:-2])
+    return list(result.values())[0]['0']
 
 
 # TODO Update key
@@ -80,8 +76,6 @@ def getResponsive(url):
         state = response['mobileFriendliness']
     except KeyError:
         state = response['error']['message']
-        logger.debug(state)
-        state = None
 
     return state
 
@@ -257,12 +251,8 @@ def getImgratio(url):
             total_img_size += size
         # print total_img_size
 
-    try:
-        total_size = total_img_size + text_size
-        ratio = float(text_size) / total_size
-    except ValueError:
-        logger.debug('Error in fetching images')
-        return None
+    total_size = total_img_size + text_size
+    ratio = float(text_size) / total_size
 
     return ratio
 
@@ -345,11 +335,7 @@ def getDate(url):
 
 def getDomain(url):
     # a fascinating use of .format() syntax
-    domain = None
-    try:
-        domain = url.getdomain()
-    except Exception as er:
-        logger.debug(er)
+    domain = url.getdomain()
     return domain
 
 
@@ -408,26 +394,21 @@ def googleinlink(url):
 
     inlinks = None
 
+    # keyword link is used in search query to search only hyperlinks
+    uri = (
+        'https://www.googleapis.com/customsearch/v1?key=' + API_KEY +
+        '&cx=017576662512468239146:omuauf_lfve&q=link:' + url.getoriginalurl()
+    )
+    uri = Urlattributes(uri)
+    txt = uri.gettext()
+
     try:
-        # keyword link is used in search query to search only hyperlinks
-        uri = (
-            'https://www.googleapis.com/customsearch/v1?key=' + API_KEY +
-            '&cx=017576662512468239146:omuauf_lfve&q=link:' +
-            url.getoriginalurl()
-        )
-        uri = Urlattributes(uri)
-        txt = uri.gettext()
-
-        try:
-            for line in txt.splitlines():
-                if "totalResults" in line:
-                    break
-            inlinks = str(re.sub("[^0-9]", "", line))
-        except:
-            logger.debug('Google Inlinks not found')
-
-    except Exception as e:
-        logger.debug(e)
+        for line in txt.splitlines():
+            if "totalResults" in line:
+                break
+        inlinks = str(re.sub("[^0-9]", "", line))
+    except:
+        logger.debug('Google Inlinks not found')
 
     return inlinks
 

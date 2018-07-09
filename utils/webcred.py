@@ -10,7 +10,6 @@ import logging
 import os
 import re
 
-
 logger = logging.getLogger('WEBCred.webcred')
 logging.basicConfig(
     filename='log/logging.log',
@@ -332,13 +331,8 @@ class Webcred(object):
         # wait to join all threads in order to get all results
         maxTime = 300
         for t in threads:
-            try:
-                t.join(maxTime)
-                data[t.getName()] = t.getResult()
-            except Exception as er:
-                logger.info(er)
-                data[t.getName()] = None
-            finally:
-                logger.debug('{} = {}'.format(t.getName(), data[t.getName()]))
+            t.join(maxTime)
+            data[t.getName()] = t.getResult()
+            logger.debug('{} = {}'.format(t.getName(), data[t.getName()]))
 
         return data
