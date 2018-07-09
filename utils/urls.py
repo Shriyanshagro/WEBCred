@@ -15,6 +15,7 @@ import threading
 import types
 import validators
 
+
 logger = logging.getLogger('WEBCred.urls')
 logging.basicConfig(
     filename='log/logging.log',

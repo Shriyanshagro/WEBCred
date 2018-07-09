@@ -10,6 +10,7 @@ import logging
 import os
 import re
 
+
 logger = logging.getLogger('WEBCred.webcred')
 logging.basicConfig(
     filename='log/logging.log',
@@ -178,7 +179,9 @@ class Webcred(object):
 
         except WebcredError as e:
             data['Error'] = e.message
-            logger.info(e)
+            if e.message != 'Response 202':
+                logger.info(e)
+                logger.info(data['Url'])
             dump = False
         except Exception as e:
             logger.info(e)
@@ -187,6 +190,7 @@ class Webcred(object):
             data['Error'] = 'Fatal Error'
             modified = 1
             dump = False
+            logger.info(data['Url'])
         finally:
 
             now = str((datetime.now() - now).total_seconds())
@@ -194,7 +198,6 @@ class Webcred(object):
             try:
                 if modified:
                     logger.debug('updating entry')
-                    logger.info(data['Url'])
                     self.db.session.query(
                         self.Features
                     ).filter(self.Features.Url == data['Url']).update(data)
@@ -202,7 +205,6 @@ class Webcred(object):
 
                 else:
                     logger.debug('creating new entry')
-                    logger.info(data['Url'])
                     data['assess_time'] = now
                     reg = self.Features(data)
                     self.db.session.add(reg)
@@ -219,6 +221,8 @@ class Webcred(object):
                 # delete dump location
                 del data['html']
                 del data['text']
+
+                logger.debug(data['Url'])
 
             except Exception as e:
                 self.db.session.rollback()
