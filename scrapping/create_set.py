@@ -13,6 +13,7 @@ import logging
 import os
 import shutil
 import sys
+import traceback
 
 
 sys.path.insert(0, '../')
@@ -21,7 +22,7 @@ logger = logging.getLogger('WEBCred.scrapping')
 logging.basicConfig(
     filename='log/logging.log',
     filemode='a',
-    format='%(asctime)s %(message)s',
+    format='[%(asctime)s] {%(name)s:%(lineno)d} %(levelname)s - %(message)s',
     datefmt='%m/%d/%Y %I:%M:%S %p',
     level=logging.INFO
 )
@@ -164,8 +165,25 @@ try:
     if os.path.exists(survey_path):
         shutil.rmtree(survey_path)
     os.makedirs(survey_path)
-except Exception as er:
-    logger.debug(er)
+except Exception:
+    # Get current system exception
+    ex_type, ex_value, ex_traceback = sys.exc_info()
+
+    # Extract unformatter stack traces as tuples
+    trace_back = traceback.extract_tb(ex_traceback)
+
+    # Format stacktrace
+    stack_trace = list()
+
+    for trace in trace_back:
+        stack_trace.append(
+            "File : %s , Line : %d, Func.Name : %s, Message : %s" %
+            (trace[0], trace[1], trace[2], trace[3])
+        )
+
+    # print("Exception type : %s " % ex_type.__name__)
+    logger.info(ex_value)
+    logger.debug(stack_trace)
 
 # prepare filterList
 prepare_filterList()

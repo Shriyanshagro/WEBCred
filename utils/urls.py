@@ -11,7 +11,9 @@ import logging
 import re
 import requests
 import statistics
+import sys
 import threading
+import traceback
 import types
 import validators
 
@@ -19,7 +21,7 @@ logger = logging.getLogger('WEBCred.urls')
 logging.basicConfig(
     filename='log/logging.log',
     filemode='a',
-    format='%(asctime)s %(message)s',
+    format='[%(asctime)s] {%(name)s:%(lineno)d} %(levelname)s - %(message)s',
     datefmt='%m/%d/%Y %I:%M:%S %p',
     level=logging.DEBUG
 )
@@ -576,12 +578,15 @@ class Urlattributes(object):
                 resp = uri.geturllibreq()
                 if resp.status_code / 100 < 4:
                     resp = resp.json()
-                    data = arrow.get(
-                        resp['archived_snapshots']['closest']['timestamp'],
-                        'YYYYMMDDHHmmss'
-                    ).timestamp
+                    try:
+                        data = arrow.get(
+                            resp['archived_snapshots']['closest']['timestamp'],
+                            'YYYYMMDDHHmmss'
+                        ).timestamp
+                    except:
+                        data = str(0)
                 if data:
-                    self.lastmod = data
+                    self.lastmod = int(data)
                     break
         #     if not data:
         #         resp = self.geturllibreq()
@@ -597,8 +602,25 @@ class Urlattributes(object):
         #             str(lastmod), '(%Y, %m, %d, %H, %M, %S, %f, %W, %U)'
         #         )
         #         self.lastmod = lastmod.isoformat()
-        except Exception as er:
-            logger.info(er)
+        except Exception:
+            # Get current system exception
+            ex_type, ex_value, ex_traceback = sys.exc_info()
+
+            # Extract unformatter stack traces as tuples
+            trace_back = traceback.extract_tb(ex_traceback)
+
+            # Format stacktrace
+            stack_trace = list()
+
+            for trace in trace_back:
+                stack_trace.append(
+                    "File : %s , Line : %d, Func.Name : %s, Message : %s" %
+                    (trace[0], trace[1], trace[2], trace[3])
+                )
+
+            # print("Exception type : %s " % ex_type.__name__)
+            logger.info(ex_value)
+            logger.debug(stack_trace)
             self.lastmod = None
 
         return self.lastmod

@@ -9,12 +9,15 @@ from utils.urls import Urlattributes
 import logging
 import os
 import re
+import sys
+import traceback
+
 
 logger = logging.getLogger('WEBCred.webcred')
 logging.basicConfig(
     filename='log/logging.log',
     filemode='a',
-    format='%(asctime)s %(message)s',
+    format='[%(asctime)s] {%(name)s:%(lineno)d} %(levelname)s - %(message)s',
     datefmt='%m/%d/%Y %I:%M:%S %p',
     level=logging.INFO
 )
@@ -107,8 +110,9 @@ class Webcred(object):
             site = Urlattributes(url=req['args'].get('site', None))
 
             # get genre
-            # TODO fetch other weightages
-            data['genre'] = str(self.request.get('genre', ['other'])[0])
+            # TODO fetch weightages
+            # WARNING there can be some issue with it
+            data['genre'] = self.request.get('genre', None)
 
             if data['Url'] != site.geturl():
                 data['redirected'] = site.geturl()
@@ -179,8 +183,25 @@ class Webcred(object):
         except WebcredError as e:
             data['Error'] = e.message
             dump = False
-        except Exception as e:
-            logger.info(e)
+        except Exception:
+            # Get current system exception
+            ex_type, ex_value, ex_traceback = sys.exc_info()
+
+            # Extract unformatter stack traces as tuples
+            trace_back = traceback.extract_tb(ex_traceback)
+
+            # Format stacktrace
+            stack_trace = list()
+
+            for trace in trace_back:
+                stack_trace.append(
+                    "File : %s , Line : %d, Func.Name : %s, Message : %s" %
+                    (trace[0], trace[1], trace[2], trace[3])
+                )
+
+            # print("Exception type : %s " % ex_type.__name__)
+            logger.info(ex_value)
+            logger.debug(stack_trace)
             # HACK if it's not webcred error,
             #  then probably it's python error
             data['Error'] = 'Fatal Error'

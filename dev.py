@@ -17,7 +17,7 @@ logger = logging.getLogger('WEBCred.dev')
 logging.basicConfig(
     filename='log/logging.log',
     filemode='a',
-    format='%(asctime)s %(message)s',
+    format='[%(asctime)s] {%(name)s:%(lineno)d} %(levelname)s - %(message)s',
     datefmt='%m/%d/%Y %I:%M:%S %p',
     level=logging.INFO
 )
@@ -46,7 +46,7 @@ if work == 'collectData':
         'langcount': 'true',
         'misspelled': 'true',
         'wot': 'true',
-        'responsive': 'false',
+        'responsive': 'true',
         'pageloadtime': 'true',
         'ads': 'true',
     }

@@ -12,13 +12,15 @@ import logging
 import os
 import re
 import requests
+import sys
+import traceback
 import validators
 
 logger = logging.getLogger('WEBCred.surface')
 logging.basicConfig(
     filename='log/logging.log',
     filemode='a',
-    format='%(asctime)s %(message)s',
+    format='[%(asctime)s] {%(name)s:%(lineno)d} %(levelname)s - %(message)s',
     datefmt='%m/%d/%Y %I:%M:%S %p',
     level=logging.INFO
 )
@@ -43,49 +45,53 @@ def funcImgratio(url):
 
 
 def getWot(url):
-
     result = (
         "http://api.mywot.com/0.4/public_link_json2?hosts=" + url.geturl() +
         "/&callback=&key=d60fa334759ae377ceb9cd679dfa22aec57ed998"
     )
     uri = Urlattributes(result)
     raw = uri.gettext()
-    result = literal_eval(raw[1:-2])
-    return list(result.values())[0]['0']
+    result = literal_eval(raw[1:-4])
+    result = str(result).split(']')[0].split('[')[-1].split(',')
+    data = None
+    if isinstance(result, list) and len(result) == 2:
+        data = {}
+        data['reputation'] = int(result[0])
+        data['confidence'] = int(result[1])
+    return data
 
 
-# TODO Update key
+# TODO get multiple keys
 def getResponsive(url):
 
     # should output boolean value
     api_url = 'https://searchconsole.googleapis.com/v1/urlTestingTools/' \
               'mobileFriendlyTest:run'
 
-    response = requests.post(
-        api_url,
-        json={
-            'url': url.geturl()
-        },
-        params={
-            'fields': 'mobileFriendliness',
-            'key': os.environ['Responsive_API_KEY']
-        }
-    ).json()
-
     try:
+        response = requests.post(
+            api_url,
+            json={'url': url.geturl()},
+            params={
+                'fields': 'mobileFriendliness',
+                'key': os.environ['Google_API_KEY']
+            }
+        )
+        if response.status_code / 100 >= 4:
+            return None
+        response = response.json()
+
         state = response['mobileFriendliness']
     except KeyError:
-        state = response['error']['message']
+        logger.warning(response['error']['message'])
+        state = None
 
     return state
 
 
 def getHyperlinks(url, attributes):
 
-    try:
-        soup = url.getsoup()
-    except Exception as e:
-        logger.debug(e)
+    soup = url.getsoup()
 
     data = {}
     for element in attributes:
@@ -240,8 +246,26 @@ def getImgratio(url):
                 t = MyThread(func, Name, Url)
                 t.start()
                 threads.append(t)
-            except Exception as e:
-                logger.debug(e)
+            except Exception:
+                # Get current system exception
+                ex_type, ex_value, ex_traceback = sys.exc_info()
+
+                # Extract unformatter stack traces as tuples
+                trace_back = traceback.extract_tb(ex_traceback)
+
+                # Format stacktrace
+                stack_trace = list()
+
+                for trace in trace_back:
+                    stack_trace.append(
+                        "File : %s , Line : %d, Func.Name : %s, Message : %s" %
+                        (trace[0], trace[1], trace[2], trace[3])
+                    )
+
+                # print("Exception type : %s " % ex_type.__name__)
+                if ex_value.message != 'Response 202':
+                    logger.warning(ex_value)
+                    logger.debug(stack_trace)
 
     for t in threads:
         t.join()
@@ -279,12 +303,9 @@ def getCookie(url):
     pattern = url.getPatternObj().regexCompile(['cookie'])
 
     for key in header.keys():
-        try:
-            match, matched = url.getPatternObj().regexMatch(
-                pattern=pattern, data=key
-            )
-        except Exception as e:
-            logger.debug(e)
+        match, matched = url.getPatternObj().regexMatch(
+            pattern=pattern, data=key
+        )
 
         if match:
             # print key
@@ -390,7 +411,7 @@ def googleinlink(url):
 
     # TODO take recent API into account to save time
     #  TODO get list of API
-    API_KEY = os.environ.get('Google_Inlinks_key')
+    API_KEY = os.environ.get('Google_API_KEY')
 
     inlinks = None
 
@@ -452,8 +473,25 @@ def getInlinks(url):
                 # HACK to incorporate 0 values
                 score = str(int(t.getResult()) + int(score))
                 length += 1
-        except Exception as er:
-            logger.debug(er)
+        except Exception:
+            # Get current system exception
+            ex_type, ex_value, ex_traceback = sys.exc_info()
+
+            # Extract unformatter stack traces as tuples
+            trace_back = traceback.extract_tb(ex_traceback)
+
+            # Format stacktrace
+            stack_trace = list()
+
+            for trace in trace_back:
+                stack_trace.append(
+                    "File : %s , Line : %d, Func.Name : %s, Message : %s" %
+                    (trace[0], trace[1], trace[2], trace[3])
+                )
+
+            # print("Exception type : %s " % ex_type.__name__)
+            logger.info(ex_value)
+            logger.debug(stack_trace)
 
     if score:
         inlinks = (int(score) / length)
