@@ -17,6 +17,7 @@ import traceback
 import types
 import validators
 
+
 logger = logging.getLogger('WEBCred.urls')
 logging.basicConfig(
     filename='log/logging.log',
@@ -470,10 +471,29 @@ class Urlattributes(object):
         if not self.urllibreq:
             try:
                 now = datetime.now()
-                self.urllibreq = requests.get(url=self.url)
+                self.urllibreq = requests.get(url=self.url, headers=self.hdr)
                 self.loadTime = int((datetime.now() - now).total_seconds())
-            except:
-                raise WebcredError('Error in binding req to given url')
+            except Exception:
+                # Get current system exception
+                ex_type, ex_value, ex_traceback = sys.exc_info()
+
+                # Extract unformatter stack traces as tuples
+                trace_back = traceback.extract_tb(ex_traceback)
+
+                # Format stacktrace
+                stack_trace = list()
+
+                for trace in trace_back:
+                    stack_trace.append(
+                        "File : %s , Line : %d, Func.Name : %s, Message : %s" %
+                        (trace[0], trace[1], trace[2], trace[3])
+                    )
+
+                # print("Exception type : %s " % ex_type.__name__)
+                raise WebcredError(ex_value)
+                # logger.info(stack_trace)
+                # HACK if it's not webcred error,
+                #  then probably it's python error
 
         # print self.urllibreq.geturl()
         return self.urllibreq
