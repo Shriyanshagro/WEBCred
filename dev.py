@@ -12,7 +12,6 @@ from utils.pipeline import Pipeline
 import json
 import logging
 
-
 logger = logging.getLogger('WEBCred.dev')
 logging.basicConfig(
     filename='log/logging.log',

@@ -24,6 +24,7 @@ pandas = "*"
 matplotlib = "*"
 seaborn = "*"
 sklearn = "*"
+webcred = {editable = true, path = "."}
 
 [dev-packages]
 

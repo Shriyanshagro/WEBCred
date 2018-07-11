@@ -16,8 +16,6 @@ import sys
 import traceback
 
 
-sys.path.insert(0, '../')
-
 logger = logging.getLogger('WEBCred.kit')
 logging.basicConfig(
     filename='log/logging.log',

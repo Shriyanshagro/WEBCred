@@ -537,10 +537,10 @@ class Urlattributes(object):
             self.html = self.getrequests().text
         return self.html
 
-    def getsoup(self):
+    def getsoup(self, parser='html.parser'):
         data = self.getrequests().text
         try:
-            self.soup = BeautifulSoup(data, "html.parser")
+            self.soup = BeautifulSoup(data, parser)
         except:
             raise WebcredError('Error while parsing using bs4')
 

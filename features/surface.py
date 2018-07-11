@@ -16,6 +16,7 @@ import sys
 import traceback
 import validators
 
+
 logger = logging.getLogger('WEBCred.surface')
 logging.basicConfig(
     filename='log/logging.log',
@@ -44,7 +45,27 @@ def funcImgratio(url):
     return size
 
 
+# if rank not available, 999999999 wil be returned
+def getAlexarank(url):
+
+    if not isinstance(url, Urlattributes):
+        url = Urlattributes(url)
+
+    uri = "http://data.alexa.com/data?cli=10&dat=s&url=" + url.geturl()
+    uri = Urlattributes(uri)
+    soup = uri.getsoup()
+    try:
+        rank = soup.find("reach")['rank']
+    except:
+        rank = None
+    return rank
+
+
 def getWot(url):
+
+    if not isinstance(url, Urlattributes):
+        url = Urlattributes(url)
+
     result = (
         "http://api.mywot.com/0.4/public_link_json2?hosts=" + url.geturl() +
         "/&callback=&key=d60fa334759ae377ceb9cd679dfa22aec57ed998"
