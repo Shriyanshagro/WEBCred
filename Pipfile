@@ -20,6 +20,10 @@ isort = "*"
 "flake8" = "*"
 arrow = "*"
 python-dotenv = "*"
+pandas = "*"
+matplotlib = "*"
+seaborn = "*"
+sklearn = "*"
 
 [dev-packages]
 

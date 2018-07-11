@@ -78,7 +78,7 @@ def check_hyperlinks(url):
         'sitemap': 'Page NA'
     }
 
-    # need to specify header for scrapping otherwise some
+    # need to specify header for kit otherwise some
     # websites doesn't allow bot to scrap
     hdr = {'User-Agent': 'Mozilla/5.0'}
     # You should use the HEAD Request for this,
@@ -153,7 +153,7 @@ def check_language(url):
         iso_lang_flag = 1
 
     count = {"Total supported Lang": "Page NA"}
-    # need to specify header for scrapping otherwise
+    # need to specify header for kit otherwise
     #  some websites doesn't allow bot to scrap
     hdr = {'User-Agent': 'Mozilla/5.0'}
     # You should use the HEAD Request for this,
@@ -193,7 +193,7 @@ def check_language(url):
 
 def check_size_ratio(url):
     ratio = "Page NA"
-    # need to specify header for scrapping
+    # need to specify header for kit
     # otherwise some websites doesn't allow bot to scrap
     hdr = {'User-Agent': 'Mozilla/5.0'}
     # You should use the HEAD Request for this,
@@ -331,7 +331,7 @@ def check_brokenlinks(url):
         'total_external_links': "Page NA",
         'broken_links': "Page NA"
     }
-    # need to specify header for scrapping otherwise
+    # need to specify header for kit otherwise
     # some websites doesn't allow bot to scrap
     hdr = {'User-Agent': 'Mozilla/5.0'}
     # You should use the HEAD Request for this,
@@ -541,7 +541,7 @@ def crawler(threadName):
             print "Nope"
         else:
 
-            # need to specify header for scrapping otherwise
+            # need to specify header for kit otherwise
             #  some websites doesn't allow bot to scrap
             # hdr = {'User-Agent': 'Mozilla/5.0'}
             # You should use the HEAD Request for this,
