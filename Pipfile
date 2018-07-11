@@ -1,0 +1,27 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+statistics = "*"
+"bs4" = "*"
+validators = "*"
+flask = "*"
+nltk = "*"
+requests = "*"
+yapf = "*"
+numpy = "*"
+"html2text" = "*"
+flask-sqlalchemy = "*"
+sqlalchemy = "*"
+"psycopg2-binary" = "*"
+isort = "*"
+"flake8" = "*"
+arrow = "*"
+python-dotenv = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "2.7"

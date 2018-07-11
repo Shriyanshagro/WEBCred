@@ -1,0 +1,65 @@
+Url,Validation API/method,misspelled,domain,ads,imgratio,inlinks,pageloadtime,hyperlinks,"Broken
+Links",responsive,lastmod,langcount,outlinks,redirected
+,,,,,,,,,,,,,,
+"""https://noscript.net/changelog""",WEBCred,42,"""net""",11,0.9951897243,1,335,"{""contact"": 1, ""email"": 0, ""sitemap"": 0, ""help"": 0}",16,"""false""","""2018-05-11T14:54:12""",1,8,Field NA
+,Manual or API,1,"""net""",0,0.99,100,2148,"{""contact"": 1, ""email"": 1, ""sitemap"": 0, ""help"": 0}",15,"""false""","""2018-05-11T14:54:12""",1,9,
+,,,,,,,,,,,,,,
+"""https://twitter.com/CTIN_Global/status/790670640642654208/photo/1""",WEBCred,287,"""com""",15,0.8191229746,0,503,"{""contact"": 0, ""email"": 0, ""sitemap"": 0, ""help"": 1}",25,"""false""","""2018-05-11T14:54:56""",44,10,Field NA
+,Manual or API,200,"""com""",2,0.6,99,6257,"{""contact"": 0, ""email"": 0, ""sitemap"": 0, ""help"": 1}",25,"""true""","""2018-05-11T14:54:56""",45,11,
+,,,,,,,,,,,,,,
+"""http://www.ncbi.nlm.nih.gov/pubmed/25204641""",WEBCred,1,"""gov""",37,0.2498734498,0,20,"{""contact"": 1, ""email"": 0, ""sitemap"": 0, ""help"": 1}",4,"""true""","""2018-05-11T14:55:57""",1,32,"""https://www.ncbi.nlm.nih.gov/pubmed/25204641"""
+,Manual or API,3,"""gov""",0,0.85,3,652,"{""contact"": 1, ""email"": 0, ""sitemap"": 0, ""help"": 1}",4,"""true""","""2018-05-11T14:55:57""",1,33,
+,,,,,,,,,,,,,,
+"""http://www.cioforum.com/""",WEBCred,0,"""com""",3,0.0452647168,0,"""+++""","{""contact"": 1, ""email"": 0, ""sitemap"": 0, ""help"": 0}",32,"""false""","""2018-05-11T14:59:35""",1,1,"""https://www.richmondevents.com/forums/details/CIO18"""
+,Manual or API,5,"""com""",2,0.4,0,3500,"{""contact"": 1, ""email"": 0, ""sitemap"": 0, ""help"": 0}",30,"""false""","""2018-05-11T14:59:35""",1,2,
+,,,,,,,,,,,,,,
+"""http://www.cc.gatech.edu/~wenke/project/id.html""",WEBCred,0,"""edu""",0,1,0,241,"{""contact"": 0, ""email"": 0, ""sitemap"": 0, ""help"": 0}",0,"""false""","""2011-08-22T19:12:58""",1,0,"""http://wenke.gtisc.gatech.edu/project/id.html"""
+,Manual or API,1,"""edu""",0,1,100,1658,"{""contact"": 0, ""email"": 1, ""sitemap"": 0, ""help"": 0}",37,"""false""","""2011-08-22T19:12:58""",1,1,
+,,,,,,,,,,,,,,
+"""http://news.softpedia.com/news/Hackers-Trick-Facebook-Users-Into-Self-Cross-Site-Scripting-XSS-Scam-452364.shtml""",WEBCred,45,"""com""",54,0.1559010507,0,"""+++""","{""contact"": 0, ""email"": 0, ""sitemap"": 0, ""help"": 1}",0,"""true""","""2018-05-11T15:00:33""",1,"""TimeOut Error, Max 130 sec""","""https://news.softpedia.com/news/Hackers-Trick-Facebook-Users-Into-Self-Cross-Site-Scripting-XSS-Scam-452364.shtml"""
+,Manual or API,0,"""com""",42,0.2,0,2000,"{""contact"": 0, ""email"": 1, ""sitemap"": 0, ""help"": 1}",0,"""true""","""2018-05-11T15:00:33""",1,13,
+,,,,,,,,,,,,,,
+"""https://web.archive.org/web/20090207005135/http://www.nsa.gov/ia/programs/suiteb_cryptography/index.shtml""",WEBCred,0,"""org""",14,1,0,772,"{""contact"": 1, ""email"": 0, ""sitemap"": 1, ""help"": 1}",123,"""false""","""2018-05-11T15:15:58""",1,5,Field NA
+,Manual or API,0,"""org""",0,1,92,1020,"{""contact"": 1, ""email"": 0, ""sitemap"": 1, ""help"": 1}",135,"""false""","""2018-05-11T15:15:58""",1,6,
+,,,,,,,,,,,,,,
+"""http://safecurves.cr.yp.to/""",WEBCred,0,"""to""",4,1,0,180,"{""contact"": 0, ""email"": 0, ""sitemap"": 0, ""help"": 0}",0,"""false""","""2017-01-22T18:14:03""",1,4,Field NA
+,Manual or API,0,"""to""",0,1,0,200,"{""contact"": 0, ""email"": 0, ""sitemap"": 0, ""help"": 0}",0,"""true""","""2017-01-22T18:14:03""",1,5,
+,,,,,,,,,,,,,,
+"""http://howtodoinjava.com/spring/spring-aop/spring-aop-aspectj-example-tutorial-using-annotation-config/""",WEBCred,1,"""com""",81,1,0,"""+++""","{""contact"": 0, ""email"": 0, ""sitemap"": 0, ""help"": 0}",3,"""true""","""2018-05-11T15:26:52""",1,15,"""https://howtodoinjava.com/spring/spring-aop/spring-aop-aspectj-example-tutorial-using-annotation-config/"""
+,Manual or API,3,"""com""",19,0.9,8,1000,"{""contact"": 0, ""email"": 0, ""sitemap"": 0, ""help"": 0}",1,"""true""","""2018-05-11T15:26:52""",1,16,
+,,,,,,,,,,,,,,
+"""http://adsabs.harvard.edu/abs/1970ApJ...159..379R""",WEBCred,11,"""edu""",33,0.322619989,0,22,"{""contact"": 0, ""email"": 0, ""sitemap"": 0, ""help"": 1}","""TimeOut Error, Max 130 sec""","""false""","""2018-05-11T15:25:01""",1,"""TimeOut Error, Max 130 sec""",Field NA
+,Manual or API,0,"""edu""",0,1,122,752,"{""contact"": 0, ""email"": 0, ""sitemap"": 0, ""help"": 1}",0,"""false""","""2018-05-11T15:25:01""",1,5,
+,,,,,,,,,,,,,,
+"""http://www.h-online.com/security/news/item/WhatsApp-no-longer-sends-plain-text-1674723.html""",WEBCred,54,"""com""",13,1,0,81,"{""contact"": 0, ""email"": 0, ""sitemap"": 0, ""help"": 0}",124,"""false""","""2014-02-13T22:37:35""",1,7,Field NA
+,Manual or API,65,"""com""",9,0.4,0,100,"{""contact"": 1, ""email"": 0, ""sitemap"": 0, ""help"": 0}",120,"""false""","""2014-02-13T22:37:35""",1,8,
+,,,,,,,,,,,,,,
+"""http://docs.saltstack.com/en/latest/""",WEBCred,3,"""com""",31,"""TimeOut Error, Max 130 sec""",0,521,"{""contact"": 0, ""email"": 1, ""sitemap"": 0, ""help"": 0}",57,"""false""","""2018-04-03T17:16:33""",1,29,"""https://docs.saltstack.com/en/latest/"""
+,Manual or API,5,"""com""",13,0.7,10,985,"{""contact"": 0, ""email"": 1, ""sitemap"": 1, ""help"": 0}",57,"""false""","""2018-04-03T17:16:33""",1,30,
+,,,,,,,,,,,,,,
+"""http://securityaffairs.co/wordpress/52583/hacking/dyn-dns-service-ddos-3.html""",WEBCred,9,"""co""",118,0.1230314683,0,107,"{""contact"": 1, ""email"": 1, ""sitemap"": 0, ""help"": 0}",61,"""true""","""2018-05-11T15:39:21""",1,"""TimeOut Error, Max 130 sec""",Field NA
+,Manual or API,9,"""co""",108,0.3,0,2510,"{""contact"": 1, ""email"": 1, ""sitemap"": 0, ""help"": 0}",60,"""false""","""2018-05-11T15:39:21""",1,22,
+,,,,,,,,,,,,,,
+"""http://www.protomatter.com/rscan/""",WEBCred,0,"""com""",1,1,0,498,"{""contact"": 0, ""email"": 0, ""sitemap"": 0, ""help"": 0}",0,"""false""","""2006-08-05T02:19:27""",1,1,Field NA
+,Manual or API,0,"""com""",0,1,0,221,"{""contact"": 0, ""email"": 0, ""sitemap"": 0, ""help"": 0}",2,"""false""","""2006-08-05T02:19:27""",1,2,
+,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,
+,Validation checker methods/API,,,,,,,,,,,,,
+,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,
+Features,,,,Validation API/method,,,,,,,,,,
+,,,,,,,,,,,,,,
+misspell,,,,http://tools.seochat.com/tools/free-spell-checker/#sthash.gq2V51Oy.sd0cpkva.dpbs,,,,,,,,,,
+inlinks ,,,,https://smallseotools.com/backlink-checker/,,,,,,,,,,
+brokenlink,,,,https://smallseotools.com/websites-broken-link-checker/,,,,,,,,,,
+responsive design,,,,https://search.google.com/test/mobile-friendly?id=bp5JCwz8iKIE7qAUf7LD2w,,,,,,,,,,
+outlinks,,,,https://smallseotools.com/website-link-analyzer-tool/,,,,,,,,,,
+domain,,,,manual,,,,,,,,,,
+lang_count,,,,manual,,,,,,,,,,
+real world presence,,,,manual,,,,,,,,,,
+text2body_ratio,,,,manual,,,,,,,,,,
+lastmodified,,,,https://archive.org/,,,,,,,,,,
+ads,,,,https://adblockplus.org/,,,,,,,,,,
+page load time,,,,https://www.webpagetest.org/result/180511_07_b889ce1b4a1728134a4b24abbc1d48e5/,,,,,,,,,,

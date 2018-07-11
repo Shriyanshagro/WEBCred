@@ -266,7 +266,7 @@ improving credibility of a webpage.</span> -->
 								<td>
 									<!-- Add more dimensions -->
 									<button type="button" onclick="addRow()">Add more
-										Dimensions</button>
+										Features</button>
 								</td>
 
 								<td>
@@ -297,7 +297,7 @@ improving credibility of a webpage.</span> -->
 			  var new_row = x.rows[1].cloneNode(true);
 				//FIXME +5 is caluclated number as total dimensions are 12
 				//and len==8
-				//HACK if +5 number is changed, then change in utils.py, validateForm()
+				//HACK if +5 number is changed, then change in urls.py, validateForm()
 				// , removeRow()
 			  var len = x.rows.length + 9;
 				dimension = "dimension" + len;
@@ -305,10 +305,10 @@ improving credibility of a webpage.</span> -->
 				console.log(dimension, api);
 
 			  new_row.cells[0].innerHTML = '<input type="text" placeholder=\
-				"New Dimension" name="'+ dimension + '" id="'+dimension+'" required/>';
+				"Name of new Feature" name="'+ dimension + '" id="'+dimension+'" required/>';
 
 			  new_row.cells[1].innerHTML = '<input type="url" placeholder=\
-				"API for dimension" name="'+ api + '" id="'+api+'"required />';
+				"API for Feature" name="'+ api + '" id="'+api+'"required />';
 
 				// <input type="number" step="any" min="0" max="100" \
 				// 	name="imgratioPerc" id="imgratioPerc" value="0">
