@@ -16,6 +16,7 @@ import sys
 import traceback
 import validators
 
+
 logger = logging.getLogger('WEBCred.surface')
 logging.basicConfig(
     filename='log/logging.log',
@@ -543,6 +544,9 @@ def getInlinks(url):
         inlinks = (int(score) / length)
         logger.debug('inlinks {}'.format(inlinks))
 
+    if inlinks == 0:
+        # HACK because database and python take 0 as None
+        inlinks = -1
     return inlinks
 
 

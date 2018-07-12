@@ -35,20 +35,20 @@ if work == 'collectData':
 
     # stitched request
     request = {
-        'lastmod': 'true',
-        'domain': 'true',
+        'lastmod': 'false',
+        'domain': 'false',
         'inlinks': 'true',
-        'outlinks': 'true',
-        'hyperlinks': 'true',
-        'imgratio': 'true',
-        'brokenlinks': 'true',
-        'cookie': 'true',
-        'langcount': 'true',
-        'misspelled': 'true',
+        'outlinks': 'false',
+        'hyperlinks': 'false',
+        'imgratio': 'false',
+        'brokenlinks': 'false',
+        'cookie': 'false',
+        'langcount': 'false',
+        'misspelled': 'false',
         'wot': 'false',
-        'responsive': 'true',
-        'pageloadtime': 'true',
-        'ads': 'true',
+        'responsive': 'false',
+        'pageloadtime': 'false',
+        'ads': 'false',
     }
 
     now = datetime.now().time().isoformat()

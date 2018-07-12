@@ -12,6 +12,7 @@ import re
 import sys
 import traceback
 
+
 logger = logging.getLogger('WEBCred.webcred')
 logging.basicConfig(
     filename='log/logging.log',
@@ -146,7 +147,7 @@ class Webcred(object):
                     successfully extracted yet
                     '''
                     for k, v in dbData.items():
-                        if v:
+                        if v or str(v) == '0':
                             # always assess loadtime
                             if k != 'pageloadtime':
                                 req['args'][k] = 'false'
