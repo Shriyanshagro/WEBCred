@@ -419,27 +419,43 @@ def getOutlinks(url):
 
 def googleinlink(url):
 
-    # TODO take recent API into account to save time
-    #  TODO get list of API
     API_KEY = os.environ.get('Google_API_KEY')
 
     inlinks = None
-
-    # keyword link is used in search query to search only hyperlinks
-    uri = (
-        'https://www.googleapis.com/customsearch/v1?key=' + API_KEY +
-        '&cx=017576662512468239146:omuauf_lfve&q=link:' + url.getoriginalurl()
-    )
-    uri = Urlattributes(uri)
-    txt = uri.gettext()
-
     try:
+        # keyword link is used in search query to search only hyperlinks
+        uri = (
+            'https://www.googleapis.com/customsearch/v1?key=' + API_KEY +
+            '&cx=017576662512468239146:omuauf_lfve&q=link:' +
+            url.getoriginalurl()
+        )
+        uri = Urlattributes(uri)
+        txt = uri.gettext()
+
         for line in txt.splitlines():
             if "totalResults" in line:
                 break
-        inlinks = str(re.sub("[^0-9]", "", line))
-    except:
-        logger.debug('Google Inlinks not found')
+        inlinks = int(re.sub("[^0-9]", "", line))
+
+    except Exception:
+        # Get current system exception
+        ex_type, ex_value, ex_traceback = sys.exc_info()
+
+        # Extract unformatter stack traces as tuples
+        trace_back = traceback.extract_tb(ex_traceback)
+
+        # Format stacktrace
+        stack_trace = list()
+
+        for trace in trace_back:
+            stack_trace.append(
+                "File : %s , Line : %d, Func.Name : %s, Message : %s" %
+                (trace[0], trace[1], trace[2], trace[3])
+            )
+
+        # print("Exception type : %s " % ex_type.__name__)
+        logger.info('Inlinks error {}'.format(ex_value))
+        logger.debug(stack_trace)
 
     return inlinks
 
@@ -505,7 +521,7 @@ def getInlinks(url):
 
     if score:
         inlinks = (int(score) / length)
-        logger.debug('inlinks {}'.format(inlinks))
+        logger.info('inlinks {}'.format(inlinks))
 
     return inlinks
 
@@ -538,4 +554,3 @@ def dimapi(url, api):
         raise WebcredError("Give valid API")
     except:
         return 'NA'
-
