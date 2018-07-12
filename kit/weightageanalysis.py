@@ -1,5 +1,10 @@
 # sum of all weightage== 1, misc. genre == 0.1
 
+# some mac os stuff
+import matplotlib  # isort:skip
+matplotlib.use('TkAgg')  # isort:skip
+import matplotlib.pyplot as pl  # isort:skip
+
 from app import db
 from datetime import datetime as dt
 from features.surface import getAlexarank
@@ -8,10 +13,6 @@ from fnmatch import fnmatch
 from sklearn.model_selection import KFold
 from utils.pipeline import Pipeline
 
-import matplotlib  # isort:skip
-# some mac os stuff
-matplotlib.use('TkAgg')  # isort:skip
-import matplotlib.pyplot as pl  # isort:skip
 import cPickle
 import json
 import logging
@@ -374,14 +375,14 @@ if __name__ == "__main__":
                 try:
                     if not database.exist(url[:-2]):
                         web_of_trust = getWot(url[:-2])
+                        data['alexa'] = getAlexarank(url[:-2])
+
                         data['wot_confidence'] = web_of_trust['confidence']
                         data['wot_reputation'] = web_of_trust['reputation']
                         data['wot'] = (
                             data['wot_reputation'] * data['wot_confidence'] /
                             10000.0
                         )
-                        data['alexa'] = getAlexarank(url[:-2])
-                        database.add(data)
 
                 except Exception:
                     # Get current system exception
@@ -402,8 +403,15 @@ if __name__ == "__main__":
 
                     # print("Exception type : %s " % ex_type.__name__)
                     if ex_value.message != 'Response 202':
-                        logger.warning(ex_value)
+                        logger.debug(ex_value)
                         logger.debug(stack_trace)
+
+                    data['Error'] = ex_value.message
+
+                try:
+                    database.add(data)
+                except Exception:
+                    database.getdb().session.rollback()
 
             # similarity = np.corrcoef(wot, alexa)[0][1]
             # print('similarity between alexa and wot = {}'.format(similarity))
