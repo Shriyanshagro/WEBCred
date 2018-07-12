@@ -12,6 +12,7 @@ from utils.pipeline import Pipeline
 import json
 import logging
 
+
 logger = logging.getLogger('WEBCred.dev')
 logging.basicConfig(
     filename='log/logging.log',
@@ -62,6 +63,7 @@ if work == 'collectData':
     # count = len(links)
     # tempcounter = counter = len(tempData)
     for url in links:
+        print(links.index(url))
         request['site'] = url[:-2]
         data = collectData(request)
         # data_file = open(new_id, 'a')
