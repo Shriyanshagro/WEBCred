@@ -5,12 +5,14 @@ import matplotlib  # isort:skip
 matplotlib.use('TkAgg')  # isort:skip
 import matplotlib.pyplot as pl  # isort:skip
 
-from app import db
 from datetime import datetime as dt
 from features.surface import getAlexarank
 from features.surface import getWot
 from fnmatch import fnmatch
 from sklearn.model_selection import KFold
+from utils.essentials import Base
+from utils.essentials import Database
+from utils.essentials import db
 from utils.pipeline import Pipeline
 
 import cPickle
@@ -23,6 +25,7 @@ import seaborn as sns
 import subprocess
 import sys
 import traceback
+
 
 logger = logging.getLogger('WEBCred.surface')
 logging.basicConfig(
@@ -284,16 +287,13 @@ def calculateWeightage():
     # ]
 
 
-table_name = 'ranks'
-
-
-class Ranks(db.Model):
-    __tablename__ = table_name
+class Ranks(Base):
+    __tablename__ = 'ranks'
 
     id = db.Column(db.Integer, primary_key=True)
-    Url = db.Column(db.String(), unique=True)
+    url = db.Column(db.String(), unique=True)
     redirected = db.Column(db.String())
-    Error = db.Column(db.String())
+    error = db.Column(db.String())
     alexa = db.Column(db.Integer())
     wot_confidence = db.Column(db.Integer())
     wot_reputation = db.Column(db.Integer())
@@ -305,41 +305,7 @@ class Ranks(db.Model):
             setattr(self, key, data[key])
 
     def __repr__(self):
-        return '<URL %r>' % self.Url
-
-
-class Database(object):
-    def __init__(self):
-        engine = db.engine
-        # check existence of table in database
-        if not engine.dialect.has_table(engine, table_name):
-            db.create_all()
-            logger.info('Created table {}'.format(table_name))
-
-        self.db = db
-        self.ranks = Ranks
-
-    def exist(self, url):
-
-        if self.db.session.query(
-                self.ranks).filter(self.ranks.Url == url).count():
-            return True
-
-        return False
-
-    def getdb(self):
-        return self.db
-
-    def add(self, data):
-        reg = self.ranks(data)
-        self.db.session.add(reg)
-        self.db.session.commit()
-
-    def update(self, data):
-        self.db.session.query(
-            self.ranks
-        ).filter(self.ranks.Url == data['Url']).update(data)
-        self.db.session.commit()
+        return self.url
 
 
 if __name__ == "__main__":
@@ -368,13 +334,13 @@ if __name__ == "__main__":
             link.close()
             wot = []
             alexa = []
-            database = Database()
+            database = Database(Ranks)
             for url in links:
                 print(links.index(url))
                 data = {}
-                data['Url'] = url[:-2]
+                data['url'] = url[:-2]
                 try:
-                    if not database.exist(url[:-2]):
+                    if not database.exist('url', url[:-2]):
                         web_of_trust = getWot(url[:-2])
                         data['alexa'] = getAlexarank(url[:-2])
 
@@ -412,7 +378,7 @@ if __name__ == "__main__":
                 try:
                     database.add(data)
                 except Exception:
-                    database.getdb().session.rollback()
+                    database.getsession().rollback()
 
             # similarity = np.corrcoef(wot, alexa)[0][1]
             # print('similarity between alexa and wot = {}'.format(similarity))

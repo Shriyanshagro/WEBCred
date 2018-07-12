@@ -12,7 +12,6 @@ import re
 import sys
 import traceback
 
-
 logger = logging.getLogger('WEBCred.webcred')
 logging.basicConfig(
     filename='log/logging.log',
@@ -53,7 +52,7 @@ apiList = {
     'cookie': ['getCookie', '', '', 'Boolean'],
     'langcount': ['getLangcount', '', '', 'Integer'],
     'misspelled': ['getMisspelled', '', '', 'Integer'],
-    'wot': ['getWot', '', 'JSON'],
+    # 'wot': ['getWot', '', 'JSON'],
     'responsive': ['getResponsive', '', '', 'Boolean'],
     'ads': ['getAds', '', 'Integer'],
     'pageloadtime': ['getPageloadtime', '', '', 'Integer'],
@@ -67,9 +66,8 @@ apiList = {
 
 
 class Webcred(object):
-    def __init__(self, db, Features, request):
+    def __init__(self, db, request):
         self.db = db
-        self.Features = Features
         self.request = request
 
     def assess(self):
@@ -105,7 +103,7 @@ class Webcred(object):
 
             # to show wot ranking
             req['args']['wot'] = "true"
-            data['Url'] = req['args']['site']
+            data['url'] = req['args']['site']
 
             site = Urlattributes(url=req['args'].get('site', None))
 
@@ -114,7 +112,7 @@ class Webcred(object):
             # WARNING there can be some issue with it
             data['genre'] = self.request.get('genre', None)
 
-            if data['Url'] != site.geturl():
+            if data['url'] != site.geturl():
                 data['redirected'] = site.geturl()
 
             data['lastmod'] = site.getlastmod()
@@ -124,23 +122,18 @@ class Webcred(object):
 
             # check database,
             # if url is already present?
-            if self.db.session.query(
-                    self.Features).filter(self.Features.Url == data['Url']
-                                          ).count():
+            if self.db.filter('url', data['url']).count():
                 '''
                 if lastmod not changed
                     update only the columns with None value
                 else update every column
                 '''
-                if self.db.session.query(
-                        self.Features
-                ).filter(self.Features.lastmod == data['lastmod']
-                         ).count() or not data['lastmod']:
+                if self.db.filter(
+                        'lastmod',
+                        data['lastmod']).count() or not data['lastmod']:
                     # get all existing data in dict format
-                    dbData = self.db.session.query(
-                        self.Features
-                    ).filter(self.Features.Url == data['Url']
-                             ).all()[0].__dict__
+                    dbData = self.db.getdata('url', data['url'])
+
                     # check the ones from columns which have non None value
                     '''
                     None value indicates that feature has not
@@ -182,10 +175,10 @@ class Webcred(object):
 
             data = self.webcredScore(data, percentage)
 
-            data['Error'] = None
+            data['error'] = None
 
         except WebcredError as e:
-            data['Error'] = e.message
+            data['error'] = e.message
             dump = False
         except Exception:
             # Get current system exception
@@ -208,46 +201,34 @@ class Webcred(object):
             logger.debug(stack_trace)
             # HACK if it's not webcred error,
             #  then probably it's python error
-            data['Error'] = 'Fatal Error'
+            data['error'] = 'Fatal Error'
             modified = 1
             dump = False
-            logger.info(data['Url'])
+            logger.debug(data['url'])
         finally:
 
             now = str((datetime.now() - now).total_seconds())
             # store it in data
-            try:
-                if modified:
-                    logger.debug('updating entry')
-                    self.db.session.query(
-                        self.Features
-                    ).filter(self.Features.Url == data['Url']).update(data)
-                    self.db.session.commit()
+            if modified:
+                logger.debug('updating entry')
+                self.db.update('url', data['url'], data)
 
-                else:
-                    logger.debug('creating new entry')
-                    data['assess_time'] = now
-                    reg = self.Features(data)
-                    self.db.session.add(reg)
-                    self.db.session.commit()
+            else:
+                logger.debug('creating new entry')
+                data['assess_time'] = now
+                self.db.add(data)
 
-                # dump text and html of html
-                if dump:
-                    self.dumpRaw(site)
+            # dump text and html of html
+            if dump:
+                self.dumpRaw(site)
 
-                data = self.db.session.query(
-                    self.Features
-                ).filter(self.Features.Url == data['Url']).all()[0].__dict__
+            data = self.db.getdata('url', data['url'])
 
-                # delete dump location
-                del data['html']
-                del data['text']
+            # delete dump location
+            del data['html']
+            del data['text']
 
-                logger.debug(data['Url'])
-
-            except Exception as e:
-                self.db.session.rollback()
-                logger.debug(e)
+            logger.debug(data['url'])
 
             logger.debug('Time = {}'.format(now))
 
@@ -295,6 +276,8 @@ class Webcred(object):
         ).filter(self.Features.Url == site.getoriginalurl()).update(data)
         self.db.session.commit()
 
+    # TODO relook at normalization
+    # esp. are we rmoving any outliers?
     def webcredScore(self, data, percentage):
         # score varies from -1 to 1
         score = 0

@@ -1,8 +1,10 @@
 from dotenv import load_dotenv
-from flask import Flask
 from flask import render_template
 from flask import request
-from flask_sqlalchemy import SQLAlchemy
+from utils.essentials import app
+from utils.essentials import Base
+from utils.essentials import Database
+from utils.essentials import db
 from utils.essentials import WebcredError
 from utils.webcred import apiList
 from utils.webcred import Webcred
@@ -24,31 +26,18 @@ logging.basicConfig(
     datefmt='%m/%d/%Y %I:%M:%S %p',
     level=logging.INFO
 )
-app = Flask(__name__)
-
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DB_URL')
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(app)
-'''
-To create our database based off our model, run the following commands
-$ python
->>> from app import db
->>> db.create_all()
->>> exit()'''
-
-table_name = 'features'
 
 
 # Our database model
-class Features(db.Model):
-    __tablename__ = table_name
+class Features(Base):
+    __tablename__ = 'features'
 
     id = db.Column(db.Integer, primary_key=True)
-    Url = db.Column(db.String(), unique=True)
+    url = db.Column(db.String(), unique=True)
     redirected = db.Column(db.String())
     genre = db.Column(db.String(120))
     webcred_score = db.Column(db.FLOAT)
-    Error = db.Column(db.String(120))
+    error = db.Column(db.String(120))
     html = db.Column(db.String())
     text = db.Column(db.String())
     assess_time = db.Column(db.Float)
@@ -57,7 +46,7 @@ class Features(db.Model):
     for key in apiList.keys():
         dataType = apiList[key][-1]
         exec (key + " = db.Column(db." + dataType + ")")
-        norm = key + 'Norm'
+        norm = key + 'norm'
         exec (norm + " = db.Column(db.Integer)")
 
     def __init__(self, data):
@@ -65,7 +54,7 @@ class Features(db.Model):
             setattr(self, key, data[key])
 
     def __repr__(self):
-        return '<URL %r>' % self.Url
+        return self.url
 
 
 class Captcha(object):
@@ -117,13 +106,9 @@ def page_not_found(e):
 def collectData(request):
 
     try:
-        engine = db.engine
-        # check existence of table in database
-        if not engine.dialect.has_table(engine, table_name):
-            db.create_all()
-            logger.info('Created table {}'.format(table_name))
 
-        dt = Webcred(db, Features, request)
+        database = Database(Features)
+        dt = Webcred(database, request)
         data = dt.assess()
 
     except WebcredError as e:

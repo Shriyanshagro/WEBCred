@@ -1,8 +1,17 @@
+from ast import literal_eval
+from dotenv import load_dotenv
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.ext.declarative import declarative_base
+
 import logging
+import os
 import sys
 import threading
 import traceback
 
+
+load_dotenv(dotenv_path='.env')
 
 logger = logging.getLogger('WEBCred.essentials')
 logging.basicConfig(
@@ -12,6 +21,20 @@ logging.basicConfig(
     datefmt='%m/%d/%Y %I:%M:%S %p',
     level=logging.INFO
 )
+
+app = Flask(__name__)
+
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DB_URL')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
+'''
+To create our database based off our model, run the following commands
+$ python
+>>> from app import db
+>>> db.create_all()
+>>> exit()'''
+
+Base = declarative_base()
 
 
 # A class to catch error and exceptions
@@ -80,3 +103,98 @@ class MyThread(threading.Thread):
     # clear url if Urlattributes object
     def freemem(self):
         self.url.freemem()
+
+
+class Database(object):
+    def __init__(self, database):
+        engine = db.engine
+        # check existence of table in database
+        if not engine.dialect.has_table(engine, database.__tablename__):
+            # db.create_all()
+            Base.metadata.create_all(engine, checkfirst=True)
+            logger.info('Created table {}'.format(database.__tablename__))
+
+        self.db = db
+        self.database = database
+
+    def filter(self, name, value):
+
+        return self.db.session.query(
+            self.database
+        ).filter(getattr(self.database, name) == value)
+
+    def exist(self, name, value):
+
+        if self.filter(name, value).count():
+            return True
+
+        return False
+
+    def getdb(self):
+        return self.db
+
+    def getsession(self):
+        return self.db.session
+
+    def add(self, data):
+        reg = self.database(data)
+        self.db.session.add(reg)
+        self.commit()
+
+    def update(self, name, value, data):
+        if not self.filter(name, value).count():
+            self.add(data)
+        else:
+            self.filter(name, value).update(data)
+            self.commit()
+
+    def commit(self):
+        try:
+            self.db.session.commit()
+        except Exception:
+            # Get current system exception
+            ex_type, ex_value, ex_traceback = sys.exc_info()
+
+            # Extract unformatter stack traces as tuples
+            trace_back = traceback.extract_tb(ex_traceback)
+
+            # Format stacktrace
+            stack_trace = list()
+
+            for trace in trace_back:
+                stack_trace.append(
+                    "File : %s , Line : %d, Func.Name : %s, Message : %s" %
+                    (trace[0], trace[1], trace[2], trace[3])
+                )
+
+            # print("Exception type : %s " % ex_type.__name__)
+            logger.debug(ex_value)
+            logger.debug(stack_trace)
+
+            logger.debug('Rolling back db commit')
+            self.getsession().rollback()
+
+    def getdata(self, name=None, value=None):
+
+        return self.filter(name, value).all()[0].__dict__
+
+    def getcolumns(self):
+
+        return self.database.metadata.tables[self.database.__tablename__
+                                             ].columns.keys()
+
+    def gettablename(self):
+
+        return self.database.__tablename__
+
+    def getcolumndata(self, column):
+        return self.getsession().query(getattr(self.database, column))
+
+
+def getlistform(temp):
+    data = []
+    if isinstance(temp, list):
+        for i in temp:
+            data.append(literal_eval(i[0]))
+
+    return data
