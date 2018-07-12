@@ -12,7 +12,6 @@ import re
 import sys
 import traceback
 
-
 logger = logging.getLogger('WEBCred.webcred')
 logging.basicConfig(
     filename='log/logging.log',
@@ -148,7 +147,8 @@ class Webcred(object):
                     '''
                     for k, v in dbData.items():
                         if v:
-                            req['args'][k] = 'false'
+                            if k != 'pageloadtime':
+                                req['args'][k] = 'false'
                     dump = False
                 # update the database
                 modified = 1
@@ -179,6 +179,8 @@ class Webcred(object):
                 number += 1
 
             data = self.webcredScore(data, percentage)
+
+            data['Error'] = None
 
         except WebcredError as e:
             data['Error'] = e.message
