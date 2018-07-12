@@ -24,6 +24,7 @@ import subprocess
 import sys
 import traceback
 
+
 logger = logging.getLogger('WEBCred.surface')
 logging.basicConfig(
     filename='log/logging.log',
@@ -369,7 +370,7 @@ if __name__ == "__main__":
             wot = []
             alexa = []
             database = Database()
-            for url in links[:5000]:
+            for url in links:
                 data = {}
                 data['Url'] = url[:-2]
                 try:

@@ -147,6 +147,7 @@ class Webcred(object):
                     '''
                     for k, v in dbData.items():
                         if v:
+                            # always assess loadtime
                             if k != 'pageloadtime':
                                 req['args'][k] = 'false'
                     dump = False

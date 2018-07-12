@@ -36,7 +36,7 @@ if work == 'collectData':
     request = {
         'lastmod': 'true',
         'domain': 'true',
-        'inlinks': 'false',
+        'inlinks': 'true',
         'outlinks': 'true',
         'hyperlinks': 'true',
         'imgratio': 'true',
@@ -44,7 +44,7 @@ if work == 'collectData':
         'cookie': 'true',
         'langcount': 'true',
         'misspelled': 'true',
-        'wot': 'true',
+        'wot': 'false',
         'responsive': 'true',
         'pageloadtime': 'true',
         'ads': 'true',
@@ -61,7 +61,7 @@ if work == 'collectData':
 
     # count = len(links)
     # tempcounter = counter = len(tempData)
-    for url in links[2900:]:
+    for url in links:
         request['site'] = url[:-2]
         data = collectData(request)
         # data_file = open(new_id, 'a')
