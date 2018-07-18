@@ -2,20 +2,14 @@ from app import Features
 from kit.weightageanalysis import Ranks
 from sqlalchemy.orm import sessionmaker
 from utils.essentials import Base
+from utils.essentials import Correlation
 from utils.essentials import Database
 from utils.essentials import db
 from utils.webcred import apiList
 
 import json
 import logging
-import numpy as np
-import pandas as pd
-import seaborn as sns
 
-
-import matplotlib  # isort:skip
-matplotlib.use('TkAgg')  # isort:skip
-import matplotlib.pyplot as pl  # isort:skip
 
 logger = logging.getLogger('similarity_score')
 
@@ -123,35 +117,21 @@ def getsimilarity():
     database = Database(FeaturesSet)
     temp = database.getcolumndata('dataset')
     # clean data in list format
-    data = []
-    for i in temp.all():
-        joker = json.loads(i[0])
-        joker['alexa'] = float(1.0 / joker['alexa'])
-        del joker['url']
-        values = joker.values()
-        data.append(values)
     features_name = json.loads(temp.all()[0][0]).keys()
     features_name.remove('url')
+    corr = Correlation()
+    for j in range(1, 6):
+        dump = temp.all()[:(50 * j)]
+        data = []
+        for i in dump:
+            joker = json.loads(i[0])
+            joker['alexa'] = float(1.0 / joker['alexa'])
+            del joker['url']
+            values = joker.values()
+            data.append(values)
 
-    # supply data to np.coorcoef
-    dataframe = pd.DataFrame(
-        data=np.asarray(data)[0:, 0:],
-        index=np.asarray(data)[0:, 0],
-        columns=features_name
-    )
-    corr = dataframe.corr()
-
-    # get correlation heatmap
-    sns.heatmap(
-        corr,
-        xticklabels=features_name,
-        yticklabels=features_name,
-        cmap=sns.diverging_palette(220, 10, as_cmap=True)
-    )
-    # show graph plot of correlation
-    pl.show()
-
-    print(corr)
+        print(corr.getcorr(data, features_name))
+        print()
 
 
 if __name__ == "__main__":

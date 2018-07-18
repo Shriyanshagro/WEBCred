@@ -1,11 +1,17 @@
-from ast import literal_eval
+import matplotlib  # isort:skip
+matplotlib.use('TkAgg')  # isort:skip
+import matplotlib.pyplot as pl  # isort:skip
+
 from dotenv import load_dotenv
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.ext.declarative import declarative_base
 
 import logging
+import numpy as np
 import os
+import pandas as pd
+import seaborn as sns
 import sys
 import threading
 import traceback
@@ -191,10 +197,32 @@ class Database(object):
         return self.getsession().query(getattr(self.database, column))
 
 
-def getlistform(temp):
-    data = []
-    if isinstance(temp, list):
-        for i in temp:
-            data.append(literal_eval(i[0]))
+class Correlation(object):
+    def __init__(self):
+        pass
 
-    return data
+    def getcorr(self, data, features_name):
+
+        # supply data to np.coorcoef
+        dataframe = pd.DataFrame(
+            data=np.asarray(data)[0:, 0:],
+            index=np.asarray(data)[0:, 0],
+            columns=features_name
+        )
+        corr = dataframe.corr()
+
+        return corr
+
+    def getheatmap(self, data, features_name):
+
+        corr = self.getcorr(data, features_name)
+
+        # get correlation heatmap
+        sns.heatmap(
+            corr,
+            xticklabels=features_name,
+            yticklabels=features_name,
+            cmap=sns.diverging_palette(220, 10, as_cmap=True)
+        )
+        # show graph plot of correlation
+        pl.show()
