@@ -10,9 +10,8 @@ from features.surface import getAlexarank
 from features.surface import getWot
 from fnmatch import fnmatch
 from sklearn.model_selection import KFold
-from utils.essentials import Base
+from utils.databases import Ranks
 from utils.essentials import Database
-from utils.essentials import db
 from utils.pipeline import Pipeline
 
 import cPickle
@@ -285,27 +284,6 @@ def calculateWeightage():
     #     -1.0507277890932947, -4.82427142749968, 8.153725324824535,
     #     -3.284626108222303, 3.2085626854529594, -7.1646404991797255
     # ]
-
-
-class Ranks(Base):
-    __tablename__ = 'ranks'
-
-    id = db.Column(db.Integer, primary_key=True)
-    url = db.Column(db.String(), unique=True)
-    redirected = db.Column(db.String())
-    error = db.Column(db.String())
-    alexa = db.Column(db.Integer())
-    wot_confidence = db.Column(db.Integer())
-    wot_reputation = db.Column(db.Integer())
-    alexa = db.Column(db.Integer())
-    wot = db.Column(db.FLOAT())
-
-    def __init__(self, data):
-        for key in data.keys():
-            setattr(self, key, data[key])
-
-    def __repr__(self):
-        return self.url
 
 
 if __name__ == "__main__":

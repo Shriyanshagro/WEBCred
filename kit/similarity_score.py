@@ -1,11 +1,13 @@
-from app import Features
-from kit.weightageanalysis import Ranks
 from sqlalchemy.orm import sessionmaker
-from utils.essentials import Base
+from utils.databases import Features
+from utils.databases import FeaturesSet
+from utils.databases import Ranks
+from utils.essentials import apiList
 from utils.essentials import Correlation
 from utils.essentials import Database
 from utils.essentials import db
-from utils.webcred import apiList
+from utils.essentials import weightage_data
+from utils.webcred import webcredScore
 
 import json
 import logging
@@ -18,38 +20,13 @@ Session.configure(bind=db.engine)
 session = Session()
 
 
-class FeaturesSet(Base):
-    __tablename__ = 'feature_set'
-
-    id = db.Column(db.Integer, primary_key=True)
-    url = db.Column(db.String(), unique=True)
-    error = db.Column(db.String())
-    dataset = db.Column(db.String())
-
-    def __init__(self, data):
-        for key in data.keys():
-            setattr(self, key, data[key])
-
-    def __repr__(self):
-        return self.url
-
-
 def merge_two_dicts(x, y):
     z = x.copy()  # start with x's keys and values
     z.update(y)  # modifies z with y's keys and values & returns None
     return z
 
 
-def prepareDataset():
-
-    # qu = ''
-    # for key in apiList.keys():
-    #     qu += '.filter(Features.' + key + ' != None)'
-    #
-    # qu += '.filter(Ranks.wot != None)'
-    # qu += '.filter(Ranks.wot_confidence != None)'
-    # qu += '.filter(Ranks.wot_reputation != None)'
-    # qu += '.filter(Ranks.alexa != None)'
+def goodurls():
 
     # get instances when none of the entry in invalid
     query = session.query(Ranks, Features).filter(
@@ -72,6 +49,21 @@ def prepareDataset():
                                                  ).filter(
                                                      Ranks.alexa != None
                                                  )  # noqa
+    return query
+
+
+def prepareDataset():
+
+    # qu = ''
+    # for key in apiList.keys():
+    #     qu += '.filter(Features.' + key + ' != None)'
+    #
+    # qu += '.filter(Ranks.wot != None)'
+    # qu += '.filter(Ranks.wot_confidence != None)'
+    # qu += '.filter(Ranks.wot_reputation != None)'
+    # qu += '.filter(Ranks.alexa != None)'
+
+    query = goodurls()
     query.count()
     features_name = apiList.keys()
 
@@ -84,7 +76,6 @@ def prepareDataset():
         features_name.append(i)
 
     # remove redundant columns
-    # TODO get integer values of columns
     features_name.remove('cookie')
     features_name.remove('site')
     features_name.remove('domain')
@@ -134,13 +125,80 @@ def getsimilarity():
         print()
 
 
+def getsimilarity_Score():
+    # get data from Class FeaturesSet
+    database = Database(FeaturesSet)
+    temp = database.getcolumndata('dataset')
+    # clean data in list format
+    features_name = json.loads(temp.all()[0][0]).keys()
+    features_name = [
+        'alexa score (1/alexa rank)', 'wot', 'article', 'shop', 'help',
+        'others', 'portrayal_individual', 'wot_confidence', 'wot_reputation'
+    ]
+    corr = Correlation()
+    for j in range(1, 6):
+        dump = temp.all()[:(50 * j)]
+        data = []
+        for i in dump:
+            joker = json.loads(i[0])
+            joker['alexa'] = float(1.0 / joker['alexa'])
+
+            # append all values in data
+            dataDict = merge_two_dicts(joker, database.getdata('dataset', i))
+            values = []
+            for k in features_name:
+                values.append(dataDict.get(k))
+
+            data.append(values)
+
+        print(corr.getcorr(data, features_name))
+        print()
+
+
+# store webcred_score for all genre
+def fillwebcredscore():
+
+    # prepare dataset first
+    prepareDataset()
+
+    features_set = Database(FeaturesSet)
+    features = Database(Features)
+    urls = features_set.getcolumndata('url')
+    feature_name = weightage_data.get('features')
+
+    for k in urls:
+
+        url = str(k[0])
+        # get data
+        data = json.loads(features_set.getdata('url', url).get('dataset'))
+        score = {}
+
+        for i in weightage_data.get('genres'):
+
+            percentage = {}
+
+            # prepare percentage dict
+            for j in range(len(i.get('weights'))):
+                percentage[feature_name[j]] = i.get('weights')[j]
+
+            # get score
+            data = webcredScore(data, percentage)
+            score[i.get('name')] = data['webcred_score']
+            del data['webcred_score']
+            features.update('url', url, data)
+
+        features_set.update('url', url, score)
+
+
 if __name__ == "__main__":
 
     while True:
         print(
             '''
             p = prepareDataset
-            s = similarity_score
+            s = similarity_score between features Vs wot & alexa
+            sw = similarity_score between webcred_score and wot & alexa
+            w = calculate webcred_score
             q = quit
         '''
         )
@@ -151,6 +209,10 @@ if __name__ == "__main__":
             prepareDataset()
         elif action == 's':
             getsimilarity()
+        elif action == 'w':
+            fillwebcredscore()
+        elif action == 'sw':
+            getsimilarity_Score()
         elif action == 'q':
             print('babaye')
             break

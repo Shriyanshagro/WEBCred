@@ -1,0 +1,60 @@
+{
+  "features": [
+    "ads", "brokenlinks", "langcount",
+    "domain", "inlinks", "lastmod",
+    "hyperlinks", "outlinks", "misspelled",
+    "imgratio", "responsive", "pageloadtime"
+  ],
+  "genres": [
+    {
+      "name": "shop",
+      "tooltip": "Production Information, Shopping",
+      "weights": [
+        13.8, 10.3, 3.4,
+        6.9, 6.9, 6.9,
+        10.3, 3.4, 6.9,
+        10.3, 6.9, 13.8
+      ]
+    },
+    {
+      "name": "help",
+      "tooltip": "QA Forum, FAQs",
+      "weights": [
+        5.9, 5.9, 17.6,
+        5.9, 5.9, 5.9,
+        5.9, 23.5, 5.9,
+        5.9, 5.9, 5.9
+      ]
+    },
+    {
+      "name": "portrayal_individual",
+      "tooltip": "Companies, Universities, Government, Brochures",
+      "weights": [
+        8.3, 11.1, 5.6,
+        11.1, 8.3, 8.3,
+        11.1, 5.6, 11.1,
+        5.6, 8.3, 5.6
+      ]
+    },
+    {
+      "name": "others",
+      "tooltip": "All others",
+      "weights": [
+        8.33, 8.33, 8.33,
+        8.33, 8.33, 8.33,
+        8.33, 8.33, 8.33,
+        8.33, 8.33, 8.33
+      ]
+    },
+    {
+      "name": "article",
+      "tooltip": "Research, Newspaper, Reports",
+      "weights": [
+        5.3, 5.3, 10.5,
+        7.9, 10.5, 10.5,
+        5.3, 7.9, 7.9,
+        10.5, 10.5, 7.9
+      ]
+    }
+  ]
+}

@@ -16,7 +16,6 @@ import sys
 import traceback
 import validators
 
-
 logger = logging.getLogger('WEBCred.surface')
 logging.basicConfig(
     filename='log/logging.log',
@@ -82,7 +81,6 @@ def getWot(url):
     return data
 
 
-# TODO get multiple keys
 def getResponsive(url):
 
     # should output boolean value

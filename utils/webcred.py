@@ -1,5 +1,6 @@
 from datetime import datetime
 from features import surface
+from utils.essentials import apiList
 from utils.essentials import MyThread
 from utils.essentials import WebcredError
 from utils.urls import normalizeCategory
@@ -21,48 +22,8 @@ logging.basicConfig(
     level=logging.INFO
 )
 
-# keywords used to check real_world_presence
-hyperlinks_attributes = ['contact', 'email', 'help', 'sitemap']
-
 # map feature to function name
 # these keys() are also used to define db columns
-apiList = {
-    'lastmod': ['getDate', '', '', 'Integer'],
-    'domain': ['getDomain', '', '', 'String(120)'],
-    'inlinks': [
-        'getInlinks',
-        '',
-        '',
-        'Integer',
-    ],
-    'outlinks': [
-        'getOutlinks',
-        '',
-        '',
-        'Integer',
-    ],
-    'hyperlinks': [
-        'getHyperlinks',
-        hyperlinks_attributes,
-        '',
-        'JSON',
-    ],
-    'imgratio': ['getImgratio', '', '', 'FLOAT'],
-    'brokenlinks': ['getBrokenlinks', '', '', 'Integer'],
-    'cookie': ['getCookie', '', '', 'Boolean'],
-    'langcount': ['getLangcount', '', '', 'Integer'],
-    'misspelled': ['getMisspelled', '', '', 'Integer'],
-    # 'wot': ['getWot', '', 'JSON'],
-    'responsive': ['getResponsive', '', '', 'Boolean'],
-    'ads': ['getAds', '', 'Integer'],
-    'pageloadtime': ['getPageloadtime', '', '', 'Integer'],
-    'site': [
-        '',
-        '',
-        '',
-        'String(120)',
-    ],
-}
 
 
 class Webcred(object):
@@ -77,7 +38,6 @@ class Webcred(object):
         if not isinstance(self.request, dict):
             self.request = dict(self.request.args)
 
-        modified = 0
         data = {}
         req = {}
         req['args'] = {}
@@ -85,8 +45,9 @@ class Webcred(object):
         site = None
         dump = True
         try:
-
             # get percentage of each feature
+            # and copy self.request to req['args']
+            # TODO come back and do this properly
             for keys in apiList.keys():
                 if self.request.get(keys, None):
                     # because self.request.args is of ImmutableMultiDict form
@@ -102,13 +63,12 @@ class Webcred(object):
                             percentage[keys] = self.request.get(perc)
 
             # to show wot ranking
-            req['args']['wot'] = "true"
+            # req['args']['wot'] = "true"
             data['url'] = req['args']['site']
 
             site = Urlattributes(url=req['args'].get('site', None))
 
             # get genre
-            # TODO fetch weightages
             # WARNING there can be some issue with it
             data['genre'] = self.request.get('genre', None)
 
@@ -132,28 +92,29 @@ class Webcred(object):
                         'lastmod',
                         data['lastmod']).count() or not data['lastmod']:
                     # get all existing data in dict format
-                    dbData = self.db.getdata('url', data['url'])
+                    data = self.db.getdata('url', data['url'])
 
                     # check the ones from columns which have non None value
                     '''
                     None value indicates that feature has not
                     successfully extracted yet
                     '''
-                    for k, v in dbData.items():
+                    for k, v in data.items():
                         if v or str(v) == '0':
                             # always assess loadtime
                             if k != 'pageloadtime':
                                 req['args'][k] = 'false'
                     dump = False
-                # update the database
-                modified = 1
-            # else create new entry, url
+                else:
+                    data = self.db.getdata('url', data['url'])
+
             data = self.extractValue(req, apiList, data, site)
 
             # HACK 13 is calculated number, refer to index.html, where new
             # dimensions are dynamically added
             # create percentage dictionary
             number = 13
+            # TODO come back and do this properly
             while True:
                 dim = "dimension" + str(number)
                 API = "api" + str(number)
@@ -173,7 +134,7 @@ class Webcred(object):
                     break
                 number += 1
 
-            data = self.webcredScore(data, percentage)
+            data = webcredScore(data, percentage)
 
             data['error'] = None
 
@@ -202,21 +163,15 @@ class Webcred(object):
             # HACK if it's not webcred error,
             #  then probably it's python error
             data['error'] = 'Fatal Error'
-            modified = 1
             dump = False
             logger.debug(data['url'])
         finally:
 
             now = str((datetime.now() - now).total_seconds())
-            # store it in data
-            if modified:
-                logger.debug('updating entry')
-                self.db.update('url', data['url'], data)
+            data['assess_time'] = now
 
-            else:
-                logger.debug('creating new entry')
-                data['assess_time'] = now
-                self.db.add(data)
+            # store it in data
+            self.db.update('url', data['url'], data)
 
             # dump text and html of html
             if dump:
@@ -224,7 +179,7 @@ class Webcred(object):
 
             data = self.db.getdata('url', data['url'])
 
-            # delete dump location
+            # prevent users to know of dump location
             del data['html']
             del data['text']
 
@@ -271,52 +226,7 @@ class Webcred(object):
             fi.close()
 
         # update db with locations of their dump
-        self.db.session.query(
-            self.Features
-        ).filter(self.Features.Url == site.getoriginalurl()).update(data)
-        self.db.session.commit()
-
-    # TODO relook at normalization
-    # esp. are we rmoving any outliers?
-    def webcredScore(self, data, percentage):
-        # score varies from -1 to 1
-        score = 0
-        # take all keys of data into account
-        for k, v in data.items():
-
-            try:
-                if k in normalizeCategory['3'
-                                          ].keys() and k in percentage.keys():
-                    name = k + "Norm"
-                    data[name] = normalizedData[k].getnormalizedScore(v)
-                    score += data[name] * float(percentage[k])
-
-                if k in normalizeCategory['2'
-                                          ].keys() and k in percentage.keys():
-                    name = k + "Norm"
-                    data[name] = normalizedData[k].getfactoise(v)
-                    score += data[name] * float(percentage[k])
-
-                if k in normalizeCategory['misc'
-                                          ].keys() and k in percentage.keys():
-                    sum_hyperlinks_attributes = 0
-                    try:
-                        for key, value in v.items():
-                            sum_hyperlinks_attributes += value
-                        name = k + "Norm"
-                        data[name] = normalizedData[k].getnormalizedScore(
-                            sum_hyperlinks_attributes
-                        )
-                        score += data[name] * float(percentage[k])
-                    except:
-                        logger.info('Issue with misc normalizing categories')
-                        # TimeOut error clause
-            except:
-                logger.info('Not able to calculate webcred score')
-        data["webcred_score"] = score / 100
-
-        # TODO add Weightage score for new dimensions
-        return data
+        self.db.update('url', site.getoriginalurl(), data)
 
     # to differentiate it with DB null value
     def extractValue(self, req, apiList, data, site):
@@ -341,3 +251,62 @@ class Webcred(object):
             logger.debug('{} = {}'.format(t.getName(), data[t.getName()]))
 
         return data
+
+
+# esp. are we removing any outliers?
+def webcredScore(data, percentage):
+    # percentage is dict
+    # score varies from -1 to 1
+    score = 0
+    # take all keys of data into account
+
+    for k, v in data.items():
+
+        try:
+            if k in normalizeCategory['3'].keys() and k in percentage.keys():
+                name = k + "norm"
+                data[name] = normalizedData[k].getnormalizedScore(v)
+                score += data[name] * float(percentage[k])
+
+            if k in normalizeCategory['2'].keys() and k in percentage.keys():
+                name = k + "norm"
+                data[name] = normalizedData[k].getfactoise(v)
+                score += data[name] * float(percentage[k])
+
+            if k in normalizeCategory['misc'
+                                      ].keys() and k in percentage.keys():
+                sum_hyperlinks_attributes = 0
+                try:
+                    for key, value in v.items():
+                        sum_hyperlinks_attributes += value
+                    name = k + "norm"
+                    data[name] = normalizedData[k].getnormalizedScore(
+                        sum_hyperlinks_attributes
+                    )
+                    score += data[name] * float(percentage[k])
+                except:
+                    logger.info('Issue with misc normalizing categories')
+        except Exception:
+            # Get current system exception
+            ex_type, ex_value, ex_traceback = sys.exc_info()
+
+            # Extract unformatter stack traces as tuples
+            trace_back = traceback.extract_tb(ex_traceback)
+
+            # Format stacktrace
+            stack_trace = list()
+
+            for trace in trace_back:
+                stack_trace.append(
+                    "File : %s , Line : %d, Func.Name : %s, Message : %s" %
+                    (trace[0], trace[1], trace[2], trace[3])
+                )
+
+            # print("Exception type : %s " % ex_type.__name__)
+            logger.info(ex_value)
+            logger.debug(stack_trace)
+
+    data["webcred_score"] = score / 100
+
+    # TODO add Weightage score for new dimensions
+    return data

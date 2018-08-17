@@ -2,6 +2,8 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 from html2text import html2text
 from urlparse import urlparse
+from utils.databases import Features
+from utils.essentials import Database
 from utils.essentials import WebcredError
 
 import arrow
@@ -16,7 +18,6 @@ import threading
 import traceback
 import types
 import validators
-
 
 logger = logging.getLogger('WEBCred.urls')
 logging.basicConfig(
@@ -39,6 +40,7 @@ global normalizedData
 normalizedData = None
 
 global lastmodMaxMonths
+# 3 months
 lastmodMaxMonths = 93
 
 # define rules to normalize data
@@ -49,6 +51,7 @@ normalizeCategory = {
         'inlinks': 'linear',
         'ads': 'reverse',
         'brokenlinks': 'reverse',
+        # TODO relook at it's normalization
         'pageloadtime': 'reverse',
         'imgratio': 'linear'
     },
@@ -59,7 +62,9 @@ normalizeCategory = {
         },
         'responsive': {
             'true': 1,
-            'false': 0
+            'false': 0,
+            '0': 0,
+            '1': 1,
         },
         'langcount': {
             1: 0,
@@ -81,7 +86,6 @@ normalizeCategory = {
     'misc': {
         'hyperlinks': "linear"
     },
-    'eval': ['wot']
 }
 
 
@@ -245,7 +249,7 @@ class Normalize(object):
         mean = self.getmean()
         deviation = self.getdeviation()
         """
-        somtimes mean<deviation and surpass good reults,
+        sometimes mean<deviation and surpass good results,
         as no value is less than 0
         """
         netmd = mean - deviation
@@ -286,12 +290,15 @@ class Normalize(object):
         try:
             # strptime  = string parse time
             # strftime = string format time
-            lastmod = datetime.strptime(value, '%Y-%m-%dT%H:%M:%S')
-            dayDiffernce = (datetime.now() - lastmod).days
+            try:
+                lastmod = datetime.strptime(value, '%Y-%m-%dT%H:%M:%S').date()
+            except:
+                lastmod = arrow.get(value).datetime.date()
+            dayDiffernce = (datetime.now().date() - lastmod).days
             return dayDiffernce
         except:
             # in case of ValueError, lastmod will sum to WEBcred Score
-            return 1000000
+            return 100000
 
     def factoise(self):
         if not self.factorise:
@@ -312,10 +319,10 @@ class Normalize(object):
                         ] = self.factorise.get(lastmodMaxMonths)
                         modified = 1
 
-                # condition for everthing else
+                # condition for everything else
                 else:
+                    value = self.data[index][self.name]
                     for k, v in self.factorise.items():
-                        value = self.data[index][self.name]
                         if str(value) == str(k):
                             self.data[index][self.name] = v
                             modified = 1
@@ -342,7 +349,6 @@ class Urlattributes(object):
         global normalizeCategory
         if not normalizedData:
             normalizedData = {}
-            # TODO read data from db
             # read existing data
             old_data = 'data/json/data2.json'
             old_data = open(old_data, 'r').read()
@@ -374,6 +380,10 @@ class Urlattributes(object):
                 if metadata.get('Error'):
                     continue
                 data.append(metadata)
+
+            # get data from postgres
+            db = Database(Features)
+            data = db.getdbdata()
 
             it = normalizeCategory['3'].items()
             for k in it:

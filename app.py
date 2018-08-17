@@ -1,12 +1,10 @@
 from dotenv import load_dotenv
 from flask import render_template
 from flask import request
+from utils.databases import Features
 from utils.essentials import app
-from utils.essentials import Base
 from utils.essentials import Database
-from utils.essentials import db
 from utils.essentials import WebcredError
-from utils.webcred import apiList
 from utils.webcred import Webcred
 
 import json
@@ -26,35 +24,6 @@ logging.basicConfig(
     datefmt='%m/%d/%Y %I:%M:%S %p',
     level=logging.INFO
 )
-
-
-# Our database model
-class Features(Base):
-    __tablename__ = 'features'
-
-    id = db.Column(db.Integer, primary_key=True)
-    url = db.Column(db.String(), unique=True)
-    redirected = db.Column(db.String())
-    genre = db.Column(db.String(120))
-    webcred_score = db.Column(db.FLOAT)
-    error = db.Column(db.String(120))
-    html = db.Column(db.String())
-    text = db.Column(db.String())
-    assess_time = db.Column(db.Float)
-
-    # create columns of features
-    for key in apiList.keys():
-        dataType = apiList[key][-1]
-        exec (key + " = db.Column(db." + dataType + ")")
-        norm = key + 'norm'
-        exec (norm + " = db.Column(db.Integer)")
-
-    def __init__(self, data):
-        for key in data.keys():
-            setattr(self, key, data[key])
-
-    def __repr__(self):
-        return self.url
 
 
 class Captcha(object):
