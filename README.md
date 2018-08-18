@@ -8,7 +8,7 @@ This application is deployed [here](https://serc.iiit.ac.in/webcred/)
 
 ### Developement
 
-Further development of this tool is taken [here](https://github.com/SIREN-SERC/WEBCred)
+Further development of this tool is forked [here](https://github.com/SIREN-SERC/WEBCred)
 
 ## Installation
 - Run pipenv 
