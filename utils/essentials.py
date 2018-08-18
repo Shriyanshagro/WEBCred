@@ -32,7 +32,7 @@ logging.basicConfig(
     level=logging.INFO
 )
 
-app = Flask(__name__)
+app = Flask(__name__, root_path=os.getcwd())
 
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DB_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False

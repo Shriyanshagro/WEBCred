@@ -1,6 +1,16 @@
-# WebCredibility
-Web Credibility assesment For Information Security Websites
+# WebCred
 
+Web Credibility assesment tool For Information Security Websites 
+based on classified Genre.
 
-install pipenv
-install (postgres)(https://www.digitalocean.com/community/tutorials/how-to-install-and-use-postgresql-on-ubuntu-14-04) 
+### Demo
+This application is deployed [here](https://serc.iiit.ac.in/webcred/)
+
+### Developement
+
+Further development of this tool is taken [here](https://github.com/SIREN-SERC/WEBCred)
+
+## Installation
+- Run pipenv 
+   - `$: install pipenv` and enter the `shell`
+- Install [postgres](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-postgresql-on-ubuntu-14-04)
